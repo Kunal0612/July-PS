@@ -178,7 +178,19 @@ int main() {
         assert(true);
     }
     // TEST_END
-
+    // TEST
+    std::vector<int> nums_13 = {100000002};
+    int expected_13;
+    try
+    {
+        Paint(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!" << std::endl;
     return 0;
 }
