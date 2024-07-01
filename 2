@@ -1,8 +1,8 @@
-/*
+/* 
 
 https://codeforces.com/problemset/problem/1661/F
 
-Create a C++ function named SwapandTake to find the minimum number of teleporters you have to install.
+Create a C++ function named Teleporters to find the minimum number of teleporters you have to install.
 
 There are n+1 teleporters on a straight line, located in points 0, nums[1], nums[2], nums[3], ..., nums[n]. 
 It's possible to teleport from point x to point y if there are teleporters in both of those points, and it costs (x−y)^2 energy.
@@ -27,3 +27,263 @@ Output:
 A integer answer the minimum number of teleporters you have to install.
 
 */
+
+
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <cassert>
+
+long long Square(int node)
+{
+    return node * 1ll * node;
+}
+
+long long Split(int len, int res)
+{
+    return Square(len / res) * (res - len % res) + Square(len / res + 1) * (len % res);
+}
+
+std::pair<int, long long> Segment(int len, long long bound)
+{
+    // only take options with value >= bound
+    if (bound <= 2 || len == 1)
+        return std::make_pair(len - 1, len);
+    int left = 0;
+    int right = len - 1;
+    while (right - left > 1)
+    {
+        int mid = (left + right) / 2;
+        if (Split(len, mid) - Split(len, mid + 1) >= bound)
+            left = mid;
+        else
+            right = mid;    
+    }
+    return std::make_pair(left, Split(len, left + 1));
+}
+
+std::pair<int, long long> EvalFull(const std::vector<int>& lens, long long bound)
+{
+    std::pair<int, long long> ans;
+    for (auto node : lens)
+    {
+        std::pair<int, long long> cur = Segment(node, bound);
+        ans.first += cur.first;
+        ans.second += cur.second;
+    }
+    return ans;
+}
+
+int Teleporters(std::vector<int> &nums,long long int limit){
+    int n=nums.size();
+
+    if (nums.size() <= 0 or nums.size()>200000) {
+        throw std::invalid_argument("vec length must be positive.");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    if (limit<nums[n-1] or limit > 1000000000000000000) {
+        throw std::invalid_argument("vec length must be positive.");
+    }
+
+    std::vector<int> lens;
+    int par = 0;
+    for (int i = 0; i < n; i++)
+    {
+        int node=nums[i];
+        lens.push_back(node - par);
+        par = node;
+    }
+    long long left = 0ll;
+    long long right = (long long)(1e18) + 43;
+
+    if (EvalFull(lens, right).second <= limit)
+    {
+        return 0;
+    }
+
+    while (right - left > 1)
+    {
+        long long mid = (left + right) / 2;
+        std::pair<int, long long> res = EvalFull(lens, mid);
+        if (res.second <= limit)
+            left = mid;
+        else
+            right = mid;
+    }   
+
+    std::pair<int, long long> res_left = EvalFull(lens, left);
+    std::pair<int, long long> res_right = EvalFull(lens, right);
+    assert(res_left.second <= limit && res_right.second > limit);
+
+    long long change = (res_right.second - res_left.second) / (res_right.first - res_left.first);
+    int ans=res_left.first + (limit - res_left.second) / change;
+    return ans;
+}
+
+int main()
+{
+    // TEST
+    std::vector<int> nums_1 = {1, 5};
+    long long limit_1 = 7;
+    int expected_1 = 2;
+    int result_1 = Teleporters(nums_1, limit_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST 
+    std::vector<int> nums_2 = {2, 3, 6};
+    long long limit_2 = 8;
+    int expected_2 = 2;
+    int result_2 = Teleporters(nums_2, limit_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1, 2, 3, 4, 5, 6};
+    long long limit_3 = 10;
+    int expected_3 = 0;
+    int result_3 = Teleporters(nums_3, limit_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {10, 20, 30, 40};
+    long long limit_4 = 100;
+    int expected_4 = 13;
+    int result_4 = Teleporters(nums_4, limit_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {5};
+    long long limit_5 = 5;
+    int expected_5 = 4;
+    int result_5 = Teleporters(nums_5, limit_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST 
+    std::vector<int> nums_6 = {1000000000, 1000000000, 1000000000};
+    long long limit_6 = 1000000005;
+    int expected_6 = 999999995;
+    int result_6 = Teleporters(nums_6, limit_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {1};
+    long long limit_7 = 1;
+    int expected_7 = 0;
+    int result_7 = Teleporters(nums_7, limit_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    long long limit_8 = 1000000000000000;
+    int expected_8 = 0;
+    int result_8 = Teleporters(nums_8, limit_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {-1, 2, 3, 4, 5, 6, 7, 9, 9, 10};
+    long long limit_9 = 1000000000000000;
+    try
+    {
+        Teleporters(nums_9, limit_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {0, 2, 3, 4, 5, 6, 7, 10, 10, 10};
+    long long limit_10 = 1000000000000000;
+    try
+    {
+        Teleporters(nums_10, limit_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1000000001, 2, 3, 4, 5, 6, 7, 11, 11, 11};
+    long long limit_11 = 1100000000000000;
+    try
+    {
+        Teleporters(nums_11, limit_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    long long limit_12 = 1200000000000000;
+    try
+    {
+        Teleporters(nums_12, limit_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {1};
+    long long limit_13 = 0;
+    try
+    {
+        Teleporters(nums_13, limit_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {1};
+    long long limit_14 = -5;
+    try
+    {
+        Teleporters(nums_14, limit_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15 = {1};
+    long long limit_15 = 1000000000000000002;
+    try
+    {
+        Teleporters(nums_15, limit_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
