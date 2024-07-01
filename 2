@@ -1,0 +1,33 @@
+/*
+
+https://codeforces.com/problemset/problem/1672/I
+
+Create a C++ function named PermutationForces to find minimum strength.
+
+You have a permutation nums of integers from 1 to n.
+
+You have a strength of s and will perform the following operation some times:
+
+Choose an index i such that 1≤i≤|nums| and |i−nums[i]|≤s.
+For all j such that 1≤j≤|nums| and nums[i]<nums[j], update nums[j] to nums[j]−1.
+
+Delete the i-th element from p. Formally, update nums to [nums[1],…,nums[i−1],nums[i+1],…,nums[n]].
+
+It can be shown that no matter what i you have chosen, nums will be a permutation of integers from 1 to |nums| after all operations.
+
+You want to be able to transform nums into the empty permutation. Find the minimum strength s that will allow you to do so.
+
+Input:
+
+A vector of integers nums.
+
+Constraints:
+
+nums.size() : ranges from 1 to 500000.
+nums : ranges from 1 to nums.size() ,  every nums[i] should be distinct.
+
+Output:
+
+A integer answer the minimum strength.
+
+*/
