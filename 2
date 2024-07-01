@@ -1,21 +1,16 @@
 /*
 
-https://codeforces.com/problemset/problem/1672/I
+https://codeforces.com/problemset/problem/1661/F
 
-Create a C++ function named PermutationForces to find minimum strength.
+Create a C++ function named SwapandTake to find the minimum number of teleporters you have to install.
 
-You have a permutation nums of integers from 1 to n.
+There are n+1 teleporters on a straight line, located in points 0, nums[1], nums[2], nums[3], ..., nums[n]. 
+It's possible to teleport from point x to point y if there are teleporters in both of those points, and it costs (x−y)^2 energy.
 
-You have a strength of s and will perform the following operation some times:
+You want to install some additional teleporters so that it is possible to get from the point 0 to the point an (possibly through some other teleporters) spending no more than limit
+energy in total. Each teleporter you install must be located in an integer point.
 
-Choose an index i such that 1≤i≤|nums| and |i−nums[i]|≤s.
-For all j such that 1≤j≤|nums| and nums[i]<nums[j], update nums[j] to nums[j]−1.
-
-Delete the i-th element from p. Formally, update nums to [nums[1],…,nums[i−1],nums[i+1],…,nums[n]].
-
-It can be shown that no matter what i you have chosen, nums will be a permutation of integers from 1 to |nums| after all operations.
-
-You want to be able to transform nums into the empty permutation. Find the minimum strength s that will allow you to do so.
+What is the minimum number of teleporters you have to install?
 
 Input:
 
@@ -23,11 +18,12 @@ A vector of integers nums.
 
 Constraints:
 
-nums.size() : ranges from 1 to 500000.
-nums : ranges from 1 to nums.size() ,  every nums[i] should be distinct.
+nums.size() : ranges from 1 to 200000.
+nums : ranges from 1 to 10^9 and in accending order.
+limit : ranges from nums[n] to 10^18.
 
 Output:
 
-A integer answer the minimum strength.
+A integer answer the minimum number of teleporters you have to install.
 
 */
