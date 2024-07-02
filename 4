@@ -1,0 +1,329 @@
+/*
+
+https://codeforces.com/problemset/problem/1799/F
+
+Create a C++ function named HalveorSubtract to find the minimum cost of a you can achieve by performing these operations.
+
+Once upon a time in a land of integers, there was an array of positive integers nums=[nums[1],nums[2],…,nums[n]] of length n.
+
+A mighty wizard named val bestowed upon you a positive integer val.
+
+The wizard allowed you to perform two magical operations, but only a limited number of times and with certain restrictions:
+
+You could choose any element nums[i] from the array and replace it with ⌈nums[i]/2⌉ (where ⌈x⌉ is the smallest integer not less than x).
+However, you could perform this operation at most lim_1 times in total, and only once per element.
+
+Alternatively, you could choose any element nums[i] and replace it with max(nums[i]−val,0). This operation could be performed at most lim_2 times in total, 
+and only once per element.
+
+Your goal was to minimize the sum of the elements in the array after performing these operations. You had to determine the minimum possible sum you could achieve, considering the constraints on the number of operations and their application to the elements.
+
+And so, with strategic planning and careful choices, you embarked on the quest to achieve the minimum cost of the array.
+
+
+Input:
+
+A vector of integers nums.
+An integer val.
+An integer lim_1.
+An integer lim_2.
+
+Constraints:
+
+val : ranges from 1 to 10^9.
+lim_1 : ranges from 0 to nums.size().
+lim_2 : ranges from 0 to nums.size().
+nums.size() : ranges from 1 to 5000.
+nums : ranges from 1 to 10^9.
+
+Output:
+
+An integer answer that contain the minimum cost of a you can achieve by performing these operations
+
+
+*/
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <queue>
+
+bool Comp(const int &node_x, const int &node_y) {
+    return node_x > node_y;
+}
+
+long long int HalveorSubtract(std::vector<int> &nums,int val,int lim_1,int lim_2)
+{
+    if (nums.size() <= 0 or nums.size()>5000) {
+        throw std::invalid_argument("Nums length must be positive.");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    if (val <= 0 or val>1000000000) {
+        throw std::invalid_argument("Invalid val value.");
+    }
+    if (lim_1 < 0 or lim_1>nums.size() or lim_2 < 0 or lim_2>nums.size()) {
+        throw std::invalid_argument("Invalid lim values");
+    }
+    int n=nums.size();
+    long long arr[n + 10];
+    long long inf = 1e18;
+    for (int i = 1; i <= n; ++i)
+    {
+        arr[i]=nums[i-1];
+    }
+
+    std::sort(arr + 1, arr + n + 1, Comp);
+    long long ans = inf;
+
+    for (int i = 0; i <= std::min(lim_1, lim_2); ++i)
+    {
+        if (lim_1 + lim_2 - i <= n)
+        {
+            long long sum = 0;
+            std::priority_queue<long long> que;
+
+            for (int j = 1; j <= i; ++j)
+            {
+                sum += std::max(((arr[j] + 1) >> 1) - val, 0ll);
+            }
+
+            for (int j = i + 1; j <= lim_1 + lim_2 - i; ++j)
+            {
+                sum += (arr[j] + 1) >> 1;
+                que.push(((arr[j] + 1) >> 1) - std::max(arr[j] - val, 0ll));
+            }
+
+            for (int j = 1; j <= lim_2 - i; ++j)
+            {
+                sum -= que.top();
+                que.pop();
+            }
+
+            for (int j = lim_1 + lim_2 - i + 1; j <= n; ++j)
+            {
+                sum += arr[j];
+            }
+
+            ans = std::min(ans, sum);
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {9, 3, 5};
+    int val_1 = 2;
+    int lim1_1 = 1;
+    int lim2_1 = 1;
+    int expected_1 = 11;
+    int result_1 = HalveorSubtract(nums_1, val_1, lim1_1, lim2_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {10, 20, 30};
+    int val_2 = 5;
+    int lim1_2 = 2;
+    int lim2_2 = 1;
+    int expected_2 = 30;
+    int result_2 = HalveorSubtract(nums_2, val_2, lim1_2, lim2_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {100, 200, 300, 400, 500};
+    int val_3 = 50;
+    int lim1_3 = 3;
+    int lim2_3 = 2;
+    int expected_3 =800;
+    int result_3 = HalveorSubtract(nums_3, val_3, lim1_3, lim2_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 1, 1, 1, 1};
+    int val_4 = 1;
+    int lim1_4 = 2;
+    int lim2_4 = 2;
+    int expected_4 = 3;
+    int result_4 = HalveorSubtract(nums_4, val_4, lim1_4, lim2_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {5000, 4000, 3000, 2000, 1000};
+    int val_5 = 100;
+    int lim1_5 = 2;
+    int lim2_5 = 3;
+    int expected_5 = 10200;
+    int result_5 = HalveorSubtract(nums_5, val_5, lim1_5, lim2_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {10, 10, 10, 10, 10};
+    int val_6 = 5;
+    int lim1_6 = 1;
+    int lim2_6 = 2;
+    int expected_6 = 35;
+    int result_6 = HalveorSubtract(nums_6, val_6, lim1_6, lim2_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {10000, 999999999, 999998};
+    int val_7 = 1000000;
+    int lim1_7 = 1;
+    int lim2_7 = 1;
+    int expected_7 = 500009998;
+    int result_7 = HalveorSubtract(nums_7, val_7, lim1_7, lim2_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {123456789, 987654321, 111111111};
+    int val_8 = 100000000;
+    int lim1_8 = 2;
+    int lim2_8 = 1;
+    int expected_8 = 566666667;
+    int result_8 = HalveorSubtract(nums_8, val_8, lim1_8, lim2_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {-123456799, 997654321, 111111111};
+    int val_9 = 100000000;
+    int lim1_9 = 2;
+    int lim2_9 = 1;
+    try
+    {
+        HalveorSubtract(nums_9, val_9, lim1_9, lim2_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {0, 101074321, 111111111};
+    int val_10 = 100000000;
+    int lim1_10 = 2;
+    int lim2_10 = 1;
+    try
+    {
+        HalveorSubtract(nums_10, val_10, lim1_10, lim2_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {};
+    int val_11 = 110000000;
+    int lim1_11 = 2;
+    int lim2_11 = 1;
+    try
+    {
+        HalveorSubtract(nums_11, val_11, lim1_11, lim2_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {1, 121274321, 111111111};
+    int val_12 = -1;
+    int lim1_12 = 2;
+    int lim2_12 = 1;
+    try
+    {
+        HalveorSubtract(nums_12, val_12, lim1_12, lim2_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {1, 131374321, 111111111};
+    int val_13 = 4;
+    int lim1_13 = -2;
+    int lim2_13 = 1;
+    try
+    {
+        HalveorSubtract(nums_13, val_13, lim1_13, lim2_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {1, 141474321, 111111111};
+    int val_14 = 4;
+    int lim1_14 = 5;
+    int lim2_14 = 1;
+    try
+    {
+        HalveorSubtract(nums_14, val_14, lim1_14, lim2_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15 = {1, 151574321, 111111111};
+    int val_15 = 4;
+    int lim1_15 = 1;
+    int lim2_15 = 5;
+    try
+    {
+        HalveorSubtract(nums_15, val_15, lim1_15, lim2_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16 = {1, 161674321, 111111111};
+    int val_16 = 4;
+    int lim1_16 = 1;
+    int lim2_16 = -5;
+    try
+    {
+        HalveorSubtract(nums_16, val_16, lim1_16, lim2_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All tests passed!" << std::endl;
+
+    return 0;
+}
+
+	 	 			 		  		 		  	      	   	
