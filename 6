@@ -1,0 +1,308 @@
+/*
+
+https://codeforces.com/problemset/problem/1214/F
+
+Create a C++ function named Employment to find the answer vector.
+
+Two large companies "Cecsi" and "Poca Pola" are fighting against each other for a long time. In order to overcome their competitor, "Poca Pola" started a super secret project, for which it has total len vacancies in all of their offices. After many tests and interviews len candidates were selected and the only thing left was their employment.
+
+Because all candidates have the same skills, it doesn't matter where each of them will work. That is why the company decided to distribute candidates between workplaces so that the total distance between home and workplace over all candidates is minimal.
+
+It is well known that Earth is round, so it can be described as a circle, and all lim cities on Earth can be described as points on this circle. All cities are enumerated from 1 to lim so that for each i (1≤i≤lim−1) cities with indexes i and i+1 are neighbors and cities with indexes 1 and lim
+are neighbors as well. People can move only along the circle. The distance between any two cities equals to minimal number of transitions between neighboring cities you have to perform to get from one city to another. In particular, the distance between the city and itself equals 0.
+
+The "Poca Pola" vacancies are located at offices in cities arr1,arr2,…,arrn
+. The candidates live in cities brr1,brr2,…,brrn
+. It is possible that some vacancies are located in the same cities and some candidates live in the same cities.
+
+The "Poca Pola" managers are too busy with super secret project, so you were asked to help "Poca Pola" to distribute candidates between workplaces, so that the sum of the distance between home and workplace over all candidates is minimum possible.
+
+
+Input:
+
+A vector of integers arr.
+A vector of integers brr.
+An integer lim.
+
+
+Constraints:
+
+lim : ranges from 1 to 10^9.
+arr.size() : ranges from 1 to 200000.
+nums : ranges from 1 to lim.
+brr.size() :  ranges from 1 to 200000.
+quer : ranges from 2 to lim.
+
+Output:
+
+An vector of integers answer of size len+1 where ans[0] is minimum total distance between home and workplace over all candidates and remaining from ans[1] to ans[len] contain len
+different integers from 1 to  len. The i-th of them should be the index of candidate that should work at i-th workplace.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+
+
+struct Node {
+    long long pos, node;
+    bool operator<(const Node &rhs) const {
+        return node != rhs.node ? node < rhs.node : pos < rhs.pos;
+    }
+} arr_1[200005 * 3], brr_1[200005];
+
+inline long long Solve(long long node,int len) {
+    long long res = 0;
+    for (long long i = 1; i <= len; i++) {
+        res += std::abs(brr_1[i].node - arr_1[i + node].node);
+    }
+    return res;
+}
+
+std::vector<int> Employment(int lim,std::vector<int> &arr,std::vector<int> &brr){
+    
+    long long ans;
+    int len=arr.size();
+    if (lim <= 0 or lim>1000000000) {
+        throw std::invalid_argument("Invalid limit");
+    }
+    if (arr.size() <= 0 or arr.size()>200000) {
+        throw std::invalid_argument("Invalid arr size");
+    }
+    for (int i = 0; i < arr.size(); ++i)
+    {
+        if (arr[i] < 1 || arr[i] > lim)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    if (brr.size() <= 0 or brr.size()>200000) {
+        throw std::invalid_argument("Invalid brr size.");
+    }
+    for (int i = 0; i < brr.size(); ++i)
+    {
+        if (brr[i] < 1 || brr[i] > lim)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    long long res[len+1];
+    for (long long i = 1; i <= len; i++) {
+        long long node=arr[i-1];
+        arr_1[i * 3 - 2].node = node;
+        arr_1[i * 3 - 1].node = node + lim;
+        arr_1[i * 3].node = node + lim * 2;
+        arr_1[i * 3 - 2].pos = arr_1[i * 3 - 1].pos = arr_1[i * 3].pos = i;
+    }
+
+    for (long long i = 1; i <= len; i++) {
+        long long node=brr[i-1];
+        brr_1[i].node = node + lim;
+        brr_1[i].pos = i;
+    }
+
+    std::sort(arr_1 + 1, arr_1 + len * 3 + 1);
+    std::sort(brr_1 + 1, brr_1 + len + 1);
+
+    long long left = 0, right = len * 2 - 1;
+    while (left <= right) {
+        long long mid = (left + right) / 2;
+        if (Solve(mid,len) > Solve(mid + 1,len)) {
+            ans = left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    std::vector<int> answer;
+    answer.push_back(Solve(ans,len));
+    for (long long i = 1; i <= len; i++) {
+        res[arr_1[i + ans].pos] = brr_1[i].pos;
+    }
+    for (long long i = 1; i <= len; i++) {
+        answer.push_back(res[i]);
+    }
+    return answer;
+}
+
+
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {1, 5, 5};
+    std::vector<int> brr_1 = {10, 4, 6};
+    int lim_1 = 10;
+    std::vector<int> expected_1 = {3, 1, 2, 3};
+    std::vector<int> result_1 = Employment(lim_1, arr_1, brr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {3, 6, 8, 2};
+    std::vector<int> brr_2 = {15, 7, 5, 10};
+    int lim_2 = 20;
+    std::vector<int> expected_2 = {12, 3, 2, 4,1};
+    std::vector<int> result_2 = Employment(lim_2, arr_2, brr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {7, 1, 12, 4, 5};
+    std::vector<int> brr_3 = {14, 11, 9, 3, 8};
+    int lim_3 = 15;
+    std::vector<int> expected_3 = {9, 3, 1, 2, 4, 5};
+    std::vector<int> result_3 = Employment(lim_3, arr_3, brr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {9, 8, 7};
+    std::vector<int> brr_4 = {3, 4, 5};
+    int lim_4 = 10;
+    std::vector<int> expected_4 = {10, 1, 3, 2};
+    std::vector<int> result_4 = Employment(lim_4, arr_4, brr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_5 = {5, 10, 15, 20, 25};
+    std::vector<int> brr_5 = {20, 15, 10, 5, 25};
+    int lim_5 = 30;
+    std::vector<int> expected_5 = {0, 4, 3, 2, 1, 5};
+    std::vector<int> result_5 = Employment(lim_5, arr_5, brr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_6 = {2, 4, 6, 8};
+    std::vector<int> brr_6 = {16, 12, 8, 4};
+    int lim_6 = 20;
+    std::vector<int> expected_6 = {12, 1, 4, 3, 2};
+    std::vector<int> result_6 = Employment(lim_6, arr_6, brr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_7 = {1, 2, 3, 4, 5};
+    std::vector<int> brr_7 = {5, 4, 3, 2, 1};
+    int lim_7 = 10;
+    std::vector<int> expected_7 = {0, 5, 4, 3, 2, 1};
+    std::vector<int> result_7 = Employment(lim_7, arr_7, brr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_8 = {5, 5, 5, 5};
+    std::vector<int> brr_8 = {5, 5, 5, 5};
+    int lim_8 = 6;
+    std::vector<int> expected_8 = {0, 1, 2, 3, 4};
+    std::vector<int> result_8 = Employment(lim_8, arr_8, brr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> arr_9 = {};
+    std::vector<int> brr_9 = {5, 5, 5, 5};
+    int lim_9 = 6;
+    try
+    {
+        Employment(lim_9, arr_9, brr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_10 = {-1};
+    std::vector<int> brr_10 = {5, 5, 5, 5};
+    int lim_10 = 6;
+    try
+    {
+        Employment(lim_10, arr_10, brr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_11 = {7};
+    std::vector<int> brr_11 = {5, 5, 5, 5};
+    int lim_11 = 6;
+    try
+    {
+        Employment(lim_11, arr_11, brr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_12 = {7};
+    std::vector<int> brr_12 = {5, 5, 5, 5};
+    int lim_12 = -2;
+    try
+    {
+        Employment(lim_12, arr_12, brr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_13 = {7};
+    std::vector<int> brr_13 = {};
+    int lim_13 = -2;
+    try
+    {
+        Employment(lim_13, arr_13, brr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_14 = {7};
+    std::vector<int> brr_14 = {10};
+    int lim_14 = 5;
+    try
+    {
+        Employment(lim_14, arr_14, brr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_15 = {7};
+    std::vector<int> brr_15 = {10};
+    int lim_15 = 0;
+    try
+    {
+        Employment(lim_15, arr_15, brr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
