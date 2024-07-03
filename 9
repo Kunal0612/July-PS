@@ -1,0 +1,336 @@
+/*
+
+https://codeforces.com/problemset/problem/1943/E1
+
+Create a C++ function named MEXGame to find Alice's score if both players play optimally.
+
+Alice and Bob play yet another game on an array a of size n. Alice starts with an empty array c. Both players take turns playing, with Alice starting first.
+
+On Alice's turn, she picks one element from a, appends that element to c, and then deletes it from a.
+
+On Bob's turn, he picks at most val elements from a, and then deletes it from a.
+
+The game ends when the array a is empty. Alice's score is defined to be the MEX† of c.
+Alice wants to maximize her score while Bob wants to minimize it. Find Alice's final score if both players play optimally.
+
+The array will be given in compressed format. Instead of giving the elements present in the array, we will be giving their frequencies. Formally, you will be given m
+,the maximum element in the array, and then len+1 integers nums[0],nums[1],…,nums[len] , where nums[i] represents the number of times i occurs in the array a.
+
+†The MEX (minimum excludant) of an array of integers is defined as the smallest non-negative integer which does not occur in the array. For example:
+
+The MEX of [2,2,1] is , because 0 does not belong to the array.
+The MEX of [3,1,0,1] is  , because 0 and 1 belong to the array, but 2 does not.
+The MEX of [0,3,1,2] is 4 , because 0 , 1 , 2 and 3 belong to the array, but 4 does not.
+
+Input:
+
+An integer len.
+An integer val.
+A vector of integers nums of size len+1.
+
+
+Constraints:
+
+len : ranges from 1 to 50.
+val : ranges from 1 to 10^9.
+nums : ranges from 1 to 10^9.
+
+Output:
+
+An integer answer to find Alice's score if both players play optimally.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <random>
+#include <deque>
+#include <cassert>
+#include <limits>
+
+
+bool Check(const std::vector<long long>& arr, long long len, long long val, long long mid) {
+    std::vector<long long> brr;
+    for (long long i = 0; i < mid; i++) {
+        brr.push_back(arr[i] - val);
+    }
+
+    std::sort(brr.begin(), brr.end());
+
+    for (long long fix = 1; fix < mid; fix++) {
+        std::deque<long long> que;
+        for (long long i = 0; i <= fix; i++) {
+            que.push_back(brr[i]);
+        }
+
+        assert(que.size() >= 2);
+
+        while (que.size() != 2) {
+            que.pop_front();
+
+            long long size = que.size();
+            long long works = 0;
+            long long sum = 0;
+            for (long long j = 1; j < size; j++) {
+                sum += que[size - j];
+                long long loss = sum - que[size - j - 1] * j;
+                if (loss >= val) {
+                    works = size - j;
+                    break;
+                }
+            }
+
+            long long have = val;
+
+            for (long long j = works + 1; j < size; j++) {
+                have -= que[j] - que[works];
+                que[j] = que[works];
+            }
+
+            assert(have >= 0);
+            for (long long j = works; j < size; j++) {
+                que[j] -= have / (size - works);
+            }
+            have %= (size - works);
+
+            for (long long j = works; j < size; j++) {
+                if (have) {
+                    que[j]--;
+                    have--;
+                }
+            }
+
+            for (long long j = 0; j < size - 1; j++) {
+                assert(que[j] <= que[j + 1]);
+            }
+        }
+
+        que.pop_front();
+        if (que[0] <= 0) return false;
+    }
+
+    return true;
+}
+
+long long MEXGame(std::vector<int> &nums,int len,int val) 
+{
+    
+    if(len<1 or len>50 or nums.size()-1!=len){
+        throw std::invalid_argument("Invalid len");
+    }
+    if(val<1 or val>1000000000){
+        throw std::invalid_argument("Invalid val value");
+    }
+    for(int i=0;i<nums.size();i++){
+        if (nums[i] < 1 or nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid nums value");
+        }
+    }
+    std::vector<long long> arr(len + 1);
+    for (long long &mid : arr) std::cin >> mid;
+
+    long long l = 1, r = len + 1;   
+    while (l != r) {
+        long long mid = (l + r + 1) / 2;
+
+        if (Check(arr, len, val, mid)) l = mid;
+        else r = mid - 1;
+    }
+    long long ans=l;
+    return ans;
+}
+
+int main() 
+{
+
+    // TEST
+    std::vector<int> nums_1 = {4, 5};
+    int len_1 = 1;
+    int val_1 = 4;
+    int expected_1 = 2;
+    int result_1 = MEXGame(nums_1, len_1, val_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {1, 2, 3, 4, 5};
+    int len_2 = 4;
+    int val_2 = 3;
+    int expected_2 = 2;
+    int result_2 = MEXGame(nums_2, len_2, val_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {7, 8, 9, 10, 11, 12};
+    int len_3 = 5;
+    int val_3 = 6;
+    int expected_3 = 4;
+    int result_3 = MEXGame(nums_3, len_3, val_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {2, 4, 6, 8, 10};
+    int len_4 = 4;
+    int val_4 = 5;
+    int expected_4 = 2;
+    int result_4 = MEXGame(nums_4, len_4, val_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 3, 5, 7, 9};
+    int len_5 = 4;
+    int val_5 = 2;
+    int expected_5 = 1;
+    int result_5 = MEXGame(nums_5, len_5, val_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {10, 20, 30, 40, 50};
+    int len_6 = 4;
+    int val_6 = 10;
+    int expected_6 = 1;
+    int result_6 = MEXGame(nums_6, len_6, val_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {1, 1000000000};
+    int len_7 = 1;
+    int val_7 = 2;
+    int expected_7 = 1;
+    int result_7 = MEXGame(nums_7, len_7, val_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {2, 2, 2, 2, 2};
+    int len_8 = 4;
+    int val_8 = 1;
+    int expected_8 = 1;
+    int result_8 = MEXGame(nums_8, len_8, val_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {2, 2, 2, 2};
+    int len_9 = 4;
+    int val_9 = 1;
+    try
+    {
+        MEXGame(nums_9, len_9, val_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {0, 2, 2, 2};
+    int len_10 = 4;
+    int val_10 = 1;
+    try
+    {
+        MEXGame(nums_10, len_10, val_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1000000001, 2, 2, 2};
+    int len_11 = 4;
+    int val_11 = 1;
+    try
+    {
+        MEXGame(nums_11, len_11, val_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    int len_12 = 4;
+    int val_12 = 1;
+    try
+    {
+        MEXGame(nums_12, len_12, val_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {1,2};
+    int len_13 = -4;
+    int val_13 = 1;
+    try
+    {
+        MEXGame(nums_13, len_13, val_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {1,2};
+    int len_14 = 1;
+    int val_14 = -5;
+    try
+    {
+        MEXGame(nums_14, len_14, val_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15 = {1,2};
+    int len_15 = 100;
+    int val_15 = 5;
+    try
+    {
+        MEXGame(nums_15, len_15, val_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16 = {1,2};
+    int len_16 = 100;
+    int val_16 = 1000000005;
+    try
+    {
+        MEXGame(nums_16, len_16, val_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
+
