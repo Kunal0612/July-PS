@@ -1,0 +1,191 @@
+/*
+
+https://codeforces.com/problemset/problem/1446/D1
+
+Create a C++ function named FrequencyProblem to find the length of the longest subarray of the array whose most frequent value is not unique.
+
+You are given an array [nums[1],nums[2],…,nums[len]].
+
+Your goal is to find the length of the longest subarray of this array such that the most frequent value in it is not unique. In other words, you are looking for a subarray such that if the most frequent value occurs f times in this subarray, then at least 2 different values should occur exactly f times.
+
+An array c is a subarray of an array d if c can be obtained from d
+by deletion of several (possibly, zero or all) elements from the beginning and several (possibly, zero or all) elements from the end.
+
+
+Input:
+
+A vector of integers nums.
+
+Constraints:
+
+nums.size() : ranges from 1 to 200000.
+nums : ranges from 1 to min(nums.size(),100).
+
+Output:
+
+An integer answer the length of the longest subarray of the array whose most frequent value is not unique.
+
+*/
+
+#include <cstring>  
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+
+
+int FrequencyProblem(std::vector<int> &nums){
+    int len=nums.size();
+    if (nums.size() <= 0 or nums.size()>200000) {
+        throw std::invalid_argument("vec length must be positive.");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > std::min(len,1000))
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    int arr[len+1], prr[len * 2], cnt[150] = {0}, maxi = 0, ans = 0;
+    for (int i = 1; i <= len; i++) {
+        arr[i]=nums[i-1];
+        cnt[arr[i]]++;
+    }
+    for (int i = 1; i <= 100; i++) {
+        if (cnt[i] > cnt[maxi]) maxi = i;
+    }
+    for (int i = 1; i <= 100; i++) {
+        if (i == maxi) continue;
+        else {
+            std::memset(prr, -1, sizeof(prr));
+            int now = len; 
+            prr[now] = 0;
+            for (int j = 1; j <= len; j++) {
+                if (arr[j] == maxi) now++;
+                else if (arr[j] == i) now--;
+                if (prr[now] != -1) ans = std::max(ans, j - prr[now]);
+                else prr[now] = j;
+            }
+        }
+    }
+    return ans;
+}
+
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {1, 1, 2, 2, 3, 3, 3};
+    int expected_1 = 6;
+    int result_1 = FrequencyProblem(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {1, 2, 2, 3, 3, 3, 4, 4, 4, 4};
+    int expected_2 = 9;
+    int result_2 = FrequencyProblem(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {5, 5, 5, 5, 5, 1, 2, 3, 4, 5};
+    int expected_3 = 5;
+    int result_3 = FrequencyProblem(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST 4
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int expected_4 = 10;
+    int result_4 = FrequencyProblem(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST 5
+    std::vector<int> nums_5 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    int expected_5 = 0;
+    int result_5 = FrequencyProblem(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST 6
+    std::vector<int> nums_6 = {2, 2, 3, 3, 3, 4, 4, 4, 4, 4};
+    int expected_6 = 8;
+    int result_6 = FrequencyProblem(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST 7
+    std::vector<int> nums_7 = {1, 3, 3, 3, 2, 2, 2, 4, 4, 4, 4};
+    int expected_7 = 10;
+    int result_7 = FrequencyProblem(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST 8
+    std::vector<int> nums_8 = {5, 4, 3, 2, 1, 5, 5, 5, 5, 5};
+    int expected_8 = 5;
+    int result_8 = FrequencyProblem(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    int expected_9;
+    try
+    {
+        FrequencyProblem(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_10 = {};
+    int expected_10;
+    try
+    {
+        FrequencyProblem(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_11 = {-100000002, 100000002};
+    int expected_11;
+    try
+    {
+        FrequencyProblem(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(300000, 1);
+    int expected_12;
+    try
+    {
+        FrequencyProblem(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
