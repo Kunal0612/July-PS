@@ -1,0 +1,288 @@
+/*
+
+https://codeforces.com/problemset/problem/1452/E
+
+Create a C++ function named TwoEditorials to find the the maximum sum of arr[i] over all participants.
+
+Berland regional ICPC contest has just ended. There were m participants numbered from 1 to m, who competed on a problemset of len
+problems numbered from 1 to len.
+
+Now the editorial is about to take place. There are two problem authors, each 
+of them is going to tell the tutorial to exactly val
+consecutive tasks of the problemset. The authors choose 
+the segment of val consecutive tasks for themselves independently 
+of each other. The segments can coincide, intersect or not intersect at all.
+
+The i-th participant is interested in listening to the tutorial of all 
+consecutive tasks from l[i] to r[i].
+Each participant always chooses to listen to only the problem author 
+that tells the tutorials to the maximum number of tasks he is interested 
+in. 
+Let this maximum number be arr[i]. No participant can listen to both 
+of the authors, even if their segments don't intersect.
+
+The authors want to choose the segments of val 
+consecutive tasks for themselves in such a way that 
+the sum of a[i] over all participants is maximized
+
+
+Input:
+
+An integer len.
+An integer val.
+A vector of vector of integers nums.
+
+
+Constraints:
+
+len : ranges from 1 to 2000.
+val : ranges from 1 to len.
+nums : nums[i][0] and nums[i][1] ranges from 1 to len.
+
+Output:
+
+An integer answer the the maximum sum of a[i] over all participants.
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+struct seg {
+    int left, right;
+};
+
+int TwoEditorials(std::vector<std::vector<int>> nums,int len,int val){
+    if(len<1 or len>2000){
+        throw std::invalid_argument("Invalid len value");
+    }
+    if(val<1 or val>len){
+        throw std::invalid_argument("Invalid val value");
+    }
+    for(int i=0;i<nums.size();i++){
+        if(nums[i][0]<1 or nums[i][0]>nums[i][1] or nums[i][1]>len){
+            throw std::invalid_argument("Invalid nums value");
+        }
+    }
+    int m=nums.size();
+    std::vector<seg> arr(m);
+    for (int i = 0; i < m; i++) {
+        arr[i].left=nums[i][0];
+        arr[i].right=nums[i][1];
+        --arr[i].left;
+    }
+    std::sort(arr.begin(), arr.end(), [](const seg &arr, const seg &b) {
+        return arr.left + arr.right < b.left + b.right;
+    });
+    std::vector<int> res(m + 1);
+    for (int i = 0; i < len - val + 1; i++) {
+        int cur = 0;
+        for (int j = m - 1; j >= 0; --j) {
+            cur += std::max(0, std::min(i + val, arr[j].right) - std::max(i, arr[j].left));
+            res[j] = std::max(res[j], cur);
+        }
+    }
+    int ans = res[0];
+    for (int i = 0; i < len - val + 1; i++) {
+        int cur = 0;
+        for (int j = 0; j < m; j++) {
+            cur += std::max(0, std::min(i + val, arr[j].right) - std::max(i, arr[j].left));
+            ans = std::max(ans, cur + res[j + 1]);
+        }
+    }
+    return ans;
+}
+
+
+
+int main() {
+    // TEST
+    std::vector<std::vector<int>> nums_1 = {{1, 3}, {2, 4}, {6, 9}, {6, 9}, {1, 8}};
+    int len_1 = 10;
+    int val_1 = 3;
+    int expected_1 = 14;
+    int result_1 = TwoEditorials(nums_1, len_1, val_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_2 = {{1, 2}, {2, 5}, {3, 7}};
+    int len_2 = 8;
+    int val_2 = 4;
+    int expected_2 = 9;
+    int result_2 = TwoEditorials(nums_2, len_2, val_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_3 = {{1, 5}, {2, 6}, {4, 8}};
+    int len_3 = 10;
+    int val_3 = 5;
+    int expected_3 = 14;
+    int result_3 = TwoEditorials(nums_3, len_3, val_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_4 = {{1, 1}, {2, 2}, {3, 3}};
+    int len_4 = 4;
+    int val_4 = 2;
+    int expected_4 = 3;
+    int result_4 = TwoEditorials(nums_4, len_4, val_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_5 = {{1, 4}, {5, 8}, {9, 12}};
+    int len_5 = 15;
+    int val_5 = 7;
+    int expected_5 = 11;
+    int result_5 = TwoEditorials(nums_5, len_5, val_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_6 = {{2, 4}, {3, 6}, {5, 7}};
+    int len_6 = 10;
+    int val_6 = 3;
+    int expected_6 = 8;
+    int result_6 = TwoEditorials(nums_6, len_6, val_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_7 = {{1, 5}, {6, 10}};
+    int len_7 = 12;
+    int val_7 = 4;
+    int expected_7 = 8;
+    int result_7 = TwoEditorials(nums_7, len_7, val_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_8 = {{1, 2}, {2, 3}, {3, 4}};
+    int len_8 = 5;
+    int val_8 = 2;
+    int expected_8 = 5;
+    int result_8 = TwoEditorials(nums_8, len_8, val_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> nums_9 = {{0, 2}, {2, 3}, {3, 4}};
+    int len_9 = 5;
+    int val_9 = 2;
+    try
+    {
+        TwoEditorials(nums_9, len_9, val_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_10 = {{1, 10}, {2, 3}, {3, 4}};
+    int len_10 = 5;
+    int val_10 = 2;
+    try
+    {
+        TwoEditorials(nums_10, len_10, val_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_11 = {{5, 2}, {2, 3}, {3, 4}};
+    int len_11 = 5;
+    int val_11 = 2;
+    try
+    {
+        TwoEditorials(nums_11, len_11, val_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_12 = {{-5, 2}, {2, 3}, {3, 4}};
+    int len_12 = 5;
+    int val_12 = 2;
+    try
+    {
+        TwoEditorials(nums_12, len_12, val_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_13 = {{-5, 2}, {2, 3}, {3, 4}};
+    int len_13 = -5;
+    int val_13 = 2;
+    try
+    {
+        TwoEditorials(nums_13, len_13, val_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_14 = {{-5, 2}, {2, 3}, {3, 4}};
+    int len_14 = 5;
+    int val_14 = -2;
+    try
+    {
+        TwoEditorials(nums_14, len_14, val_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_15 = {{1,2}, {2, 3}, {3, 4}};
+    int len_15 = 5000;
+    int val_15 = 2;
+    try
+    {
+        TwoEditorials(nums_15, len_15, val_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> nums_16 = {{1,2}, {2, 3}, {3, 4}};
+    int len_16 = 5;
+    int val_16 = 200;
+    try
+    {
+        TwoEditorials(nums_16, len_16, val_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
