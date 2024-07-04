@@ -1,0 +1,229 @@
+// https://codeforces.com/problemset/problem/1701/E
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <climits>
+#include <stdexcept>
+#include <cassert>
+
+std::vector<int> ZAlgo(const std::string &str) {
+    int len = str.size();
+    std::vector<int> ans(len);
+    int left = 0, right = 0;
+    for (int i = 1; i < len; ++i) {
+        if (i <= right) {
+            ans[i] = std::min(right - i + 1, ans[i - left]);
+        }
+        while (i + ans[i] < len && str[ans[i]] == str[i + ans[i]]) {
+            ++ans[i];
+        }
+        if (i + ans[i] - 1 > right) {
+            left = i;
+            right = i + ans[i] - 1;
+        }
+    }
+    return ans;
+}
+
+int Editor(std::string &str, std::string &ptr)
+{
+    int len=str.size(), lem=ptr.size();
+    if(lem>len or len<1 or len>5000){
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    int answer = INT_MAX;
+    bool is_bad = false;
+    std::vector<int> left_positions(lem), right_positions(lem);
+    for (int i = 0; i < lem; ++i)
+    {
+        if (i > 0)
+        {
+            left_positions[i] = left_positions[i - 1] + 1;
+        }
+        else
+        {
+            left_positions[i] = 0;
+        }
+        while (left_positions[i] < len && str[left_positions[i]] != ptr[i])
+        {
+            ++left_positions[i];
+        }
+        if (left_positions[i] >= len)
+        {
+            is_bad = true;
+            break;
+        }
+    }
+    for (int i = lem - 1; i >= 0; --i)
+    {
+        if (i + 1 < lem)
+        {
+            right_positions[i] = right_positions[i + 1] - 1;
+        }
+        else
+        {
+            right_positions[i] = len - 1;
+        }
+        while (right_positions[i] >= 0 && str[right_positions[i]] != ptr[i])
+        {
+            --right_positions[i];
+        }
+        if (right_positions[i] < 0)
+        {
+            is_bad = true;
+            break;
+        }
+    }
+
+    if (is_bad)
+    {
+        return -1;
+    }
+
+    for (int pos = 0; pos <= len; ++pos)
+    {
+        std::string temp = str.substr(0, pos);
+        std::reverse(temp.begin(), temp.end());
+        temp += "#" + ptr;
+        std::reverse(temp.begin() + pos + 1, temp.end());
+        std::vector<int> ans = ZAlgo(temp);
+        for (int suf = 0; suf <= lem; ++suf)
+        {
+            if (pos - suf < 0)
+            {
+                continue;
+            }
+            if (suf < lem && right_positions[suf] < pos)
+            {
+                continue;
+            }
+            if (suf - 1 >= 0 && left_positions[suf - 1] > pos)
+            {
+                continue;
+            }
+            int range = 0;
+            if (suf != 0)
+            {
+                int sum = (pos - ans[pos + 1 + lem - suf]) + (pos - suf);
+                range = (sum != 0) + sum;
+            }
+            else
+            {
+                range = pos;
+            }
+            answer = std::min(answer, (len - pos) + range);
+        }
+    }
+    return answer;
+}
+
+int main() {
+    // TEST
+    std::string str_1 = "aaaaaaaaa";
+    std::string ptr_1 = "aaaa";
+    int expected_1 = 5;
+    int result_1 = Editor(str_1, ptr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "ababababab";
+    std::string ptr_2 = "abab";
+    int expected_2 = 6;
+    int result_2 = Editor(str_2, ptr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abcdabcdabcd";
+    std::string ptr_3 = "abcd";
+    int expected_3 = 8;
+    int result_3 = Editor(str_3, ptr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "xyzxyzxyzxyz";
+    std::string ptr_4 = "xyz";
+    int expected_4 = 9;
+    int result_4 = Editor(str_4, ptr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "mississippi";
+    std::string ptr_5 = "issi";
+    int expected_5 = 9;
+    int result_5 = Editor(str_5, ptr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "abracadabra";
+    std::string ptr_6 = "abra";
+    int expected_6 = 7;
+    int result_6 = Editor(str_6, ptr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "abcdefgabcdefg";
+    std::string ptr_7 = "def";
+    int expected_7 = 14;
+    int result_7 = Editor(str_7, ptr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "hellohellohello";
+    std::string ptr_8 = "hello";
+    int expected_8 = 10;
+    int result_8 = Editor(str_8, ptr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    std::string ptr_9 = "hello";
+    try
+    {
+        Editor(str_9, ptr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "";
+    std::string ptr_10 = "";
+    try
+    {
+        Editor(str_10, ptr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(5005,'a');
+    std::string ptr_11 = "a";
+    try
+    {
+        Editor(str_11, ptr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout<<"YESSS";
+    return 0;
+}
+
