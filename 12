@@ -1,0 +1,165 @@
+// https://codeforces.com/problemset/problem/1562/E
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <stdexcept>
+#include <cassert>
+
+bool IsGreater(const std::string &str, int node_x, int node_y, const std::vector<std::vector<int16_t>> &lcp)
+{
+    if (lcp[node_x][node_y] == static_cast<int>(str.size()) - node_x)
+    {
+        return false;
+    }
+    return str[node_x + lcp[node_x][node_y]] > str[node_y + lcp[node_x][node_y]];
+}
+
+int GetScore(const std::string &str, int node_x, int node_y, const std::vector<std::vector<int16_t>> &lcp, const std::vector<int> &dpp)
+{
+    if (IsGreater(str, node_x, node_y, lcp))
+    {
+        return dpp[node_y] + static_cast<int>(str.size()) - node_x - lcp[node_x][node_y];
+    }
+    return 0;
+}
+
+int Rescue(std::string &str)
+{
+    int len=str.size();
+    if(len<1 or len>5000){
+        throw std::invalid_argument("Invalid string size");
+    }
+    std::vector<std::vector<int16_t>> lcp(len + 1, std::vector<int16_t>(len + 1, 0));
+    std::vector<int> dpp(len + 1, 0);
+
+    for (int i = len - 1; i >= 0; i--)
+    {
+        for (int j = len - 1; j >= 0; j--)
+        {
+            if (i == j)
+            {
+                lcp[i][j] = len - i;
+            }
+            else if (str[i] != str[j])
+            {
+                lcp[i][j] = 0;
+            }
+            else
+            {
+                lcp[i][j] = lcp[i + 1][j + 1] + 1;
+            }
+        }
+    }
+
+    int answer = len;
+    dpp[0] = len;
+    for (int i = 1; i < len; i++)
+    {
+        dpp[i] = len - i;
+        for (int j = 0; j < i; j++)
+        {
+            dpp[i] = std::max(dpp[i], GetScore(str, i, j, lcp, dpp));
+        }
+        answer = std::max(answer, dpp[i]);
+    }
+
+    return answer;
+}
+
+int main() {
+    // TEST
+    std::string str_1 = "aaaaaaaaa";
+    int expected_1 = 9;
+    int result_1 = Rescue(str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "ababababab";
+    int expected_2 = 19;
+    int result_2 = Rescue(str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abcdabcdabcd";
+    int expected_3 = 42;
+    int result_3 = Rescue(str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "xyzxyzxyzxyz";
+    int expected_4 = 33;
+    int result_4 = Rescue(str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "mississippi";
+    int expected_5 = 24;
+    int result_5 = Rescue(str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "abracadabra";
+    int expected_6 = 35;
+    int result_6 = Rescue(str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "abcdefgabcdefg";
+    int expected_7 = 77;
+    int result_7 = Rescue(str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "hellohellohello";
+    int expected_8 = 50;
+    int result_8 = Rescue(str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    try
+    {
+        Rescue(str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "";
+    try
+    {
+        Rescue(str_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(5005,'a');
+    try
+    {
+        Rescue(str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+   std::cout << "All test cases passed!";
+    return 0;
+}
