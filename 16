@@ -1,0 +1,277 @@
+// https://codeforces.com/problemset/problem/1497/E2
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <climits>
+#include <stdexcept>
+#include <cassert>
+
+std::vector<int> generate_primes_and_mind()
+{
+    const int MAXA = 1e7;
+    std::vector<int> mind(MAXA + 1, 0);
+    std::vector<int> primes;
+    for (int i = 2; i <= MAXA; ++i)
+    {
+        if (mind[i] == 0)
+        {
+            primes.emplace_back(i);
+            mind[i] = i;
+        }
+        for (auto &res : primes)
+        {
+            if (res > mind[i] || res * i > MAXA)
+                break;
+            mind[res * i] = res;
+        }
+    }
+    return mind;
+}
+std::vector<int> mind = generate_primes_and_mind();
+
+int SquareFreeDivision(std::vector<int> &nums, int val)
+{
+    int len = nums.size();
+    
+    if (nums.size() <= 0 or nums.size() > 200000 or val < 0 or val > 20)
+    {
+        throw std::invalid_argument("Invalid  Constraints");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 10000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    const int MAXA = *max_element(nums.begin(), nums.end());
+    std::vector<int> cnt(MAXA + 1);
+    std::vector<int> arr(len, 1);
+    const int INF = 1e9 + 1;
+
+    for (int i = 0; i < len; ++i)
+    {
+        int res = nums[i];
+        int cnt = 0, last = 0;
+        while (res > 1)
+        {
+            int pec = mind[res];
+            if (last == pec)
+            {
+                ++cnt;
+            }
+            else
+            {
+                if (cnt % 2 == 1)
+                    arr[i] *= last;
+                last = pec;
+                cnt = 1;
+            }
+            res /= pec;
+        }
+        if (cnt % 2 == 1)
+            arr[i] *= last;
+    }
+
+    std::vector<std::vector<int>> left(len, std::vector<int>(val + 1));
+    for (int j = 0; j <= val; ++j)
+    {
+        int l = len, now = 0;
+        for (int i = len - 1; i >= 0; --i)
+        {
+            while (l - 1 >= 0 && now + (cnt[arr[l - 1]] > 0) <= j)
+            {
+                --l;
+                now += (cnt[arr[l]] > 0);
+                cnt[arr[l]]++;
+            }
+            left[i][j] = l;
+            if (cnt[arr[i]] > 1)
+                --now;
+            cnt[arr[i]]--;
+        }
+    }
+
+    std::vector<std::vector<int>> dpp(len + 1, std::vector<int>(val + 1, INF));
+    std::fill(dpp[0].begin(), dpp[0].end(), 0);
+
+    for (int i = 1; i <= len; ++i)
+    {
+        for (int j = 0; j <= val; ++j)
+        {
+            if (j > 0)
+                dpp[i][j] = dpp[i][j - 1];
+            for (int lst = 0; lst <= j; ++lst)
+            {
+                dpp[i][j] = std::min(dpp[i][j], dpp[left[i - 1][lst]][j - lst] + 1);
+            }
+        }
+    }
+
+    int ans = INF;
+    for (int &c : dpp.back())
+        ans = std::min(ans, c);
+    return ans;
+}
+
+int main()
+{
+    // TEST
+    std::vector<int> nums_1 = {18, 6, 2, 4, 1};
+    int val_1 = 2;
+    int expected_1 = 1;
+    int result_1 = SquareFreeDivision(nums_1, val_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    int val_2 = 3;
+    int expected_2 = 1;
+    int result_2 = SquareFreeDivision(nums_2, val_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {16, 25, 36, 49, 64, 81, 100};
+    int val_3 = 5;
+    int expected_3 = 2;
+    int result_3 = SquareFreeDivision(nums_3, val_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+    int val_4 = 1;
+    int expected_4 = 9;
+    int result_4 = SquareFreeDivision(nums_4, val_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1};
+    int val_5 = 0;
+    int expected_5 = 1;
+    int result_5 = SquareFreeDivision(nums_5, val_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {15, 15, 15, 15, 15};
+    int val_6 = 3;
+    int expected_6 = 2;
+    int result_6 = SquareFreeDivision(nums_6, val_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {10, 10, 30, 400, 5};
+    int val_7 = 4;
+    int expected_7 = 1;
+    int result_7 = SquareFreeDivision(nums_7, val_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1};
+    int val_8 = 2;
+    int expected_8 = 1;
+    int result_8 = SquareFreeDivision(nums_8, val_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {};
+    int val_9 = 2;
+    try
+    {
+        SquareFreeDivision(nums_9, val_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {-1};
+    int val_10 = 2;
+    try
+    {
+        SquareFreeDivision(nums_10, val_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {10000002};
+    int val_11 = 2;
+    try
+    {
+        SquareFreeDivision(nums_11, val_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {0};
+    int val_12 = 2;
+    try
+    {
+        SquareFreeDivision(nums_12, val_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {1};
+    int val_13 = 25;
+    try
+    {
+        SquareFreeDivision(nums_13, val_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {1};
+    int val_14 = -25;
+    try
+    {
+        SquareFreeDivision(nums_14, val_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(200005,1);
+    int val_15 = 2;
+    try
+    {
+        SquareFreeDivision(nums_15, val_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
