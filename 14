@@ -1,0 +1,263 @@
+// https://codeforces.com/problemset/problem/1076/F
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+
+int MinimumMove(int node_a, int node_b, int arr, int brr, int val) {
+    constexpr int INF = std::numeric_limits<int>::max();
+    int minimum_moves = INF;
+
+    if (node_a <= val) {
+        int total = node_a + arr;
+        int cnt = (total + val - 1) / val - 1;
+        if (brr == cnt)
+            minimum_moves = std::min(minimum_moves, total - cnt * val);
+        else if (brr > cnt && brr <= arr * static_cast<long long>(val))
+            minimum_moves = std::min(minimum_moves, 1);
+    }
+
+    if (node_b <= val) {
+        int cnt = (arr + val - 1) / val - 1;
+        if (brr == cnt)
+            minimum_moves = std::min(minimum_moves, arr - cnt * val);
+        else if (brr > cnt && brr <= (arr - 1) * static_cast<long long>(val) + (val - node_b))
+            minimum_moves = std::min(minimum_moves, 1);
+    }
+
+    return minimum_moves;
+}
+bool Report(int val,std::vector<int> &arr,std::vector<int> &brr){
+    constexpr int INF = std::numeric_limits<int>::max();
+    int len=arr.size();
+     if (len <= 0 or len>300000 or arr.size()!=brr.size()) {
+        throw std::invalid_argument("Invalid limit");
+    }
+    if (val <= 0 or val>1000000) {
+        throw std::invalid_argument("Invalid val value");
+    }
+    for (int i = 0; i < arr.size(); ++i)
+    {
+        if (arr[i] < 1 || arr[i] > 1000000 || brr[i] < 1 || brr[i] > 1000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    std::vector<std::vector<int>> dpp(len + 1, std::vector<int>(2, INF));
+    dpp[0][0] = dpp[0][1] = 0;
+
+    for (int i = 0; i < len; ++i) {
+        dpp[i + 1][0] = MinimumMove(dpp[i][0], dpp[i][1], arr[i], brr[i], val);
+        dpp[i + 1][1] = MinimumMove(dpp[i][1], dpp[i][0], brr[i], arr[i], val);
+    }
+
+    if(dpp[len][0] <= val || dpp[len][1] <= val) return true;
+    return false;
+}
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {1, 5, 5};
+    std::vector<int> brr_1 = {10, 4, 6};
+    int val_1 = 10;
+    bool expected_1 = 1;
+    bool result_1 = Report(val_1, arr_1, brr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {3, 6, 8, 2};
+    std::vector<int> brr_2 = {15, 7, 5, 10};
+    int val_2 = 20;
+    bool expected_2 = 1;
+    bool result_2 = Report(val_2, arr_2, brr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {7, 1, 12, 4, 5};
+    std::vector<int> brr_3 = {14, 11, 9, 3, 8};
+    int val_3 = 15;
+    bool expected_3 = 1;
+    bool result_3 = Report(val_3, arr_3, brr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {9, 8, 7};
+    std::vector<int> brr_4 = {3, 4, 5};
+    int val_4 = 10;
+    bool expected_4 = 1;
+    bool result_4 = Report(val_4, arr_4, brr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_5 = {5, 10, 15, 20, 25};
+    std::vector<int> brr_5 = {20, 15, 10, 5, 25};
+    int val_5 = 30;
+    bool expected_5 = 1;
+    bool result_5 = Report(val_5, arr_5, brr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_6 = {2, 4, 6, 8};
+    std::vector<int> brr_6 = {16, 12, 8, 4};
+    int val_6 = 20;
+    bool expected_6 = 1;
+    bool result_6 = Report(val_6, arr_6, brr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_7 = {1, 2, 3, 4, 5};
+    std::vector<int> brr_7 = {5, 4, 3, 2, 1};
+    int val_7 = 10;
+    bool expected_7 = 1;
+    bool result_7 = Report(val_7, arr_7, brr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_8 = {5, 5, 5, 5};
+    std::vector<int> brr_8 = {5, 5, 5, 5};
+    int val_8 = 6;
+    bool expected_8 = 1;
+    bool result_8 = Report(val_8, arr_8, brr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> arr_9 = {};
+    std::vector<int> brr_9 = {5, 5, 5, 5};
+    int val_9 = 6;
+    try
+    {
+        Report(val_9, arr_9, brr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_10 = {-1};
+    std::vector<int> brr_10 = {5, 5, 5, 5};
+    int val_10 = 6;
+    try
+    {
+        Report(val_10, arr_10, brr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_11 = {7};
+    std::vector<int> brr_11 = {5, 5, 5, 5};
+    int val_11 = 6;
+    try
+    {
+        Report(val_11, arr_11, brr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_12 = {7};
+    std::vector<int> brr_12 = {5, 5, 5, 5};
+    int val_12 = -2;
+    try
+    {
+        Report(val_12, arr_12, brr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_13 = {7};
+    std::vector<int> brr_13 = {};
+    int val_13 = -2;
+    try
+    {
+        Report(val_13, arr_13, brr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_14 = {7};
+    std::vector<int> brr_14 = {10};
+    int val_14 = 10000000;
+    try
+    {
+        Report(val_14, arr_14, brr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_15 = {7};
+    std::vector<int> brr_15 = {10};
+    int val_15 = 0;
+    try
+    {
+        Report(val_15, arr_15, brr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_16 = {22222227};
+    std::vector<int> brr_16 = {10};
+    int val_16 = 0;
+    try
+    {
+        Report(val_16, arr_16, brr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_17 = {1};
+    std::vector<int> brr_17 = {22222227};
+    int val_17 = 0;
+    try
+    {
+        Report(val_17, arr_17, brr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
