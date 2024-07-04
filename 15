@@ -1,0 +1,280 @@
+// https://codeforces.com/problemset/problem/993/D
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <stdexcept>
+#include <cassert>
+
+
+struct Data {
+    int node_x, node_y;
+    bool operator<(const Data& rhs) const {
+        return node_x != rhs.node_x ? node_x > rhs.node_x : node_y > rhs.node_y;
+    }
+};
+
+template<typename T>
+inline void CheckMin(T&node_x,const T&node_y){node_x=std::min(node_x,node_y);}
+
+int ComputePower(std::vector<int> &arr,std::vector<int> brr){
+    int len=arr.size();
+    const long long INF = 1e14;
+    if (arr.size() <= 0 or arr.size()>50 or arr.size()!=brr.size()) {
+        throw std::invalid_argument("Invalid arr size");
+    }
+    for (int i = 0; i < arr.size(); ++i)
+    {
+        if (arr[i] < 1 || arr[i] > 100000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    if (brr.size() <= 0 or brr.size()>50) {
+        throw std::invalid_argument("Invalid brr size.");
+    }
+    for (int i = 0; i < brr.size(); ++i)
+    {
+        if (brr[i] < 1 || brr[i] > 100)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    std::vector<Data> nums(len + 1);
+    for (int i = 1; i <= len; ++i)  nums[i].node_x=arr[i-1];
+    for (int i = 1; i <= len; ++i) nums[i].node_y=brr[i-1];
+
+    std::sort(nums.begin() + 1, nums.end());
+    int lem=len+1;
+    long long dpp[lem][lem][lem * 100];
+    std::memset(dpp, 0x3f, sizeof(dpp));
+    dpp[0][0][0] = 0;
+
+    for (int i = 1; i <= len; ) {
+        int right = i;
+        while (right < len && nums[right + 1].node_x == nums[right].node_x) ++right;
+
+        std::vector<int> pre(right - i + 2, 0);
+        std::vector<long long> preSum(right - i + 2, 0);
+
+        for (int j = 1; j <= right - i + 1; ++j) {
+            pre[j] = pre[j - 1] + nums[i + j - 1].node_y;
+            preSum[j] = preSum[j - 1] + nums[i + j - 1].node_x;
+        }
+
+        for (int j = 0; j < i; ++j) {
+            for (int k = 0; k <= i * 100 - 100; ++k) {
+                for (int t = 0; t <= right - i + 1; ++t) {
+                    int res = right - i + 1 - t;
+                    if (j < res) continue;
+                    CheckMin(dpp[right][j - res + t][k + pre[t]], dpp[i - 1][j][k] + preSum[t]);
+                }
+            }
+        }
+        i = right + 1;
+    }
+
+    double ans = 1e18;
+    for (int i = 0; i <= len; ++i) {
+        for (int j = 1; j <= len * 100; ++j) {
+            if (dpp[len][i][j] < INF) {
+                CheckMin(ans, dpp[len][i][j] * 1000.0 / j);
+            }
+        }
+    }
+
+    long long answer=std::ceil(ans);
+    return answer;
+}
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {8,10,9,9,8,10};
+    std::vector<int> brr_1 = {1,1,1,1,1,1};
+    int expected_1 = 9000;
+    int result_1 = ComputePower(arr_1, brr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {3, 6, 8, 2};
+    std::vector<int> brr_2 = {15, 7, 5, 10};
+    int expected_2 = 434;
+    int result_2 = ComputePower(arr_2, brr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {7, 1, 12, 4, 5};
+    std::vector<int> brr_3 = {14, 11, 9, 3, 8};
+    int lim_3 = 15;
+    int expected_3 =589;
+    int result_3 = ComputePower(arr_3, brr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {9, 8, 7};
+    std::vector<int> brr_4 = {3, 4, 5};
+    int expected_4 = 2000;
+    int result_4 = ComputePower(arr_4, brr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_5 = {5, 10, 15, 20, 25};
+    std::vector<int> brr_5 = {20, 15, 10, 5, 25};
+    int expected_5 = 786;
+    int result_5 = ComputePower(arr_5, brr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_6 = {2, 4, 6, 8};
+    std::vector<int> brr_6 = {16, 12, 8, 4};
+    int expected_6 = 438;
+    int result_6 = ComputePower( arr_6, brr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_7 = {1, 2, 3, 4, 5};
+    std::vector<int> brr_7 = {5, 4, 3, 2, 1};
+    int lim_7 = 10;
+    int expected_7 = 847;
+    int result_7 = ComputePower(arr_7, brr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_8 = {5, 5, 5, 5};
+    std::vector<int> brr_8 = {5, 5, 5, 5};
+    int expected_8 = 1000;
+    int result_8 = ComputePower(arr_8, brr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> arr_9 = {};
+    std::vector<int> brr_9 = {5, 5, 5, 5};
+    try
+    {
+        ComputePower(arr_9, brr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_10 = {-1};
+    std::vector<int> brr_10 = {5, 5, 5, 5};
+    try
+    {
+        ComputePower(arr_10, brr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_11 = {7};
+    std::vector<int> brr_11 = {};
+    try
+    {
+        ComputePower(arr_11, brr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_12 = {0};
+    std::vector<int> brr_12 = {5, 5, 5, 5};
+    int lim_12 = -2;
+    try
+    {
+        ComputePower(arr_12, brr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_13 = {7};
+    std::vector<int> brr_13 = {0};
+    try
+    {
+        ComputePower(arr_13, brr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_14 = {100000002};
+    std::vector<int> brr_14 = {10};
+    try
+    {
+        ComputePower(arr_14, brr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_15 = {7};
+    std::vector<int> brr_15 = {1000};
+    try
+    {
+        ComputePower(arr_15, brr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_16(200,1);
+    std::vector<int> brr_16 = {1000};
+    try
+    {
+        ComputePower(arr_16, brr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_17(20,1);
+    std::vector<int> brr_17(200,1);
+    try
+    {
+        ComputePower(arr_17, brr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
+
