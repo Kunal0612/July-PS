@@ -1,0 +1,148 @@
+// https://codeforces.com/problemset/problem/1710/C
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+#include <string>
+
+
+int XORTriangle(std::string &str){
+    const int MOD = 998244353;
+
+    if (str.empty() || str.size() > 200001 || str[0] == '0' || str.find_first_not_of("01") != std::string::npos) {
+        throw std::invalid_argument("Invalid limit");
+    }
+    int max_n = str.size() + 2;
+    std::vector<std::vector<std::vector<long long int>>> dp(max_n, std::vector<std::vector<long long int>>(8, std::vector<long long int>(8, 0)));
+
+    dp[0][0][0] = 1;
+
+    for (int idx = 0; idx < str.size(); idx++) {
+        for (int mask_1 = 0; mask_1 < 8; mask_1++) {
+            for (int mask_2 = 0; mask_2 < 8; mask_2++) {
+                dp[idx][mask_1][mask_2] %= MOD;
+                for (int mask = 0; mask < 8; mask++) {
+                    bool flag = false;
+                    for (int bit = 0; bit < 3; bit++) {
+                        if (str[idx] == '0' && (mask_2 >> bit) % 2 == 0 && (mask >> bit) % 2 == 1) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                        continue;
+
+                    int temp_mask_1 = mask_1;
+                    int temp_mask_2 = mask_2;
+                    for (int bit = 0; bit < 3; bit++) {
+                        if (str[idx] - '0' != ((mask >> bit) & 1))
+                            temp_mask_2 |= (1 << bit);
+                    }
+                    for (int bit = 0; bit < 3; bit++) {
+                        if (mask == (1 << bit) || mask == 7 - (1 << bit))
+                            temp_mask_1 |= (1 << bit);
+                    }
+                    dp[idx + 1][temp_mask_1][temp_mask_2] += dp[idx][mask_1][mask_2];
+                }
+            }
+        }
+    }
+    long long int result = 0;
+    for (int mask = 0; mask < 8; mask++) {
+        result += dp[str.size()][7][mask];
+    }
+
+    int ans=result % MOD;
+    return ans;
+}
+
+
+int main() {
+    // TEST
+    std::string str_1 = "11011111101010010";
+    int expected_1 = 141427753;
+    int result_1 = XORTriangle(str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "1010";
+    int expected_2 = 234;
+    int result_2 = XORTriangle(str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "101";
+    int expected_3 = 12;
+    int result_3 = XORTriangle(str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "1111";
+    int expected_4 =960;
+    int result_4 = XORTriangle(str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "11111111";
+    int expected_5 = 11934720;
+    int result_5 = XORTriangle(str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "1110";
+    int expected_6 = 780;
+    int result_6 = XORTriangle(str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "";
+    try
+    {
+        XORTriangle(str_7);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_8 = "01";
+    try
+    {
+        XORTriangle(str_8);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_9 = std::string(200002,'1');
+    try
+    {
+        XORTriangle(str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All test cases passed!";
+    return 0;
+
+    return 0;
+}
