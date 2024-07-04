@@ -1,0 +1,217 @@
+// https://codeforces.com/problemset/problem/1420/E
+
+#include <cassert>
+#include <climits>
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <stdexcept>
+#include <cassert>
+
+std::vector<int> BattleLemmings(std::vector<int> &nums)
+{
+    std::ios_base::sync_with_stdio(false);
+    int len=nums.size();
+    if(len<1 or len>80){
+        throw std::invalid_argument("Invalid Constraint");
+    }
+    for(int i=0;i<len;i++){
+        if(nums[i]!=0 and nums[i]!=1){
+            throw std::invalid_argument("Invalid value of nums");
+        }
+    }
+    nums.push_back(1);
+
+    std::vector<int> zero_lengths;
+    for (int i = 0; i <= len; ++i)
+    {
+        int start = i;
+        while (i < len && nums[i] == 0)
+            ++i;
+        zero_lengths.push_back(i - start);
+    }
+
+    std::vector<int> prefix_sum = zero_lengths;
+    std::partial_sum(prefix_sum.begin(), prefix_sum.end(), prefix_sum.begin());
+
+    int max_val = len+2;
+    int dxx = max_val + 1, dyy = max_val + 1, dzz = max_val * (max_val + 1) / 2 + 1;
+    std::vector<std::vector<std::vector<int>>> dpp(dxx, std::vector<std::vector<int>>(dyy, std::vector<int>(dzz, INT_MAX)));
+
+    dpp[0][0][0] = 0;
+
+    int k = zero_lengths.size(), l = prefix_sum.back();
+    for (int i = 0; i < k; ++i)
+    {
+        for (int j = 0; j <= l; ++j)
+        {
+            for (int s = 0; s <= len * (len - 1) / 2; ++s)
+            {
+                if (dpp[i][j][s] == INT_MAX)
+                    continue;
+                for (int q = j; q <= l; ++q)
+                {
+                    dpp[i + 1][q][s + std::abs(q - prefix_sum[i])] = std::min(dpp[i + 1][q][s + std::abs(q - prefix_sum[i])], dpp[i][j][s] + (q - j) * (q - j));
+                }
+            }
+        }
+    }
+
+    int min_val = INT_MAX;
+    std::vector<int> ans;
+    for (int s = 0; s <= len * (len - 1) / 2; ++s)
+    {
+        min_val = std::min(min_val, dpp[k][l][s]);
+        int result = l * l - min_val;
+        if(result%2==0){
+            ans.push_back(result / 2);
+        }
+    }
+    return ans;
+}
+
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {1, 0,0,0,1};
+    std::vector<int> expected_1 = {0,2,3,3 ,3, 3, 3, 3, 3, 3, 3 };
+    std::vector<int> result_1 = BattleLemmings(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {0, 0, 1, 0, 1, 1};
+    std::vector<int> expected_2 = {2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+    std::vector<int> result_2 = BattleLemmings(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1, 1, 1, 1};
+    std::vector<int> expected_3 = {0, 0,0,0,0,0,0};
+    std::vector<int> result_3 = BattleLemmings(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {0, 1, 0, 0};
+    std::vector<int> expected_4 = {2, 2, 2, 2, 2, 2, 2};
+    std::vector<int> result_4 = BattleLemmings(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+    std::vector<int> expected_5 = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
+    std::vector<int> result_5 = BattleLemmings(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 0};
+    std::vector<int> expected_6 = {0, 0};
+    std::vector<int> result_6 = BattleLemmings(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {0, 1, 1, 0, 1, 1, 0, 1, 0};
+    std::vector<int> expected_7 = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6};
+    std::vector<int> result_7 = BattleLemmings(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0};
+    std::vector<int> expected_8 = {12, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15};
+    std::vector<int> result_8 = BattleLemmings(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {};
+    try
+    {
+        BattleLemmings(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {-1};
+    try
+    {
+        BattleLemmings(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {100000};
+    try
+    {
+        BattleLemmings(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {-100000};
+    try
+    {
+        BattleLemmings(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {};
+    try
+    {
+        BattleLemmings(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    //TEST
+    std::vector<int> nums_14 = {};
+    try
+    {
+        BattleLemmings(nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(100,1);
+    try
+    {
+        BattleLemmings(nums_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
