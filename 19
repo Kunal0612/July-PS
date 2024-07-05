@@ -1,0 +1,181 @@
+// https://codeforces.com/problemset/problem/578/D
+
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <cassert>
+
+int LCSAgain(std::string &str,int lem){
+    if (str.size() <= 0 or str.size()>100000 or lem>26 or lem<2) {
+        throw std::invalid_argument("Invalid length.");
+    }
+    for (int i = 0; i < str.size(); ++i)
+    {
+        if (str[i] > 'z' || str[i] < 'a')
+        {
+            throw std::invalid_argument("Invalid str");
+        }
+    }
+    int len=str.size();
+    long long ans=0;
+    str="@"+str;
+    ans = len * (lem - 1);
+    for (int i = 2, x = 0; i <= len; i++) {
+        if (i > 2 && str[i] == str[i - 2]) {
+            ++x;
+        } else {
+            x = 0;
+        }
+        if (str[i] != str[i - 1]) {
+            ans += len * (lem - 1) - x - 1;
+        }
+    }
+    return ans;
+}
+
+int main() {
+    // TEST
+    std::string str_1 = "aaa";
+    int lem_1 = 3;
+    int expected_1 = 6;
+    int result_1 = LCSAgain(str_1, lem_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "abab";
+    int lem_2 = 2;
+    int expected_2 = 10;
+    int result_2 = LCSAgain(str_2, lem_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abcabc";
+    int lem_3 = 3;
+    int expected_3 = 67;
+    int result_3 = LCSAgain(str_3, lem_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "aabbaabb";
+    int lem_4 = 4;
+    int expected_4 = 93;
+    int result_4 = LCSAgain(str_4, lem_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "abcde";
+    int lem_5 = 5;
+    int expected_5 = 96;
+    int result_5 = LCSAgain(str_5, lem_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "abacabad";
+    int lem_6 = 4;
+    int expected_6 = 182;
+    int result_6 = LCSAgain(str_6, lem_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "zzzz";
+    int lem_7 = 2;
+    int expected_7 = 4;
+    int result_7 = LCSAgain(str_7, lem_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "abcdabcd";
+    int lem_8 = 4;
+    int expected_8 = 185;
+    int result_8 = LCSAgain(str_8, lem_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::string str_9 = "";
+    int lem_9 = 4;
+    try
+    {
+        LCSAgain(str_9, lem_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST
+    std::string str_10 = "A";
+    int lem_10 = 4;
+    try
+    {
+        LCSAgain(str_10, lem_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(200002,'a');
+    int lem_11 = 4;
+    try
+    {
+        LCSAgain(str_11, lem_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_12 = std::string(2,'a');
+    int lem_12 = -4;
+    try
+    {
+        LCSAgain(str_12, lem_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_13 = std::string(2,'a');
+    int lem_13 = 45;
+    try
+    {
+        LCSAgain(str_13, lem_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_14 = std::string(2,'a');
+    int lem_14 = 1;
+    try
+    {
+        LCSAgain(str_14, lem_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All test cases passed!" << std::endl;
+    return 0;
+}
