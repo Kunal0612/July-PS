@@ -1,0 +1,236 @@
+// https://codeforces.com/problemset/problem/1091/F
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cassert>
+
+long long int MinTime(std::vector<long long int> nums,std::string &str){
+    if (nums.size() <= 0 or nums.size()>100000 or str.size() <= 0 or str.size()>100000 or str.size()!=nums.size()) {
+        throw std::invalid_argument("Invalid Constralong long ints");
+    }
+    for (long long int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    for(long long int i=0;i<str.size();i++){
+        if(str[i]!='W' and str[i]!='G' and str[i]!='L'){
+            throw std::invalid_argument("Invalid str");
+        }
+    }
+    long long int len=nums.size();
+    bool had_water = false;
+    long long time = 0, stamina = 0, twice_grass = 0;
+    for (long long int i = 0; i < len; ++i) {
+        if (str[i] == 'L') {
+            time += nums[i];
+            stamina -= nums[i];
+            if (stamina < 0) {
+                time -= stamina * (had_water ? 3 : 5);
+                stamina = 0;
+            }
+        } else if (str[i] == 'W') {
+            had_water = true;
+            stamina += nums[i];
+            time += 3 * nums[i];
+        } else {
+            stamina += nums[i];
+            time += 5 * nums[i];
+            twice_grass += 2 * nums[i];   
+        }
+        twice_grass = std::min(twice_grass, stamina);
+    }
+
+    if (stamina > 0) {
+        time -= (5 - 1) * twice_grass / 2;
+        time -= (3 - 1) * (stamina - twice_grass) / 2;
+    }
+    return time;
+}
+
+
+int main() {
+    // TEST
+    std::vector<long long int> nums_1 = {10, 10};
+    std::string str_1 = "WL";
+    long long int expected_1 = 40;
+    long long int result_1 = MinTime(nums_1, str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_2 = {1, 2, 3};
+    std::string str_2 = "LGW";
+    long long int expected_2 = 18;
+    long long int result_2 = MinTime(nums_2, str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_3 = {5, 5, 5};
+    std::string str_3 = "WWW";
+    long long int expected_3 = 30;
+    long long int result_3 = MinTime(nums_3, str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_4 = {1000000000, 100000000, 100000000};
+    std::string str_4 = "LLL";
+    long long int expected_4 = 7200000000;
+    long long int result_4 = MinTime(nums_4, str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_5 = {1, 1, 1, 1};
+    std::string str_5 = "WGLG";
+    long long int expected_5 = 10;
+    long long int result_5 = MinTime(nums_5, str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_6 = {2, 4, 8, 16};
+    std::string str_6 = "GWLG";
+    long long int expected_6 = 84;
+    long long int result_6 = MinTime(nums_6, str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_7 = {3, 3, 3};
+    std::string str_7 = "GGG";
+    long long int expected_7 = 27;
+    long long int result_7 = MinTime(nums_7, str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_8 = {6, 6, 6, 6};
+    std::string str_8 = "WLWL";
+    long long int expected_8 = 48;
+    long long int result_8 = MinTime(nums_8, str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_9 = {1000000000000};
+    std::string str_9 = "G";
+    long long int expected_9 = 3000000000000;
+    long long int result_9 = MinTime(nums_9, str_9);
+    assert(result_9 == expected_9);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_10 = {1, 2, 3, 4, 5};
+    std::string str_10 = "LWLWL";
+    long long int expected_10 = 38;
+    long long int result_10 = MinTime(nums_10, str_10);
+    assert(result_10 == expected_10);
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_11 = {0, 2, 3, 4, 5};
+    std::string str_11 = "LWLWL";
+    long long int expected_11 = 38;
+    try
+    {
+        MinTime(nums_11, str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_12 = {1000000000000000, 2, 3, 4, 5};
+    std::string str_12 = "LWLWL";
+    long long int expected_12 = 38;
+    try
+    {
+        MinTime(nums_12, str_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_13 = {-1000000000000000, 2, 3, 4, 5};
+    std::string str_13 = "LWLWL";
+    long long int expected_13 = 38;
+    try
+    {
+        MinTime(nums_13, str_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_14 = {};
+    std::string str_14 = "LWLWL";
+    long long int expected_14 = 38;
+    try
+    {
+        MinTime(nums_14, str_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_15 = {};
+    std::string str_15 = "";
+    long long int expected_15 = 38;
+    try
+    {
+        MinTime(nums_15, str_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_16 = {5,5};
+    std::string str_16 = "vcfv";
+    long long int expected_16 = 38;
+    try
+    {
+        MinTime(nums_16, str_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_17 = {5,5};
+    std::string str_17 = "AB";
+    long long int expected_17 = 38;
+    try
+    {
+        MinTime(nums_17, str_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
