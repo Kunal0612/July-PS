@@ -1,5 +1,41 @@
-// https://codeforces.com/problemset/problem/1076/F
+/*
 
+https://codeforces.com/problemset/problem/1076/F
+
+Write a C++ Solution Report to find a boolean answer.
+
+Vova had just completed his summer practice and was now tasked with writing a report detailing his experience. He was meticulous and had already drawn all the tables and noted down all the formulas he needed. Vova decided that his report would consist of exactly n pages, with each page i containing arr[i] tables and brr[i] formulas. 
+The pages were to be filled in sequential order, from 1 to n.
+
+Vova was excited to begin, but he had a peculiar condition: he knew that if he drew more than val tables in a row or wrote more than val formulas in a row, he would get incredibly bored. To keep his motivation high, he needed to rearrange the tables and formulas on each page so that he wouldn't exceed val consecutive tables or formulas.
+
+However, Vova faced a challenge. He couldn't skip pages or move tables and formulas to a different page. The sequence had to be continuous across the pages. For instance, if one page ended with 3 consecutive tables and the next page started with 5 tables, it would count as 8 consecutive tables.
+
+Now, Vova needed to figure out if he could rearrange the tables and formulas on each page to avoid getting bored. He needed your help to determine if it was possible to organize the report such that no page or sequence of pages would have more than val tables or formulas in a row.
+
+Help Vova find out if he can arrange his report in a way that keeps him interested and avoids boredom!
+
+Input :
+
+An integer val.
+A vector of integer arr.
+A vector of integer brr.
+
+Output :
+
+An bool answer return true if Vova can rearrange tables and formulas on each page in such a way that there is no more than val
+tables in a row and no more than val formulas in a row.
+
+Constraints :
+
+val : ranges from 1 to 1000000
+arr.size() : ranges from 1 to 300000.
+arr : ranges from 1 to 1000000.
+brr.size() : ranges from 1 to 300000.
+brr : ranges from 1 to 1000000.
+
+
+*/
 #include <iostream>
 #include <vector>
 #include <algorithm>
