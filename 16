@@ -1,4 +1,44 @@
-// https://codeforces.com/problemset/problem/1497/E2
+/*
+
+https://codeforces.com/problemset/problem/1497/E2
+
+Write a C++ Solution SquareFreeDivision the minimum number of continuous segments you should use if you will make changes optimally .
+
+In the land of Numerica, there exists a mystical array of n positive integers: nums[1],nums[2].....nums[n].
+​
+The Grand Sage has given you a challenging task: to divide this array into the minimal number of 
+continuous segments. However, there is a magical constraint you must adhere to.
+
+In each segment, no two numbers (at different positions) can have a product that is a perfect square. 
+This ancient rule of Numerica must be strictly followed to maintain the balance of the realm.
+
+To assist you in this quest, the Grand Sage has granted you a limited number of magical transformations. 
+You are allowed to perform at most val operations where you can choose any number in the array and change 
+its value to any positive integer. These transformations must be used wisely to achieve the optimal division of the array.
+
+Your goal is to determine the minimum number of continuous segments you need to divide the array into, 
+ensuring that no two numbers within any segment have a product that is a perfect square, even after 
+performing the allowed transformations.
+
+Embark on this mathematical journey and find the optimal way to segment the array, preserving the harmony of Numerica!
+
+Input :
+
+An integer val.
+A vector of integer nums.
+
+Output :
+
+An integer answer the minimum number of continuous segments you should use if you will make changes optimally .
+
+Constraints :
+
+nums.size() : ranges from 1 to 200000.
+nums : ranges from 1 to 10000000.
+val : ranges from 0 to 20.
+
+
+*/
 
 #include <iostream>
 #include <vector>
