@@ -1,5 +1,34 @@
-// https://codeforces.com/problemset/problem/1710/C
 
+/*
+
+https://codeforces.com/problemset/problem/1710/C
+
+Write a C++ Solution XORTriangle to find the number of triples (a,b,c) satisfying the conditions.
+
+In the kingdom of Binaryland, a mathematician named Arya was fascinated by the properties of numbers. One day, Arya came across a challenging problem involving a positive integer n. Since the inhabitants of Binaryland only understood binary, the integer was presented in its binary form.
+
+Arya's mission was to find the number of unique triples (a,b,c) such that: 0≤a,b,c≤n
+The values a⊕b, b⊕c, and a⊕c are the sides of a non-degenerate triangle.
+In Binaryland, the symbol ⊕ represents the bitwise XOR operation. Arya knew that for three values x, y, and z to form the 
+sides of a non-degenerate triangle, they must satisfy the following conditions: x+y>z , x+z>y , y+z>x.
+However, Arya also knew that the answer could be astronomically large, so the result needed to be computed modulo 998244353, the prime number revered in Binaryland.
+
+Arya set out to solve this puzzle, knowing that it would require both mathematical insight and computational prowess. The task was to determine the number of such valid triples 
+(a,b,c) and present the result in a manner that Binaryland could appreciate.
+
+Input :
+
+A string str representing binary representation of number n without leading zeros.
+
+Output :
+
+An integer answer the number of triples (a,b,c) satisfying the conditions described in the statement modulo 998244353.
+
+Constraints :
+
+str : in binary n ranges from 0 to 2^200000 , contain only 0 and 1.
+
+*/
 
 #include <iostream>
 #include <vector>
