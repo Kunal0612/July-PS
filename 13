@@ -1,4 +1,41 @@
-// https://codeforces.com/problemset/problem/1420/E
+/*
+
+https://codeforces.com/problemset/problem/1420/E
+
+Write a C++ Solution BattleLemmings to determine the maximal value of army protection for each k from 0 to len*(len−1)/2.
+
+High upon the cliffs of Shield Rock, Peter, the lighthouse keeper, commanded a brave army of len battle lemmings. Each lemming stood proudly in line, numbered from 1 to len from left to right. Among them, some lemmings held shields, but each lemming could hold no more than one shield.
+
+Peter knew that the key to their defence was in the protection of his army. The protection of the army was measured by the number of protected pairs of lemmings. A pair of lemmings was considered protected if:
+
+Both lemmings in the pair did not hold a shield.
+There was a lemming with a shield standing between them.
+As the threat of an impending attack loomed, Peter needed to maximize the army's protection. To do this, he could give orders to the lemmings holding shields. Each shield-holding lemming could:
+
+Pass the shield to their left neighbor, if the left neighbor existed and did not already hold a shield.
+Pass the shield to their right neighbor, if the right neighbor existed and did not already hold a shield.
+Peter had no idea how much time he had before the enemy arrived, so he wanted to be prepared for any scenario. He needed to determine the maximal protection of his army for each possible number of orders 
+k he could give, ranging from 0 to len*(len−1)/2.
+​
+
+Help Peter devise a strategy to calculate the maximal protection of his army for each k from 0 to len*(len−1)/2. 
+Ensuring they are ready to defend Shield Rock no matter when the attack may come.
+
+
+Input :
+
+A vector of integer nums.
+
+Output :
+
+An integer answer to determine the maximal value of army protection for each k from 0 to len*(len−1)/2.
+
+Constraints :
+
+nums.size() : ranges from 1 to 80.
+nums : contain either 0 or 1.
+
+*/
 
 #include <cassert>
 #include <climits>
