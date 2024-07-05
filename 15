@@ -1,4 +1,45 @@
-// https://codeforces.com/problemset/problem/993/D
+/*
+
+https://codeforces.com/problemset/problem/993/D
+
+Write a C++ Solution ComputePower to find the answer the lowest threshold for which it is possible to assign all tasks in such a way that the system will not blow up after the first round of computation, multiplied by 1000 and rounded up.
+
+In a distant land of high-tech wizardry, you are the commander of an elite team of analog computers. Each computer is capable of performing powerful computations, but they come with their quirks and limitations. Your task is to assign several computational tasks to these computers efficiently.
+
+Each task you have is associated with:
+
+A specific number of processors it needs.
+The compute power it will consume.
+Fortunately, you have enough analog computers, and each computer has enough processors to handle any task you throw at it. Each computer can execute up to two tasks, but with a critical rule:
+
+The first task on a computer can be any task.
+The second task must consume strictly less compute power than the first task.
+Once assigned, the process is straightforward: you will execute the first task on all computers, wait for them to complete, and then execute the second task on each computer that has one. However, there is a catch. If the average compute power per utilized processor (the sum of all consumed powers for all first tasks divided by the number of utilized processors) exceeds a certain threshold during the execution of the first tasks, the entire system will blow up!
+
+This threshold is unknown, and your goal is to determine the lowest possible threshold for which it is feasible to assign the tasks without causing the system to blow up. Note that there is no restriction on the second tasks execution, only the first tasks must adhere to the safety constraint.
+
+Due to the peculiarities of the analog computers, you need to print the answer multiplied by 1000 and rounded up to the nearest whole number.
+
+Help the team find the optimal assignment of tasks and determine the critical threshold to avoid a catastrophic system failure!
+
+Input :
+
+A vector of integer arr.
+A vector of integer brr.
+
+Output :
+
+An integer answer the lowest threshold for which it is possible to assign all tasks in such a way that the system will not blow up after the first round of computation, multiplied by 1000 and rounded up.
+
+Constraints :
+
+arr.size() : ranges from 1 to 50.
+arr : ranges from 1 to 10^8.
+brr.size() : ranges from 1 to 50.
+brr : ranges from 1 to 100.
+
+
+*/
 
 #include <iostream>
 #include <vector>
