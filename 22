@@ -1,0 +1,222 @@
+// https://codeforces.com/problemset/problem/150/D
+
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#include <cassert>
+
+int MissionImpassable(std::vector<int> &nums,std::string &str){
+    if (nums.size() <= 0 or nums.size()>150 or str.size()<=0 or str.size()>150 or nums.size()!=str.size()) {
+        throw std::invalid_argument("vec length must be positive.");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < -1 || nums[i] > 100000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+        if(str[i]>'z' or str[i]<'a'){
+            throw std::invalid_argument("Invalid str length");
+        }
+    }
+    int len=nums.size();
+
+    std::vector<int> arr(len + 1);
+    for (int i = 1; i <= len; i++) arr[i]=nums[i-1];
+
+    std::vector<std::vector<std::vector<int>>> frr(len, std::vector<std::vector<int>>(len, std::vector<int>(len, -1)));
+    std::vector<std::vector<int>> grr(len, std::vector<int>(len, -1));
+    std::vector<int> right(len, 0);
+
+    for (int l = 0; l < len; l++) {
+        for (int i = 0; i + l < len; i++) {
+            int j = i + l;
+            if (l == 0) frr[i][j][1] = 0;
+            
+            for (int k = 1; k <= l + 1; k++) {
+                if (str[i] == str[j] && k > 1) {
+                    frr[i][j][k] = (k == 2 ? grr[i + 1][j - 1] : frr[i + 1][j - 1][k - 2]);
+                }
+
+                for (int x = i + 1; x <= j; x++) {
+                    if (grr[i][x - 1] >= 0 && frr[x][j][k] >= 0) {
+                        frr[i][j][k] = std::max(frr[i][j][k], grr[i][x - 1] + frr[x][j][k]);
+                    }
+                    if (grr[x][j] >= 0 && frr[i][x - 1][k] >= 0) {
+                        frr[i][j][k] = std::max(frr[i][j][k], grr[x][j] + frr[i][x - 1][k]);
+                    }
+                }
+
+                if (frr[i][j][k] >= 0 && arr[k] >= 0) {
+                    grr[i][j] = std::max(grr[i][j], frr[i][j][k] + arr[k]);
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < len; i++) {
+        right[i] = std::max(grr[0][i], i ? right[i - 1] : 0);
+        for (int j = 1; j <= i; j++) {
+            right[i] = std::max(right[i], right[j - 1] + grr[j][i]);
+        }
+    }
+
+    int ans=right[len - 1];
+    return ans;
+}
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {-1, 1, -1, -1, -1, -1, -1};
+    std::string str_1 = "abacaba";
+    int expected_1 = 0;
+    int result_1 = MissionImpassable(nums_1, str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {-1,-1,1,-1,-1};
+    std::string str_2 = "abcde";
+    int expected_2 = 0;
+    int result_2 = MissionImpassable(nums_2, str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1, 1, -1, -1, -1, -1, -1};
+    std::string str_3 = "abacaba";
+    int expected_3 = 7;
+    int result_3 = MissionImpassable(nums_3, str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {-1, 100000, -1, -1, 100000, -1};
+    std::string str_4 = "abcdef";
+    int expected_4 = 0;
+    int result_4 = MissionImpassable(nums_4, str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {-1, 1, -1, -1, -1, -1, -1};
+    std::string str_5 = "abacaba";
+    int expected_5 = 0;
+    int result_5 = MissionImpassable(nums_5, str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {5, 4, 3, 2, 1};
+    std::string str_6 = "abcde";
+    int expected_6 = 25;
+    int result_6 = MissionImpassable(nums_6, str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {100000, 99999, 99998, 99997, 99996};
+    std::string str_7 = "vwxyz";
+    int expected_7 = 500000;
+    int result_7 = MissionImpassable(nums_7, str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {-1, -1, -1, -1, -1, -1, -1};
+    std::string str_8 = "aaaaaaa";
+    int expected_8 = 0;
+    int result_8 = MissionImpassable(nums_8, str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {-15, -1, -1, -1, -1, -1, -1};
+    std::string str_9 = "aaaaaaa";
+    try
+    {
+        MissionImpassable(nums_9, str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {};
+    std::string str_10 = "aaaaaaa";
+    try
+    {
+        MissionImpassable(nums_10, str_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {11000000};
+    std::string str_11 = "aaaaaaa";
+    try
+    {
+        MissionImpassable(nums_11, str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {12};
+    std::string str_12 = "ABaa";
+    try
+    {
+        MissionImpassable(nums_12, str_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {13};
+    std::string str_13 = std::string(200,'a');
+    try
+    {
+        MissionImpassable(nums_13, str_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14(15500,1);
+    std::string str_14 = std::string(200,'a');
+    try
+    {
+        MissionImpassable(nums_14, str_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+
+    // TEST_END
+
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
