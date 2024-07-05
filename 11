@@ -1,4 +1,40 @@
-// https://codeforces.com/problemset/problem/1701/E
+/*
+
+https://codeforces.com/problemset/problem/1701/E
+
+Write a C++ Solution Editor to find minimum number of moves required to obtain the text ptr from the text str using the given set of actions or determine it is impossible.
+
+In the bustling city of Letterville, a diligent writer named Lina was working on her masterpiece. She intended to write a beautiful text ptr consisting of m lowercase Latin letters. However, in a moment of distraction, she ended up writing a different text str consisting of n lowercase Latin letters.
+
+Determined to fix her mistake, Lina decided to use her magical text editor, which had some special powers. The cursor of the text editor was initially positioned at the end of the text s.
+Lina could perform the following actions to transform str into ptr:
+
+Press the "left" button to move the cursor one position to the left (or do nothing if the cursor was already at the beginning of the text).
+Press the "right" button to move the cursor one position to the right (or do nothing if the cursor was already at the end of the text).
+Press the "home" button to instantly move the cursor to the beginning of the text.
+Press the "end" button to instantly move the cursor to the end of the text.
+Press the "backspace" button to remove the character before the cursor (if there was any character before the cursor).
+Lina's goal was to determine the minimum number of moves required to transform the text str into the desired text ptr. 
+However, if it was impossible to achieve this transformation, Lina needed to know that too.
+
+Help Lina by figuring out the least number of moves required to obtain ptr from str using
+the given set of actions. If the transformation is impossible, let Lina know so she can start over with a fresh piece of parchment.
+
+Input :
+
+A string str.
+A string ptr.
+
+Output :
+
+An integer answer to find minimum number of moves required to obtain the text ptr from the text str using the given set of actions or determine it is impossible.
+
+Constraints :
+
+ptr : ranges from 1 to ptr.size().
+str : ranges from prt.size() to 5000.
+
+*/
 
 #include <iostream>
 #include <vector>
