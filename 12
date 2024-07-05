@@ -1,4 +1,43 @@
-// https://codeforces.com/problemset/problem/1562/E
+/*
+
+https://codeforces.com/problemset/problem/1562/E
+
+Write a C++ Solution Rescue to find the size of the largest increasing subsequence of the "expansion" of the string str.
+
+After a long and arduous journey through the Windswept Wastes, Ori finally arrived at the legendary Windtorn Ruins. Within these ancient ruins lay the Heart of the Forest, a priceless Willow light that Ori needed to restore balance. However, as Ori approached the ancient repository where the Heart was kept, he found it firmly sealed.
+
+Startled and disheartened, Ori heard the soothing Voice of the Forest. The Voice explained that the repository had been secured by the clever Gorleks, who were known for their love of intricate puzzles and challenges. The Gorleks had used their favorite "string expansion" operation to protect the repository.
+
+To unlock the repository, Ori needed to solve the Gorleks' puzzle. The puzzle involved a string str=str1str2str3..strn. 
+The "expansion" of this string s was defined as a sequence of substrings formed as follows:
+
+then its "expansion" is defined as the sequence of strings 
+s1, s1s2, ..., s1s2…sn
+s2, s2s3, ..., s2s3…sn
+s3, s3s4, ..., sn−1 sn
+sn
+ 
+For example, the "expansion" of the string 'abcd' would be: 'a', 'ab', 'abc', 'abcd', 'b', 'bc', 'bcd', 'c', 'cd', 'd'.
+
+Ori's task was to find the size of the largest increasing subsequence in this "expansion". The subsequence had to be lexicographically ordered, meaning each string in the subsequence had to be smaller than the next. A string a is lexicographically smaller than a string b if one of the following conditions holds:
+
+a is a prefix of b, but 𝑎≠𝑏 . In the first position where a and b differ, the character in a appears earlier in the alphabet than the corresponding character in b.
+Help Ori solve this challenge and unlock the repository to find the Heart of the Forest!
+
+
+Input :
+
+A string str.
+
+Output :
+
+An integer answer to find the size of the largest increasing subsequence of the "expansion" of the string str.
+
+Constraints :
+
+str : ranges from 1 to 5000.
+
+*/
 
 #include <iostream>
 #include <vector>
