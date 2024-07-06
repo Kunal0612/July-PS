@@ -1,0 +1,189 @@
+// https://codeforces.com/problemset/problem/1612/G
+
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <utility>
+#include <map>
+#include <cassert>
+
+int Normalize(int node) {
+    const int MOD = int(1e9) + 7;
+    while (node >= MOD) {
+        node -= MOD;
+    }
+    while (node < 0) {
+        node += MOD;
+    }
+    return node;
+}
+
+int Multiply(int node, int b) {
+    const int MOD = int(1e9) + 7;
+    return int(node * 1LL * b % MOD);
+}
+
+
+
+
+std::pair<int,int> MaxSumArray(std::vector<int> nums) {
+    if (nums.size() <= 0 or nums.size()>500000) {
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    int mx = int(1e6) + 55;
+    int len=nums.size();
+    const int MOD = int(1e9) + 7;
+    std::vector<int> cnt(mx,0);
+    long long total = 0;
+    for(int i=0;i<len;i++){
+        cnt[nums[i]]++;
+        total+=nums[i];
+    }
+    std::vector<int> fact(mx, 1);
+    for (int i = 1; i < mx; i++) {
+        fact[i] = Multiply(fact[i - 1], i);
+    }
+
+    int ans_sum = 0;
+    int ans_cnt = 1;
+
+    for (int lvl = mx - 1; lvl > 1; lvl--) {
+        ans_cnt = Multiply(ans_cnt, Multiply(fact[cnt[lvl]], fact[cnt[lvl]]));
+
+        ans_sum = Normalize(ans_sum + Multiply(Multiply(lvl - 1, cnt[lvl]), (total - cnt[lvl]) % MOD));
+
+        total -= 2 * cnt[lvl];
+        cnt[lvl - 2] += cnt[lvl];
+    }
+
+    ans_cnt = Multiply(ans_cnt, fact[cnt[1]]);
+    return {ans_sum,ans_cnt};
+}
+
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {1, 1, 1, 1, 1, 1};
+    std::pair<int, int> expected_1 = {0, 720};
+    std::pair<int, int> result_1 = MaxSumArray(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TES
+    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    std::pair<int, int> expected_2 = {54798,471651705};
+    std::pair<int, int> result_2 = MaxSumArray(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1000000};
+    std::pair<int, int> expected_3 = {499833345,1};
+    std::pair<int, int> result_3 = MaxSumArray(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    std::pair<int, int> expected_4 = {138,96};
+    std::pair<int, int> result_4 = MaxSumArray(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    std::pair<int, int> expected_5 = {333515,711835223};
+    std::pair<int, int> result_5 = MaxSumArray(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    std::pair<int, int> expected_6 = {720,761845563};
+    std::pair<int, int> result_6 = MaxSumArray(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    std::pair<int, int> expected_7 = {1400,77491774};
+    std::pair<int, int> result_7 = MaxSumArray(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    std::pair<int, int> expected_8 = {196,24063104};
+    std::pair<int, int> result_8 = MaxSumArray(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        MaxSumArray(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(600000,0);
+    try
+    {
+        MaxSumArray(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        MaxSumArray(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        MaxSumArray(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        MaxSumArray(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
