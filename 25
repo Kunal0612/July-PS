@@ -1,0 +1,181 @@
+// https://codeforces.com/contest/1884/problem/D
+
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+
+int CountingRhyme(std::vector<int> &nums){
+    if (nums.size() <= 0 or nums.size()>1000000) {
+        throw std::invalid_argument("Invalid Nums Length");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > nums.size())
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    int n=nums.size();
+    std::vector<int> cnt(n + 5), g(n + 5);
+    long long a[n+1];
+    
+    for (int i = 1; i <= n; i++) {
+        a[i]=nums[i-1];
+        cnt[a[i]]++;
+    }
+    
+    for (int i = n; i >= 1; i--) {
+        int sum = 0;
+        for (int j = i; j <= n; j += i) {
+            sum += cnt[j];
+        }
+        g[i] = sum * (sum - 1) / 2;
+        for (int j = i * 2; j <= n; j += i) {
+            g[i] -= g[j];
+        }
+    }
+    
+    for (int i = 1; i <= n; i++) {
+        if (cnt[i]) {
+            for (int j = i; j <= n; j += i) {
+                g[j] = 0;
+            }
+        }
+    }
+    
+    long long ans = 0;
+    for (int i = 1; i <= n; i++) {
+        ans += g[i];
+    }
+    
+    return ans;
+}
+
+
+
+int main() {
+
+    // TEST
+    std::vector<int> nums_1 = {1};
+    int expected_1 = 0;
+    int result_1 = CountingRhyme(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {1, 2};
+    int expected_2 = 0;
+    int result_2 = CountingRhyme(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {2,3,4,4};
+    int expected_3 =3;
+    int result_3 = CountingRhyme(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {2,3,4,5,4};
+    int expected_4 = 7;
+    int result_4 = CountingRhyme(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {2, 3, 4, 2, 2};
+    int expected_5 =4;
+    int result_5 = CountingRhyme(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {3, 4, 4, 1, 5};
+    int expected_6 = 0;
+    int result_6 = CountingRhyme(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {1, 2, 3, 3, 4};
+    int expected_7 = 0;
+    int result_7 = CountingRhyme(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {6, 7, 8, 1, 1,1,2,3,4,5};
+    int expected_8 = 0;
+    int result_8 = CountingRhyme(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {4,4,2,4,5};
+    int expected_9 = 4;
+    int result_9 = CountingRhyme(nums_9);
+    assert(result_9 == expected_9);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_10 = {5, 5, 5, 5, 5, 5};
+    int expected_10 = 0;
+    int result_10 = CountingRhyme(nums_10);
+    assert(result_10 == expected_10);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_11 = {};
+    try
+    {
+        CountingRhyme(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {0};
+    try
+    {
+        CountingRhyme(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {1000000001};
+    try
+    {
+        CountingRhyme(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {-1};
+    try
+    {
+        CountingRhyme(nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
