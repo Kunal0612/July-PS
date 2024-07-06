@@ -1,4 +1,35 @@
-// https://codeforces.com/problemset/problem/578/D
+/*
+
+https://codeforces.com/problemset/problem/578/D
+
+Write a C++ Solution LCSAgain to find the number of  different strings.
+
+In the enchanted land of Lexicoria, there lies a string str of length n, composed of the first lem lowercase English letters. The wise sages of Lexicoria have presented you with a fascinating challenge: to determine how many different strings T of length n can be composed using the first lem lowercase English letters, such that the longest common subsequence (LCS) between str and T is exactly n−1.
+
+The Longest Common Subsequence (LCS) of two strings str and T is defined as the longest string C such that C appears as a subsequence in both str and T. For this challenge, the sages require that the LCS between str and T be exactly one character shorter than the full length of the strings str and T.
+
+To solve this puzzle, you need to calculate the number of valid strings T that meet the criteria. The task involves:
+
+Constructing strings T of length n from the first lem lowercase English letters.
+Ensuring that the LCS between str and T is exactly n−1.
+Embark on this mathematical journey and uncover the number of different strings T that satisfy the sages' conditions. Your answer will reveal the depth of Lexicoria's lexicographic magic!
+
+Input :
+
+A string str.
+A integer lem.
+
+Output :
+
+An integer answer to find the number of  different strings.
+
+Constraints :
+
+str.size() : ranges from 1 to 100000.
+str : contains lowercase english alphabet.
+lem : ranges from 2 to 26.
+
+*/
 
 #include <cstdio>
 #include <cstring>
