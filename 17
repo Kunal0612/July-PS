@@ -1,4 +1,41 @@
-// https://codeforces.com/problemset/problem/1799/G
+/*
+
+https://codeforces.com/problemset/problem/1799/G
+
+Write a C++ Solution CountVoting to find the number of possible votings.
+
+In the vibrant realm of Teamland, there are n citizens, each belonging to one of n different teams. Every citizen, identified by their unique number from 1 to n, belongs to a team 
+brr[i] , where brr[i] = brr[j] indicates that citizen i and citizen j are in the same team.
+
+A grand voting event is about to take place, and the rules are very specific:
+
+Each citizen has exactly one vote.
+Each citizen must vote for someone from a different team.
+No citizen can vote for themselves.
+Additionally, each citizen has a specific desire regarding the number of votes they want to receive. Citizen i wishes to receive exactly arr[i] votes.
+
+Your challenge is to determine how many possible ways the votes can be cast so that each citizen receives the exact number of votes they desire. Since the number of possible voting configurations can be extremely large, you need to compute the result modulo 998244353.
+
+Help the citizens of Teamland ensure a fair and satisfying voting process by calculating the number of possible voting configurations that meet everyone's expectations!
+
+Input :
+
+A vector of integer arr.
+A vector of integer brr.
+
+Output :
+
+An integer answer the the number of possible votings with modulo 998244353.
+
+Constraints :
+
+arr.size() : ranges from 1 to 200.
+arr : ranges from 0 to arr.size().
+brr.size() : ranges from 1 to 200.
+brr : ranges from 1 to arr.size().
+
+
+*/
 
 #include <iostream>
 #include <vector>
