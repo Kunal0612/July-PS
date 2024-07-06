@@ -1,5 +1,45 @@
-// https://codeforces.com/problemset/problem/1672/H
+/*
 
+https://codeforces.com/problemset/problem/1672/H
+
+Write a C++ Solution ZiguZagu to find the minimum number of operations needed for the each query.
+
+
+In the land of Binaryia, there exists a magical binary string str of length n, composed solely of the mystical digits 0 and 1. This string holds great power and mystery, and it has caught the attention of the scholars of Binaryia.
+
+One day, the scholars posed a challenging quest involving this string. They presented q queries to the adventurers of the land. In each query, adventurers were given two indices l and r (such that 1≤l≤r≤n), defining a substring s=a[l,r].
+
+The challenge was to perform a series of operations on this substring s to make it disappear completely. The rules for the operations were as follows:
+
+Choose two indices x and y within s (where 1≤x≤y≤∣s∣).
+Let t be the substring s[x,y].
+For t to be a valid substring for deletion, every adjacent pair of characters in t must differ (𝑡𝑖≠𝑡𝑖 + 1) for all 1≤i≤∣t∣−1). 
+Note that x=y is always valid, as a single character is trivially alternating.
+Delete the substring s[x,y] from s.
+The goal for each query was to determine the minimum number of such operations needed to make s an empty string.
+
+The scholars tasked the adventurers to embark on this journey and find the solution for each query, ensuring the magical binary string could be cleared efficiently. This grand quest would test the logic and determination of the bravest minds in Binaryia.
+
+
+Input :
+
+A string str.
+A vector of vector of integer queries.
+
+Output :
+
+A vector of integers answer the answer[i] representing the minimum number of operations needed for the i-th query.
+
+Constraints :
+
+str.size() : ranges from 1 to 200000.
+str : contains either 0 or 1.
+queries.size() : ranges from 1 to 200000.
+queries[i][0] or queries[i][1] : ranges from 1 to str.size().
+
+
+
+*/
 #include <iostream>
 #include <vector>
 #include <string>
