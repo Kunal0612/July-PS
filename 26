@@ -1,0 +1,249 @@
+// https://codeforces.com/problemset/problem/1720/E
+
+#include <iostream>
+#include <vector>
+#include <array>
+#include <algorithm>
+#include <cassert>
+
+int MishaandPaintings(std::vector<std::vector<int>> &mat, int val) {
+    int len = mat.size();
+    if (mat[0].size() <= 0 or mat.size() <= 0 or mat.size()>500 or val<1 or val>len*len or mat.size()!=mat[0].size()) {
+        throw std::invalid_argument("Invalid Length");
+    }
+    for (int i = 0; i < mat.size(); ++i)
+    {
+        for (int j = 0; j < mat[0].size(); j++)
+        {
+            if (mat[i][j] < 1 || mat[i][j] > len*len or mat[i].size() <mat.size())
+            {
+                throw std::invalid_argument("Invalid element value");
+            }
+        }
+    }
+    
+    int cnt = 0;
+    const int INF = 1e9;
+    std::vector<std::vector<int>> arr(len, std::vector<int>(len)), pref(len + 1, std::vector<int>(len + 1));
+    std::vector<std::array<int, 4>> all(len * len, {INF, -INF, INF, -INF});
+
+    for (int i = 0; i < len; ++i) {
+        for (int j = 0; j < len; ++j) {
+            arr[i][j] = mat[i][j];
+            --arr[i][j];
+            all[arr[i][j]][0] = std::min(all[arr[i][j]][0], i);
+            all[arr[i][j]][1] = std::max(all[arr[i][j]][1], i);
+            all[arr[i][j]][2] = std::min(all[arr[i][j]][2], j);
+            all[arr[i][j]][3] = std::max(all[arr[i][j]][3], j);
+        }
+    }
+
+    for (int i = 0; i < all.size(); ++i) {
+        if (all[i][0] != INF) ++cnt;
+    }
+
+    if (cnt <= val) {
+        return val - cnt;
+    }
+
+    for (int length = 1; length <= len; ++length) {
+        for (int i = 0; i < all.size(); ++i) {
+            if (all[i][0] == INF) continue;
+            int mn_x = all[i][0], mx_x = all[i][1], mn_y = all[i][2], mx_y = all[i][3];
+            mx_x = std::max(0, mx_x - length + 1);
+            mx_y = std::max(0, mx_y - length + 1);
+            mn_x = std::min(mn_x, len - length);
+            mn_y = std::min(mn_y, len - length);
+
+            if (mx_x <= mn_x && mx_y <= mn_y) {
+                ++pref[mx_x][mx_y];
+                --pref[mx_x][mn_y + 1];
+                --pref[mn_x + 1][mx_y];
+                ++pref[mn_x + 1][mn_y + 1];
+            }
+        }
+
+        for (int x = 0; x < len; ++x) {
+            for (int y = 0; y < len; ++y) {
+                if (x == 0 && y == 0) continue;
+                else if (x == 0) pref[x][y] += pref[x][y - 1];
+                else if (y == 0) pref[x][y] += pref[x - 1][y];
+                else pref[x][y] += pref[x - 1][y] + pref[x][y - 1] - pref[x - 1][y - 1];
+            }
+        }
+
+        for (int x = 0; x < len; ++x) {
+            for (int y = 0; y < len; ++y) {
+                if (cnt - pref[x][y] == val || cnt - pref[x][y] + 1 == val) {
+                    return 1;
+                }
+            }
+        }
+
+        std::fill(pref.begin(), pref.end(), std::vector<int>(len + 1, 0));
+    }
+
+    return 2;
+}
+
+
+
+int main() {
+    // TEST
+    int val_1 = 4;
+    std::vector<std::vector<int>> mat_1 = {{1, 1, 1}, {1, 1, 2}, {3, 4, 5}};
+    int result_1 = MishaandPaintings(mat_1, val_1);
+    int expected_1 = 1;
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int val_2 = 5;
+    std::vector<std::vector<int>> mat_2 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    int result_2 = MishaandPaintings(mat_2, val_2);
+    int expected_2 = 1;
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int val_3 = 3;
+    std::vector<std::vector<int>> mat_3 = {{1, 1, 1}, {2, 2, 2}, {3, 3, 3}};
+    int result_3 = MishaandPaintings(mat_3, val_3);
+    int expected_3 = 0;
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int val_4 = 9;
+    std::vector<std::vector<int>> mat_4 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    int result_4 = MishaandPaintings(mat_4, val_4);
+    int expected_4 = 0;
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int val_5 = 1;
+    std::vector<std::vector<int>> mat_5 = {{1}};
+    int result_5 = MishaandPaintings(mat_5, val_5);
+    int expected_5 = 0;
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int val_6 = 4;
+    std::vector<std::vector<int>> mat_6 = {{4, 4, 4}, {4, 4, 4}, {4, 4, 4}};
+    int result_6 = MishaandPaintings(mat_6, val_6);
+    int expected_6 = 3;
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int val_7 = 7;
+    std::vector<std::vector<int>> mat_7 = {{1, 1, 2}, {3, 3, 4}, {5, 5, 6}};
+    int result_7 = MishaandPaintings(mat_7, val_7);
+    int expected_7 = 1;
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int val_8 = 2;
+    std::vector<std::vector<int>> mat_8 = {{1, 2}, {3, 4}};
+    int result_8 = MishaandPaintings(mat_8, val_8);
+    int expected_8 = 2;
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int val_9 = 0;
+    std::vector<std::vector<int>> mat_9 = {{1, 2}, {3, 4}};
+    try
+    {
+        MishaandPaintings(mat_9,val_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int val_10 = 10;
+    std::vector<std::vector<int>> mat_10 = {{1, 2}, {3, 4}};
+    try
+    {
+        MishaandPaintings(mat_10,val_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int val_11 = -11;
+    std::vector<std::vector<int>> mat_11 = {{1, 2}, {3, 4}};
+    try
+    {
+        MishaandPaintings(mat_11,val_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int val_12 = 2;
+    std::vector<std::vector<int>> mat_12 = {{}, {3, 4}};
+    try
+    {
+        MishaandPaintings(mat_12,val_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int val_13 = 2;
+    std::vector<std::vector<int>> mat_13 = {{-1,1}, {3, 4}};
+    try
+    {
+        MishaandPaintings(mat_13,val_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int val_14 = 2;
+    std::vector<std::vector<int>> mat_14 = {{80,1}, {3, 4}};
+    try
+    {
+        MishaandPaintings(mat_14,val_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int val_15 = 2;
+    std::vector<std::vector<int>> mat_15 = {{},{2,2}};
+    try
+    {
+        MishaandPaintings(mat_15,val_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
