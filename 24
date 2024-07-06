@@ -1,0 +1,212 @@
+// https://codeforces.com/problemset/problem/1884/E
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+
+
+std::vector<std::pair<int, int>> HardDesign(std::vector<int> &nums)
+{
+    int len=nums.size(), pos;
+    long long Max = 0, num = 0;
+    if (nums.size() <= 0 or nums.size()>100000) {
+        throw std::invalid_argument("Invalid Nums Length");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    std::vector<long long> arr(3 * len + 5), brr(2 * len + 5), lrr(len + 5), prr(len + 5);
+    std::stack<std::pair<long long, int>> stk;
+    int mod = 1e9 + 7;
+    for (int i = 1; i <= len; ++i)
+    {
+        arr[i]=nums[i-1];
+        Max = std::max(Max, arr[i]);
+    }
+
+    for (int i = 1; i <= len; ++i)
+    {
+        arr[i] = arr[i + len] = arr[i + len + len] = Max - arr[i];
+        if (arr[i] == 0)
+            pos = len + i;
+    }
+
+    for (int i = 1; i <= len + len; ++i)
+    {
+        brr[i] = brr[i - 1] + std::max(arr[i] - arr[i - 1], 0LL);
+    }
+
+    for (int i = 1; i <= len; ++i)
+    {
+        int siz = 1;
+        while (!stk.empty() && stk.top().first >= arr[pos + i])
+        {
+            long long x = stk.top().first;
+            int y = stk.top().second;
+            stk.pop();
+            siz += y;
+            num = (num - (x - arr[pos + i]) * y % mod + mod) % mod;
+        }
+        prr[i] = (prr[i - 1] + arr[pos + i] + num * 2) % mod;
+        num += arr[pos + i];
+        stk.push({arr[pos + i], siz});
+    }
+
+    num = 0;
+    stk = std::stack<std::pair<long long, int>>();
+    for (int i = 1; i <= len; ++i)
+    {
+        int siz = 1;
+        while (!stk.empty() && stk.top().first >= arr[pos - i])
+        {
+            long long x = stk.top().first;
+            int y = stk.top().second;
+            stk.pop();
+            siz += y;
+            num = (num - (x - arr[pos - i]) * y % mod + mod) % mod;
+        }
+        lrr[i] = (lrr[i - 1] + arr[pos - i] + num * 2) % mod;
+        num += arr[pos - i];
+        stk.push({arr[pos - i], siz});
+    }
+    std::vector<std::pair<int,int>> ans;
+    for (int i = 1; i <= len; ++i)
+    {
+        int p = ((pos - i) % len + len) % len;
+        long long cnt = brr[i + len - 1] - brr[i] + arr[i];
+        long long cost = (lrr[p] + prr[len - p - 1]) % mod;
+        ans.push_back({cnt,cost});
+    }
+    return ans;
+}
+
+int main() {
+
+    // TEST
+    std::vector<int> nums_1 = {1};
+    std::vector<std::pair<int, int>> expected_1 = {{0, 0}};
+    std::vector<std::pair<int, int>> result_1 = HardDesign(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {1, 2};
+    std::vector<std::pair<int, int>> expected_2 = {{1, 1}, {1, 1}};
+    std::vector<std::pair<int, int>> result_2 = HardDesign(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {5, 4, 3, 2, 1};
+    std::vector<std::pair<int, int>> expected_3 = {{4, 30}, {4, 30}, {5, 24}, {6, 18}, {7, 18}};
+    std::vector<std::pair<int, int>> result_3 = HardDesign(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1000000000};
+    std::vector<std::pair<int, int>> expected_4 = {{0, 0}};
+    std::vector<std::pair<int, int>> result_4 = HardDesign(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {2, 2, 2, 2, 2};
+    std::vector<std::pair<int, int>> expected_5 = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+    std::vector<std::pair<int, int>> result_5 = HardDesign(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {3, 1, 4, 1, 5};
+    std::vector<std::pair<int, int>> expected_6 = {{7, 25}, {9, 17}, {8, 17}, {8, 19}, {7, 25}};
+    std::vector<std::pair<int, int>> result_6 = HardDesign(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {10, 20, 30, 40, 50};
+    std::vector<std::pair<int, int>> expected_7 = {{40, 300}, {70, 180}, {60, 180}, {50, 240}, {40, 300}};
+    std::vector<std::pair<int, int>> result_7 = HardDesign(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {6, 7, 8, 9, 10};
+    std::vector<std::pair<int, int>> expected_8 = {{4, 30}, {7, 18}, {6, 18}, {5, 24}, {4, 30}};
+    std::vector<std::pair<int, int>> result_8 = HardDesign(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {9, 8, 7, 6, 5};
+    std::vector<std::pair<int, int>> expected_9 = {{4, 30}, {4, 30}, {5, 24}, {6, 18}, {7,18}};
+    std::vector<std::pair<int, int>> result_9 = HardDesign(nums_9);
+    assert(result_9 == expected_9);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_10 = {5, 5, 5, 5, 5, 5};
+    std::vector<std::pair<int, int>> expected_10 = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+    std::vector<std::pair<int, int>> result_10 = HardDesign(nums_10);
+    assert(result_10 == expected_10);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_11 = {};
+    try
+    {
+        HardDesign(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {0};
+    try
+    {
+        HardDesign(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {1000000001};
+    try
+    {
+        HardDesign(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {-1};
+    try
+    {
+        HardDesign(nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
