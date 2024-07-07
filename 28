@@ -48,29 +48,29 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 
 
 std::pair<int, int> Get(int len, int left, int right, int query_l, int query_r, const std::vector<std::pair<int, int>> &res) {
-    const int mx= 31;
+    const int mxi= 31;
     const int inf = std::numeric_limits<int>::max();
     if (left >= query_l && right <= query_r) return res[len];
     if (query_r <= left || query_l >= right) return std::make_pair(inf, inf);
-    int vm = (left + right) / 2;
-    return std::min(Get(2 * len + 1, left, vm, query_l, query_r, res), Get(2 * len + 2, vm, right, query_l, query_r, res));
+    int vmi = (left + right) / 2;
+    return std::min(Get(2 * len + 1, left, vmi, query_l, query_r, res), Get(2 * len + 2, vmi, right, query_l, query_r, res));
 }
 
-void Mod(int len, int left, int right, int id, int val, std::vector<std::pair<int, int>> &res) {
+void Mod(int len, int left, int right, int idx, int val, std::vector<std::pair<int, int>> &res) {
     if (right - left == 1) {
-        res[len] = std::make_pair(val, id);
+        res[len] = std::make_pair(val, idx);
         return;
     }
-    const int mx= 31;
+    const int mxi= 31;
     const int inf = std::numeric_limits<int>::max();
-    int vm = (left + right) / 2;
-    if (id < vm) Mod(2 * len + 1, left, vm, id, val, res);
-    else Mod(2 * len + 2, vm, right, id, val, res);
+    int vmi = (left + right) / 2;
+    if (idx < vmi) Mod(2 * len + 1, left, vmi, idx, val, res);
+    else Mod(2 * len + 2, vmi, right, idx, val, res);
     res[len] = std::min(res[2 * len + 1], res[2 * len + 2]);
 }
 
 int MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> queries){
-    const int mx= 31;
+    const int mxi= 31;
     const int inf = std::numeric_limits<int>::max();
     int len=nums.size();
     if (nums.size() <= 0 or nums.size()>100000 or queries.size() <= 0 or queries.size()>100000) {
@@ -97,7 +97,7 @@ int MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> quer
         query_l--;
 
         std::vector<std::pair<int, int>> brr;
-        for (int i = 0; i < std::min(query_r - query_l, mx); i++) {
+        for (int i = 0; i < std::min(query_r - query_l, mxi); i++) {
             std::pair<int,int> now = Get(0, 0, len, query_l, query_r, res);
             brr.push_back(now);
             Mod(0, 0, len, now.second, inf, res);
