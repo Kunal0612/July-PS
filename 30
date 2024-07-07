@@ -50,19 +50,19 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <stdexcept>
 
 int Normalize(int node) {
-    const int MOD = int(1e9) + 7;
-    while (node >= MOD) {
-        node -= MOD;
+    const int mod = int(1e9) + 7;
+    while (node >= mod) {
+        node -= mod;
     }
     while (node < 0) {
-        node += MOD;
+        node += mod;
     }
     return node;
 }
 
-int Multiply(int node, int b) {
-    const int MOD = int(1e9) + 7;
-    return int(node * 1LL * b % MOD);
+int Multiply(int node, int base) {
+    const int mod = int(1e9) + 7;
+    return int(node * 1LL * base % mod);
 }
 
 
@@ -79,27 +79,27 @@ std::pair<int,int> MaxSumArray(std::vector<int> nums) {
             throw std::invalid_argument("Invalid element value");
         }
     }
-    int mx = int(1e6) + 55;
+    int max = int(1e6) + 55;
     int len=nums.size();
-    const int MOD = int(1e9) + 7;
-    std::vector<int> cnt(mx,0);
+    const int mod = int(1e9) + 7;
+    std::vector<int> cnt(max,0);
     long long total = 0;
     for(int i=0;i<len;i++){
         cnt[nums[i]]++;
         total+=nums[i];
     }
-    std::vector<int> fact(mx, 1);
-    for (int i = 1; i < mx; i++) {
+    std::vector<int> fact(max, 1);
+    for (int i = 1; i < max; i++) {
         fact[i] = Multiply(fact[i - 1], i);
     }
 
     int ans_sum = 0;
     int ans_cnt = 1;
 
-    for (int lvl = mx - 1; lvl > 1; lvl--) {
+    for (int lvl = max - 1; lvl > 1; lvl--) {
         ans_cnt = Multiply(ans_cnt, Multiply(fact[cnt[lvl]], fact[cnt[lvl]]));
 
-        ans_sum = Normalize(ans_sum + Multiply(Multiply(lvl - 1, cnt[lvl]), (total - cnt[lvl]) % MOD));
+        ans_sum = Normalize(ans_sum + Multiply(Multiply(lvl - 1, cnt[lvl]), (total - cnt[lvl]) % mod));
 
         total -= 2 * cnt[lvl];
         cnt[lvl - 2] += cnt[lvl];
