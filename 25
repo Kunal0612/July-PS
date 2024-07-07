@@ -1,4 +1,34 @@
-// https://codeforces.com/contest/1884/problem/D
+/*
+
+https://codeforces.com/contest/1884/problem/D
+
+Write a C++ function CountingRhyme to to solve the following problem.
+You are given an array of integers nums[1],nums[2],…,nums[n].
+
+A pair of integers (i,j), such that 1≤i<j≤n, is called good, if there does not exist an integer k
+ (1≤k≤n) such that nums[i] is divisible by nums[k] and nums[j] is divisible by nums[k]
+ at the same time.
+
+Please, find the number of good pairs.
+
+Input :
+
+A vector of integers nums.
+
+Output :
+
+An integer answer which contains the number of good pairs.
+
+
+Constraints :
+
+nums.size() : ranges from 1 to 100000.
+nums : ranges from 1 to nums.size().
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
 
 #include <iostream>
 #include <vector>
