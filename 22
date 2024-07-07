@@ -1,4 +1,38 @@
-// https://codeforces.com/problemset/problem/150/D
+/*
+
+https://codeforces.com/problemset/problem/150/D
+
+Write a C++ function MissionImpassable to find the maximum number of points one can gain if he plays on the given string.
+
+You are given a string and a set of integers nums[i]. 
+You are allowed to choose any substring that is a palindrome and delete it, 
+earning points equal to nums[k], where k is the length of the deleted palindrome. For some k, 
+nums[k]=−1, which means that deleting palindromes of such length is forbidden. 
+After a substring is deleted, the remaining parts of the string shift together, ensuring no gaps. 
+The process repeats as long as there is at least one deletable palindrome substring. 
+All points gained are summed up.
+
+Determine the maximum number of points that can be earned.
+
+Input :
+
+A vector of integers nums.
+A string str.
+
+Output :
+
+A integer answer which contains he maximum number of points one can gain if he plays on the given string.
+
+Constraints :
+
+nums.size() : ranges from 1 to 150.
+str.size() : ranges from 1 to 150.
+str : contains lower case english alphabet.
+nums : ranges from -1 to 100000
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+*/
 
 #include <iostream>
 #include <cstdio>
@@ -6,6 +40,7 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include <stdexcept>
 
 int MissionImpassable(std::vector<int> &nums,std::string &str){
     if (nums.size() <= 0 or nums.size()>150 or str.size()<=0 or str.size()>150 or nums.size()!=str.size()) {
