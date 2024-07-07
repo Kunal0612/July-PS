@@ -43,7 +43,6 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cassert>
 #include <stdexcept>
 
 long long int MinTime(std::vector<long long int> nums,std::string &str){
@@ -92,6 +91,7 @@ long long int MinTime(std::vector<long long int> nums,std::string &str){
     return time;
 }
 
+#include <cassert>
 
 int main() {
     // TEST
