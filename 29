@@ -196,74 +196,74 @@ int main() {
 
     // TEST
     std::string str_1="01101";
-    int a=2, b=2, c=1;
+    int val_a=2, val_b=2, val_c=1;
     int expected_1 = 3;
-    int result_1 = StrangeInstructions(str_1, a, b, c);
+    int result_1 = StrangeInstructions(str_1, val_a, val_b, val_c);
     assert(result_1 == expected_1);
     // TEST_END
 
     // TEST
     std::string str_2="000";
-    a=5, b=3, c=2;
+    val_a=5, val_b=3, val_c=2;
     int expected_2 = 5;
-    int result_2 = StrangeInstructions(str_2, a, b, c);
+    int result_2 = StrangeInstructions(str_2, val_a, val_b, val_c);
     assert(result_2 == expected_2);
     // TEST_END
 
     // TEST
     std::string str_3="1111";
-    a=10, b=10, c=10;
+    val_a=10, val_b=10, val_c=10;
     int expected_3 = 10;
-    int result_3 = StrangeInstructions(str_3, a, b, c);
+    int result_3 = StrangeInstructions(str_3, val_a, val_b, val_c);
     assert(result_3 == expected_3);
     // TEST_END
 
     // TEST
     std::string str_4="010101";
-    a=1, b=2, c=1;
+    val_a=1, val_b=2, val_c=1;
     int expected_4 = 2;
-    int result_4 = StrangeInstructions(str_4, a, b, c);
+    int result_4 = StrangeInstructions(str_4, val_a, val_b, val_c);
     assert(result_4 == expected_4);
     // TEST_END
 
     // TEST
     std::string str_5="00111000";
-    a=3, b=3, c=2;
+    val_a=3, val_b=3, val_c=2;
     int expected_5 = 15;
-    int result_5 = StrangeInstructions(str_5, a, b, c);
+    int result_5 = StrangeInstructions(str_5, val_a, val_b, val_c);
     assert(result_5 == expected_5);
     // TEST_END
 
     // TEST
     std::string str_6="101010";
-    a=2, b=1, c=2;
+    val_a=2, val_b=1, val_c=2;
     int expected_6 = 0;
-    int result_6 = StrangeInstructions(str_6, a, b, c);
+    int result_6 = StrangeInstructions(str_6, val_a, val_b, val_c);
     assert(result_6 == expected_6);
     // TEST_END
 
     // TEST
     std::string str_7="10000001";
-    a=5, b=4, c=3;
+    val_a=5, val_b=4, val_c=3;
     int expected_7 = 5;
-    int result_7 = StrangeInstructions(str_7, a, b, c);
+    int result_7 = StrangeInstructions(str_7, val_a, val_b, val_c);
     assert(result_7 == expected_7);
     // TEST_END
 
     // TEST
     std::string str_8="1110101110";
-    a=7, b=8, c=5;
+    val_a=7, val_b=8, val_c=5;
     int expected_8 = 17;
-    int result_8 = StrangeInstructions(str_8, a, b, c);
+    int result_8 = StrangeInstructions(str_8, val_a, val_b, val_c);
     assert(result_8 == expected_8);
     // TEST_END
 
     // TEST
     std::string str_9 = "";
-    a = 7, b = 9, c = 5;
+    val_a = 7, val_b = 9, val_c = 5;
     try
     {
-        StrangeInstructions(str_9, a, b, c);
+        StrangeInstructions(str_9, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -273,10 +273,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_10 = std::string(1000000,'0');
-    a = 7, b = 10, c = 5;
+    val_a = 7, val_b = 10, val_c = 5;
     try
     {
-        StrangeInstructions(str_10, a, b, c);
+        StrangeInstructions(str_10, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -286,10 +286,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_11 ="abc";
-    a = 7, b = 11, c = 5;
+    val_a = 7, val_b = 11, val_c = 5;
     try
     {
-        StrangeInstructions(str_11, a, b, c);
+        StrangeInstructions(str_11, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -299,10 +299,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_12 ="010";
-    a = 0, b = 12, c = 5;
+    val_a = 0, val_b = 12, val_c = 5;
     try
     {
-        StrangeInstructions(str_12, a, b, c);
+        StrangeInstructions(str_12, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -312,10 +312,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_13 ="010";
-    a = 1, b = 0, c = 5;
+    val_a = 1, val_b = 0, val_c = 5;
     try
     {
-        StrangeInstructions(str_13, a, b, c);
+        StrangeInstructions(str_13, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -325,10 +325,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_14 ="010";
-    a = 1, b = 1, c = 0;
+    val_a = 1, val_b = 1, val_c = 0;
     try
     {
-        StrangeInstructions(str_14, a, b, c);
+        StrangeInstructions(str_14, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -338,10 +338,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_15 ="010";
-    a = 1000000001, b = 1, c = 1;
+    val_a = 1000000001, val_b = 1, val_c = 1;
     try
     {
-        StrangeInstructions(str_15, a, b, c);
+        StrangeInstructions(str_15, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -351,10 +351,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_16 ="010";
-    b = 1000000001, a = 1, c = 1;
+    val_b = 1000000001, val_a = 1, val_c = 1;
     try
     {
-        StrangeInstructions(str_16, a, b, c);
+        StrangeInstructions(str_16, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -364,10 +364,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_17 ="010";
-    c = 1000000001, a = 1, b = 1;
+    val_c = 1000000001, val_a = 1, val_b = 1;
     try
     {
-        StrangeInstructions(str_17, a, b, c);
+        StrangeInstructions(str_17, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -377,10 +377,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_18 ="010";
-    c = -1, a = 1, b = 1;
+    val_c = -1, val_a = 1, val_b = 1;
     try
     {
-        StrangeInstructions(str_18, a, b, c);
+        StrangeInstructions(str_18, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -390,10 +390,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_19 ="010";
-    a = -1, c = 1, b = 1;
+    val_a = -1, val_c = 1, val_b = 1;
     try
     {
-        StrangeInstructions(str_19, a, b, c);
+        StrangeInstructions(str_19, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -403,10 +403,10 @@ int main() {
     // TEST_END
     // TEST
     std::string str_20 ="010";
-    b = -1, a = 1, c = 1;
+    val_b = -1, val_a = 1, val_c = 1;
     try
     {
-        StrangeInstructions(str_20, a, b, c);
+        StrangeInstructions(str_20, val_a, val_b, val_c);
         assert(false);
     }
     catch (const std::invalid_argument &e)
