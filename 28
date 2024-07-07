@@ -1,11 +1,49 @@
-// https://codeforces.com/problemset/problem/1665/E
+/*
+
+https://codeforces.com/problemset/problem/1665/E
+
+Write a C++ function MinimizOR to find the answer for each query.
+
+You are given an array nums of n non-negative integers, numbered from 1 to n.
+
+Let's define the cost of the array a as min nums[i]|nums[j] 
+where i!=j, where |denotes the bitwise OR operation.
+
+There are q queries. For each query you are given two integers l and r 
+(l<r). For each query you should 
+find the cost of the subarray nums[l],nums[l+1],…,nums[r].
+
+
+Input :
+
+A  vector of long long integers nums.
+A vector of vector of integers queries.
+
+Output :
+
+An vector of integer answer to find the answer for each query.
+
+
+Constraints :
+
+nums.size() : ranges from 1 to 100000.
+nums : ranges from 0 to 2^30 .
+queries.size() : ranges from 1 to 100000.
+queries : queries[i][0] ranges from 1 to queries[i][1] and queries[i][1] 
+ranges from queries[i][0] to nums.size().
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
+
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <utility>
-#include <cassert>
 #include <limits>
+#include <stdexcept>
 
 
 
@@ -78,6 +116,7 @@ int MinimizOR(std::vector<long long int> nums,std::vector<std::vector<int>> quer
 }
 
 
+#include <cassert>
 
 int main() {
     // TEST
