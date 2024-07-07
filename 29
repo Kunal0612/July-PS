@@ -53,7 +53,9 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <stdexcept>
 
 
-void Solver(int turn, long long int &ans, long long int val_a, long long int val_b, long long int val_c, std::vector<int> blocks, long long int other_0, long long int single_0, long long int per, long long int turns_1) {
+void Solver(int turn, long long int &ans, long long int val_a, 
+long long int val_b, long long int val_c, std::vector<int> blocks, 
+long long int other_0, long long int single_0, long long int per, long long int turns_1) {
     long long int cur = 0;
     while (true) {
         if (turn == 1) {
@@ -106,7 +108,8 @@ void Solver(int turn, long long int &ans, long long int val_a, long long int val
     }
 }
 
-long long int StrangeInstructions(const std::string& str, long long int val_a, long long int val_b, long long int val_c) {
+long long int StrangeInstructions(const std::string& str, long long int val_a, 
+long long int val_b, long long int val_c) {
     
     int len=str.length();
     if (str.size() <= 0 or str.size()>100000) {
@@ -133,22 +136,22 @@ long long int StrangeInstructions(const std::string& str, long long int val_a, l
     }
 
     long long int ans = 0;
-    long long int fir_1 = std::numeric_limits<int>::max(), lst1 = -1;
+    long long int fir = std::numeric_limits<int>::max(), lst = -1;
     
     for (int i = 0; i < len; ++i) {
         if (str[i] == '1') {
-            lst1 = i;
+            lst = i;
         }
     }
     
     for (int i = 0; i < len; ++i) {
         if (str[i] == '1') {
-            fir_1 = i;
+            fir = i;
             break;
         }
     }
     
-    if (fir_1 == std::numeric_limits<int>::max()) {
+    if (fir == std::numeric_limits<int>::max()) {
         return val_a;
     }
 
@@ -156,7 +159,7 @@ long long int StrangeInstructions(const std::string& str, long long int val_a, l
     long long int per = 0;
     if (str[0] == '0') per++;
     if (str.back() == '0') per++;
-    long long int other_0 = std::max(fir_1 - 1, 0LL) + std::max(len - lst1 - 2, 0LL);
+    long long int other_0 = std::max(fir - 1, 0LL) + std::max(len - lst - 2, 0LL);
     long long int turns_1 = 0;
 
     for (int i = 0; i + 1 < len; ++i) {
@@ -166,7 +169,7 @@ long long int StrangeInstructions(const std::string& str, long long int val_a, l
     }
 
     long long int single_0 = 0;
-    for (int i = fir_1; i < lst1; ) {
+    for (int i = fir; i < lst; ) {
         int j = i + 1;
         while (str[j] != '1') {
             j++;
