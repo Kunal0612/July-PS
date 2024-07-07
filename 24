@@ -1,10 +1,54 @@
-// https://codeforces.com/problemset/problem/1884/E
+/*
 
+https://codeforces.com/problemset/problem/1884/E
+
+Write a C++ function HardDesign to to solve the following problem.
+
+In a land of integers, there exists an array of integers b[0],b[1],…,b[n−1]. 
+Your quest is to transform this array so that all its elements are equal. You can achieve this by performing the following magical operation several times, including possibly zero times:
+
+Pick a pair of indices 0≤l≤r≤n−1.
+For each l≤i≤r, increase b[i] by 1 (i.e., replace b[i] with b[i+1]).
+After performing this operation, you receive (r−l+1)^2 coins as a reward.
+
+The value f(b) is defined as a pair of integers (cnt,cost):
+
+cnt is the smallest number of operations required to make all elements of the array equal.
+cost is the largest total number of coins you can receive among all possible ways to make all elements equal within cnt operations.
+You are given an array of integers nums[0] ,nums[1] ,…,nums[n−1]. Your task is to determine the value of f for all cyclic shifts of nums.
+
+Formally, for each 0≤i≤n−1, you need to do the following:
+
+Let c[j]=a[j+i]%n for each 0≤j≤n−1.
+
+Find f(c). Since cost can be very large, output it modulo 10^9+7.
+Note that under a fixed cnt, you need to maximize the total number of coins cost, not its remainder modulo 10^9+7.
+
+Input :
+
+A vector of integers nums.
+
+Output :
+
+A vector of pair of integers answer, which contain cnt (the minimum number of operations), then output cost
+(the maximum number of coins these operations can give) modulo 10^9+7
+
+
+Constraints :
+
+nums.size() : ranges from 1 to 100000.
+nums : ranges from 1 to 10^9.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
 #include <iostream>
 #include <vector>
 #include <stack>
 #include <algorithm>
 #include <cassert>
+#include <stdexcept>
 
 
 std::vector<std::pair<int, int>> HardDesign(std::vector<int> &nums)
