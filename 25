@@ -2,8 +2,8 @@
 
 https://codeforces.com/contest/1884/problem/D
 
-Write a C++ function CountingRhyme to to solve the following problem.
-You are given an array of integers nums[1],nums[2],…,nums[n].
+Write arr C++ function CountingRhyme to to solve the following problem.
+You are given an array of integers nums[1],nums[2],…,nums[len].
 
 A pair of integers (i,j), such that 1≤i<j≤n, is called good, if there does not exist an integer k
  (1≤k≤n) such that nums[i] is divisible by nums[k] and nums[j] is divisible by nums[k]
@@ -46,37 +46,37 @@ int CountingRhyme(std::vector<int> &nums){
             throw std::invalid_argument("Invalid element value");
         }
     }
-    int n=nums.size();
-    std::vector<int> cnt(n + 5), g(n + 5);
-    long long a[n+1];
+    int len=nums.size();
+    std::vector<int> cnt(len + 5), grr(len + 5);
+    long long arr[len+1];
     
-    for (int i = 1; i <= n; i++) {
-        a[i]=nums[i-1];
-        cnt[a[i]]++;
+    for (int i = 1; i <= len; i++) {
+        arr[i]=nums[i-1];
+        cnt[arr[i]]++;
     }
     
-    for (int i = n; i >= 1; i--) {
+    for (int i = len; i >= 1; i--) {
         int sum = 0;
-        for (int j = i; j <= n; j += i) {
+        for (int j = i; j <= len; j += i) {
             sum += cnt[j];
         }
-        g[i] = sum * (sum - 1) / 2;
-        for (int j = i * 2; j <= n; j += i) {
-            g[i] -= g[j];
+        grr[i] = sum * (sum - 1) / 2;
+        for (int j = i * 2; j <= len; j += i) {
+            grr[i] -= grr[j];
         }
     }
     
-    for (int i = 1; i <= n; i++) {
+    for (int i = 1; i <= len; i++) {
         if (cnt[i]) {
-            for (int j = i; j <= n; j += i) {
-                g[j] = 0;
+            for (int j = i; j <= len; j += i) {
+                grr[j] = 0;
             }
         }
     }
     
     long long ans = 0;
-    for (int i = 1; i <= n; i++) {
-        ans += g[i];
+    for (int i = 1; i <= len; i++) {
+        ans += grr[i];
     }
     
     return ans;
@@ -205,6 +205,6 @@ int main() {
     }
     // TEST_END
 
-    std::cout << "All test cases passed!\n";
+    std::cout << "All test cases passed!\len";
     return 0;
 }
