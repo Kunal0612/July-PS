@@ -98,7 +98,7 @@ int MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> quer
 
         std::vector<std::pair<int, int>> brr;
         for (int i = 0; i < std::min(query_r - query_l, mx); i++) {
-            auto now = Get(0, 0, len, query_l, query_r, res);
+            std::pair<int,int> now = Get(0, 0, len, query_l, query_r, res);
             brr.push_back(now);
             Mod(0, 0, len, now.second, inf, res);
         }
