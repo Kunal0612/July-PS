@@ -1,10 +1,61 @@
-// https://codeforces.com/problemset/problem/484/C
+/*
+
+https://codeforces.com/problemset/problem/484/C
+
+Write a C++ function StrangeSorting to find the current state of string after each operations.
+
+In the mystical realm of Stringland, there exists a string str of length n 
+composed of enigmatic characters. 
+The wise scholars of Stringland have discovered a unique method of sorting strings, known as d-sorting. This sorting technique is applied to strings of length at least d, where d is a positive integer.
+
+The process of d-sorting works as follows:
+
+First, collect all the characters at positions that are 0 modulo d.
+Then, collect all the characters at positions that are 1 modulo d.
+Continue this process until all characters have been collected, maintaining their relative order within each group.
+For example, consider the string "qwerty":
+
+Its 1-sorting is the string "qwerty" (all characters stand on 0 positions).
+Its 2-sorting is the string "qetwry" (characters 'q', 'e', and 't' stand on 0 positions, and characters 'w', 'r', and 'y' are on 1 positions).
+Its 3-sorting is the string "qrwtey" (characters 'q' and 'r' stand on 0 positions, characters 'w' and 't' stand on 1 positions, and characters 'e' and 'y' stand on 2 positions).
+Its 4-sorting is the string "qtwyer".
+Its 5-sorting is the string "qywert".
+
+The scholars of Stringland have now presented you with a challenge. You are given a string str of length n and m shuffling operations to perform on this string. Each shuffling operation is defined by two integer parameters k and d, and it transforms the string str as follows:
+
+For each i from 0 to n−k in increasing order, apply the operation of d-sorting to the substring S[i..i+k−1]. Here, S[a..b] represents the substring consisting of characters from positions 
+a to b, inclusive.
+
+After each shuffling operation, you need to print the transformed string S.
+
+Input :
+
+A string str.
+A vector of vector of integer queries.
+
+Output :
+
+A vector of string that will contain the state of the string after each operations.
+
+Constraints :
+
+str : contain lowercase letter , uppercase English letter and digit from 0 to 9.
+str.size()*queries.size() : ranges from 1 to 10^6.
+queries :
+         
+queries[i][0] : ranges from 1 to str.size().
+queries[i][1] : ranges from 1 to str.size().
+
+
+
+*/
 
 #include <iostream>
 #include <vector>
 #include <cstring>
 #include <cassert>
 #include <cstdio>
+#include <cassert>
 
 std::vector<std::string> StrangeSorting(std::string &str,std::vector<std::vector<int>> queries){
     
