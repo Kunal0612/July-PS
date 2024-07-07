@@ -246,7 +246,7 @@ int main() {
     }
     // TEST_END
     // TEST
-    std::string str_14 = std::string(2,'aaa');
+    std::string str_14 = std::string(2,'a');
     std::vector<std::vector<int>> queries_14(200002,{1,1});
     try
     {
