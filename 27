@@ -1,9 +1,44 @@
-// https://codeforces.com/contest/1720/problem/D2
+/*
+
+https://codeforces.com/contest/1720/problem/D2
+
+
+In the mystical realm of arrays, there exists a character named Bryap who is fascinated by the concept of beautiful subsequences. He has an array of 
+n integers nums[0] , nums[1] , nums[2] ... nums[n-1] and wants to find the longest beautiful subsequence within it.
+
+A subsequence b=[b[0],b[1],…,b[m−1]], where 0≤b[0]<b[1]<…<b[m−1]<n, is a subsequence of length m of the array nums.
+
+Bryap considers a subsequence b=[b[0],b[1],…,b[m−1]] of length m to be beautiful if the following condition holds for every p (where 0≤p<m−1):
+
+For any p: a[b[p]]⊕b[p+1]<a[b[p+1]]⊕b[p]
+
+Here, a⊕b denotes the bitwise XOR of a and b. For example, 2⊕4=6 and 3⊕1=2.
+
+Bryap, being a straightforward individual, is only interested in knowing the length of the longest such beautiful subsequence. Help Bryap find the answer to his question.
+
+
+Input :
+
+A  vector of integers nums.
+
+Output :
+
+An integer answer to find the the length of the longest beautiful subsequence.
+
+
+Constraints :
+
+nums.size() : ranges from 1 to 300000.
+nums : ranges from 0 to 1000000000 .
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <cassert>
 #include <stdexcept>
 
 
@@ -60,6 +95,7 @@ int XorSubsequence(std::vector<int> &nums){
     return ans;
 }
 
+#include <cassert>
 
 int main() {
 
