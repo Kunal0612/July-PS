@@ -1,10 +1,56 @@
-// https://codeforces.com/problemset/problem/1621/F
+/*
+
+https://codeforces.com/problemset/problem/1621/F
+
+Write a C++ function MinimizOR to find the maximum profit Dasha can get by 
+doing these operations and following this rule..
+
+In the realm of Dasha's binary strings and magical operations, she has discovered a way to maximize her wealth using a binary string str of length 
+n and specific operations. Dasha begins her adventure with a grand total of 10^100 coins.
+
+Here are the operations she can perform, each yielding different rewards and costs:
+
+Replace substring '00' with '0': This operation grants val_a coins.
+Replace substring '11' with '1': This operation grants val_b coins.
+Remove '0' from any position: This operation incurs a cost of val_c coins.
+However, there's a magical rule that Dasha must follow:
+
+She cannot perform two operations of the same parity (odd or even) in a row. The operations are indexed as follows:
+Operation 1: Replace '00' with '0'
+Operation 2: Replace '11' with '1'
+Operation 3: Remove '0' from any position
+Dasha's challenge is to calculate the maximum profit she can achieve by performing these operations, while adhering strictly to this rule.
+
+
+Input :
+
+A string str.
+An integer val_a.
+An integer val_b.
+An integer val_c.
+
+Output :
+
+An integer answer to find the maximum profit Dasha can 
+get by doing these operations and following this rule.
+
+
+Constraints :
+
+str.size() : ranges from 1 to 100000.
+str : contains either 0 or 1.
+val_a , val_b , val_c : ranges from 1 to 1000000000.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <limits>
-#include <cassert>
+#include <stdexcept>
 
 
 void Solver(int turn, long long int &ans, long long int val_a, long long int val_b, long long int val_c, std::vector<int> blocks, long long int other_0, long long int single_0, long long int per, long long int turns_1) {
@@ -140,6 +186,8 @@ long long int StrangeInstructions(const std::string& str, long long int val_a, l
 
     return ans;
 }
+
+#include <cassert>
 
 int main() {
 
