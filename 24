@@ -47,7 +47,6 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <vector>
 #include <stack>
 #include <algorithm>
-#include <cassert>
 #include <stdexcept>
 
 
@@ -130,6 +129,7 @@ std::vector<std::pair<int, int>> HardDesign(std::vector<int> &nums)
     return ans;
 }
 
+#include <cassert>
 int main() {
 
     // TEST
