@@ -44,7 +44,6 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 
 #include <iostream>
 #include <vector>
-#include <cassert>
 #include <stdexcept>
 
 
@@ -85,6 +84,8 @@ std::vector<int>  MetroScheme(int len,std::vector<std::vector<int>> &connections
     }
     return {ans,lem};
 }
+
+#include <cassert>
 
 int main() {
     // TEST
