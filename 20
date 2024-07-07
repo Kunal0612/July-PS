@@ -47,7 +47,7 @@ queries[i][0] : ranges from 1 to str.size().
 queries[i][1] : ranges from 1 to str.size().
 
 
-
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
 */
 
 #include <iostream>
@@ -55,7 +55,7 @@ queries[i][1] : ranges from 1 to str.size().
 #include <cstring>
 #include <cassert>
 #include <cstdio>
-#include <cassert>
+#include <stdexcept>
 
 std::vector<std::string> StrangeSorting(std::string &str,std::vector<std::vector<int>> queries){
     
@@ -112,6 +112,7 @@ std::vector<std::string> StrangeSorting(std::string &str,std::vector<std::vector
     }
     return ans;
 }
+#include <cassert>
 
 
 int main() {
