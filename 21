@@ -1,8 +1,51 @@
-// https://codeforces.com/problemset/problem/191/D
+/*
+
+https://codeforces.com/problemset/problem/191/D
+
+Write a C++ function MetroScheme to find the the minimum and maximum number of lines correspondingly.
+
+Berland is very concerned with privacy, so almost all plans and blueprints are kept secret. However, a spy from a neighboring state managed to steal the Bertown subway scheme.
+
+The Bertown Subway consists of:
+
+n stations, numbered from 1 to n
+m bidirectional tunnels connecting these stations
+The subway is composed of two types of lines:
+
+Radial Lines: A sequence of stations v1,v2,...,vk(where k>1) such that each pair of consecutive stations (v[i],v[i+1]) is connected by a tunnel, and no station appears more than once in the line (i.e., 𝑣𝑖≠𝑣𝑗 for 𝑖≠𝑗).
+Circular Lines: A series of stations v1,v2,...,vk (where k>2) such that each pair of consecutive stations (v[i],v[i+1]) is connected by a tunnel, and additionally, the first and the last stations (v[1],v[k]) are also connected by a tunnel. No station appears more than once in the line.
+The following constraints are given:
+
+There can't be more than one tunnel between any two stations.
+Each tunnel belongs to exactly one line.
+There is a path between any two stations along the subway tunnels.
+The subway can be represented as a vertex cactus graph, meaning each vertex lies on no more than one simple cycle.
+However, the scheme stolen by the spy only includes the stations and the tunnels. The spy cannot determine which tunnels belong to which lines. To successfully sabotage, the spy needs to know the minimum and maximum number of lines that may be present in the Bertown subway.
+
+Input :
+
+An integer len.
+A vector of vector of integers connections.
+
+Output :
+
+A vector of integers that will contain the minimum and maximum number of lines correspondingly.
+
+Constraints :
+
+len : ranges from 1 to 100000.
+connections.size() : ranges from 0 to 300000.
+connections[i][0] , connections[i][1] : ranges from 1 to len
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
 
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <stdexcept>
 
 
 std::vector<int>  MetroScheme(int len,std::vector<std::vector<int>> &connections){
