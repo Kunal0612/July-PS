@@ -1,11 +1,53 @@
-// https://codeforces.com/problemset/problem/1612/G
+/*
+
+https://codeforces.com/problemset/problem/1612/G
+
+Write a C++ function MaxSumArray to find An pair of integers answer the maximum 
+possible value of f(a) and the number of arrays a with such value.
+
+You are given an array nums=[nums[1],nums[2],…,nums[m]].
+An array a=[a1,a2,…,an] is constructed in such a way that it consists of integers 
+1,2,…,m, and for each i∈[1,m], there are exactly nums[i]
+occurrences of integer i in a. So, the number of elements in a is 
+exactly to sum of from i=1 to m for every nums[i].
+
+Let's define for such array a the value f(a) as
+f(a)=∑1≤i<j≤n for every ai=aj sum of distances for all j−i.
+
+
+In other words, f(a) is the total sum of distances between all pairs of equal elements.
+
+Your task is to calculate the maximum possible value of f(a) and the 
+number of arrays yielding the maximum possible value of f(a).
+Two arrays are considered different, if elements at some position differ.
+
+Input :
+
+A vector of integers nums.
+
+Output :
+
+An pair of integers answer the maximum possible value of f(a) and the number of arrays a with such value.
+
+
+Constraints :
+
+nums.size() : ranges from 1 to 500000.
+nums: ranges from 1 to 1000000
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
+
+
 
 #include <iostream>
 #include <vector>
 #include <iomanip>
 #include <utility>
 #include <map>
-#include <cassert>
+#include <stdexcept>
 
 int Normalize(int node) {
     const int MOD = int(1e9) + 7;
@@ -66,6 +108,8 @@ std::pair<int,int> MaxSumArray(std::vector<int> nums) {
     ans_cnt = Multiply(ans_cnt, fact[cnt[1]]);
     return {ans_sum,ans_cnt};
 }
+
+#include <cassert>
 
 int main() {
      // TEST
