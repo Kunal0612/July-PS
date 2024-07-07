@@ -47,13 +47,15 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 
 
 
-std::pair<int, int> Get(int len, int left, int right, int query_l, int query_r, const std::vector<std::pair<int, int>> &res) {
-    const int mxi= 31;
+std::pair<int, int> Get(int len, int left, int right, int query_l, int query_r, 
+const std::vector<std::pair<int, int>> &res) {
+    const int max= 31;
     const int inf = std::numeric_limits<int>::max();
     if (left >= query_l && right <= query_r) return res[len];
     if (query_r <= left || query_l >= right) return std::make_pair(inf, inf);
-    int vmi = (left + right) / 2;
-    return std::min(Get(2 * len + 1, left, vmi, query_l, query_r, res), Get(2 * len + 2, vmi, right, query_l, query_r, res));
+    int mid = (left + right) / 2;
+    return std::min(Get(2 * len + 1, left, mid, query_l, query_r, res), 
+    Get(2 * len + 2, mid, right, query_l, query_r, res));
 }
 
 void Mod(int len, int left, int right, int idx, int val, std::vector<std::pair<int, int>> &res) {
@@ -61,16 +63,16 @@ void Mod(int len, int left, int right, int idx, int val, std::vector<std::pair<i
         res[len] = std::make_pair(val, idx);
         return;
     }
-    const int mxi= 31;
+    const int max= 31;
     const int inf = std::numeric_limits<int>::max();
-    int vmi = (left + right) / 2;
-    if (idx < vmi) Mod(2 * len + 1, left, vmi, idx, val, res);
-    else Mod(2 * len + 2, vmi, right, idx, val, res);
+    int mid = (left + right) / 2;
+    if (idx < mid) Mod(2 * len + 1, left, mid, idx, val, res);
+    else Mod(2 * len + 2, mid, right, idx, val, res);
     res[len] = std::min(res[2 * len + 1], res[2 * len + 2]);
 }
 
-int MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> queries){
-    const int mxi= 31;
+std::vector<int> MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> queries){
+    const int max= 31;
     const int inf = std::numeric_limits<int>::max();
     int len=nums.size();
     if (nums.size() <= 0 or nums.size()>100000 or queries.size() <= 0 or queries.size()>100000) {
@@ -89,15 +91,18 @@ int MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> quer
         }
     }
     std::vector<std::pair<int, int>> res(4 * len);
-    for (int i = 0; i < len; i++) Mod(0, 0, len, i, nums[i], res);
+    for (int i = 0; i < len; i++){
+        Mod(0, 0, len, i, nums[i], res);
+    }
 
     int q_len=queries.size();
+    std::vector<int> answer;
     for(int i = 0; i < q_len; i++) {
         int query_l=queries[i][0], query_r=queries[i][1];
         query_l--;
 
         std::vector<std::pair<int, int>> brr;
-        for (int i = 0; i < std::min(query_r - query_l, mxi); i++) {
+        for (int i = 0; i < std::min(query_r - query_l, max); i++) {
             std::pair<int,int> now = Get(0, 0, len, query_l, query_r, res);
             brr.push_back(now);
             Mod(0, 0, len, now.second, inf, res);
@@ -110,9 +115,12 @@ int MinimizOr(std::vector<long long int> nums,std::vector<std::vector<int>> quer
             }
         }
 
-        for (std::pair<int,int> &c : brr) Mod(0, 0, len, c.second, c.first, res);
-        return ans;
+        for (std::pair<int,int> &c : brr){
+            Mod(0, 0, len, c.second, c.first, res);
+        } 
+        answer.push_back(ans);
     }
+    return answer;
 }
 
 
@@ -122,72 +130,72 @@ int main() {
     // TEST
     std::vector<long long int> nums_1 = {6, 1, 3, 2, 1};
     std::vector<std::vector<int>> queries_1 = {{1, 2}, {2, 3}, {2, 4}, {2, 5}};
-    int expected_1 = 7;
-    int result_1 = MinimizOr(nums_1, queries_1);
+    std::vector<int> expected_1 = {7,3,3,1};
+    std::vector<int> result_1 = MinimizOr(nums_1, queries_1);
     assert(result_1 == expected_1);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_2 = {5, 5, 5, 5};
     std::vector<std::vector<int>> queries_2 = {{1, 4}};
-    int expected_2 = 5;
-    int result_2 = MinimizOr(nums_2, queries_2);
+    std::vector<int> expected_2 = {5};
+    std::vector<int> result_2 = MinimizOr(nums_2, queries_2);
     assert(result_2 == expected_2);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_3 = {1, 2, 3, 4, 5};
     std::vector<std::vector<int>> queries_3 = {{1, 5}, {2, 4}};
-    int expected_3 = 3;
-    int result_3 = MinimizOr(nums_3, queries_3);
+    std::vector<int> expected_3 = {3,3};
+    std::vector<int> result_3 = MinimizOr(nums_3, queries_3);
     assert(result_3 == expected_3);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_4 = {10, 20, 30, 40, 50};
     std::vector<std::vector<int>> queries_4 = {{1, 2}, {3, 5}};
-    int expected_4 = 30;
-    int result_4 = MinimizOr(nums_4, queries_4);
+    std::vector<int> expected_4 = {30,58};
+    std::vector<int> result_4 = MinimizOr(nums_4, queries_4);
     assert(result_4 == expected_4);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_5 = {2, 3, 7, 15};
     std::vector<std::vector<int>> queries_5 = {{1, 4}};
-    int expected_5 = 3;
-    int result_5 = MinimizOr(nums_5, queries_5);
+    std::vector<int> expected_5 = {3};
+    std::vector<int> result_5 = MinimizOr(nums_5, queries_5);
     assert(result_5 == expected_5);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_6 = {1, 3, 5, 7, 9};
     std::vector<std::vector<int>> queries_6 = {{1, 3}, {4, 5}};
-    int expected_6 = 3;
-    int result_6 = MinimizOr(nums_6, queries_6);
+    std::vector<int> expected_6 = {3,15};
+    std::vector<int> result_6 = MinimizOr(nums_6, queries_6);
     assert(result_6 == expected_6);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_7 = {4, 8, 16, 32};
     std::vector<std::vector<int>> queries_7 = {{2, 4}};
-    int expected_7 = 24;
-    int result_7 = MinimizOr(nums_7, queries_7);
+    std::vector<int> expected_7 = {24};
+    std::vector<int> result_7 = MinimizOr(nums_7, queries_7);
     assert(result_7 == expected_7);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_8 = {1, 2, 4, 8, 16};
     std::vector<std::vector<int>> queries_8 = {{1, 5}};
-    int expected_8 = 3;
-    int result_8 = MinimizOr(nums_8, queries_8);
+    std::vector<int> expected_8 = {3};
+    std::vector<int> result_8 = MinimizOr(nums_8, queries_8);
     assert(result_8 == expected_8);
     // TEST_END
 
     // TEST
     std::vector<long long int> nums_9 = {7, 7, 7, 7, 7};
     std::vector<std::vector<int>> queries_9 = {{1, 5}};
-    int expected_9 = 7;
-    int result_9 = MinimizOr(nums_9, queries_9);
+    std::vector<int> expected_9 = {7};
+    std::vector<int> result_9 = MinimizOr(nums_9, queries_9);
     assert(result_9 == expected_9);
     // TEST_END
 
