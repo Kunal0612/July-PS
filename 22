@@ -21,7 +21,7 @@ A string str.
 
 Output :
 
-A integer answer which contains he maximum number of points one can gain if he plays on the given string.
+A integer answer which contains the maximum number of points one can gain if he plays on the given string.
 
 Constraints :
 
