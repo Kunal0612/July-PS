@@ -1,4 +1,47 @@
-// https://codeforces.com/problemset/problem/1720/E
+/*
+
+https://codeforces.com/problemset/problem/1720/E
+
+Write a C++ function MishaandPaintings to find the minimum number 
+of operations that Misha needs to achieve his goal.
+
+In the magical land of Misha, there exists a square n×n matrix, where 
+the number in row i and column j is equal to mat(i,j). 
+Misha, a talented wizard, wants to transform this matrix to contain exactly 
+val distinct integers. To accomplish this, Misha can cast a powerful spell 
+that allows him to modify any square submatrix within the matrix. 
+
+This is how the spell works:
+
+Choose a square submatrix: Misha selects a submatrix by choosing two pairs 
+of coordinates (x1,y1) and (x2,y2) such that x1≤x2 and y1≤y2, 
+and the size of the submatrix is defined by x2−x1=y2−y1. 
+This submatrix is a set of cells with coordinates (x,y) where x1≤x≤x2 and y1≤y≤y2.
+
+Replace integers: Misha then chooses an integer val, where 1≤k≤n^2, 
+and replaces all integers in the selected submatrix with val.
+Misha aims to minimize the number of such operations required to 
+achieve exactly val distinct integers in the entire matrix.
+
+Input :
+
+A vector of vector of integers mat.
+An integer val.
+
+Output :
+
+An integer answer to find the minimum number of operations that Misha needs to achieve his goal.
+
+
+Constraints :
+
+mat.size() and mat[0].size() : ranges from 1 to 500.
+val : ranges from 1 to mat.size() * mat.size() .
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases
+
+
+*/
 
 #include <iostream>
 #include <vector>
