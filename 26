@@ -47,6 +47,7 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <stdexcept>
 #include <cassert>
 
 int MishaandPaintings(std::vector<std::vector<int>> &mat, int val) {
