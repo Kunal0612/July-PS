@@ -2,8 +2,8 @@
 
 https://codeforces.com/problemset/problem/1621/F
 
-Write a C++ function MinimizOR to find the maximum profit Dasha can get by 
-doing these operations and following this rule..
+Write a C++ function StrangeInstructions to find the maximum profit Dasha can get by 
+doing these operations and following this rule.
 
 In the realm of Dasha's binary strings and magical operations, she has discovered a way to maximize her wealth using a binary string str of length 
 n and specific operations. Dasha begins her adventure with a grand total of 10^100 coins.
