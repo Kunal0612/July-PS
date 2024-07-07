@@ -1,7 +1,8 @@
 /*
 
-https://codeforces.com/contest/1720/problem/D2
+https://codeforces.com/problemset/problem/1665/E
 
+Write a C++ function XorSubsequence to find the the length of the longest beautiful subsequence.
 
 In the mystical realm of arrays, there exists a character named Bryap who is fascinated by the concept of beautiful subsequences. He has an array of 
 n integers nums[0] , nums[1] , nums[2] ... nums[n-1] and wants to find the longest beautiful subsequence within it.
