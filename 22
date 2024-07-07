@@ -38,8 +38,8 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#include <stdexcept>
 #include <vector>
-#include <cassert>
 
 int MissionImpassable(std::vector<int> &nums,std::string &str){
     if (nums.size() <= 0 or nums.size()>150 or str.size()<=0 or str.size()>150 or nums.size()!=str.size()) {
@@ -101,7 +101,7 @@ int MissionImpassable(std::vector<int> &nums,std::string &str){
     return ans;
 }
 
-#include <stdexcept>
+#include <cassert>
 
 int main() {
     // TEST
