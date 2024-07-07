@@ -9,7 +9,7 @@ You are given an array nums of n non-negative integers, numbered from 1 to n.
 Let's define the cost of the array a as min nums[i]|nums[j] 
 where i!=j, where |denotes the bitwise OR operation.
 
-There are q queries. For each query you are given two integers l and r 
+There are q_len queries. For each query you are given two integers l and r 
 (l<r). For each query you should 
 find the cost of the subarray nums[l],nums[l+1],…,nums[r].
 
@@ -91,8 +91,8 @@ int MinimizOR(std::vector<long long int> nums,std::vector<std::vector<int>> quer
     std::vector<std::pair<int, int>> res(4 * len);
     for (int i = 0; i < len; i++) Mod(0, 0, len, i, nums[i], res);
 
-    int q=queries.size();
-    for(int i = 0; i < q; i++) {
+    int q_len=queries.size();
+    for(int i = 0; i < q_len; i++) {
         int query_l=queries[i][0], query_r=queries[i][1];
         query_l--;
 
