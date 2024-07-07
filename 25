@@ -32,7 +32,6 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 
 #include <iostream>
 #include <vector>
-#include <cassert>
 #include <stdexcept>
 
 
@@ -83,7 +82,7 @@ int CountingRhyme(std::vector<int> &nums){
     return ans;
 }
 
-
+#include <cassert>
 
 int main() {
 
