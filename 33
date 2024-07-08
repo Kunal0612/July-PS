@@ -1,0 +1,163 @@
+// https://codeforces.com/problemset/problem/1363/F
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
+#include <stdexcept>
+
+int dp(int idx, int jdx, const std::string& str, const std::string& ptr, std::vector<std::vector<int>>& cache, std::vector<std::vector<int>>& suf, std::vector<std::vector<int>>& suf_2) {
+    if (jdx == 0)
+        return 0;
+    int &ans = cache[idx][jdx];
+    if (ans != -1)
+        return ans;
+    ans = 2e9;
+    if (idx > 0) {
+        ans = 1 + dp(idx - 1, jdx, str, ptr, cache, suf, suf_2);
+        if (str[idx - 1] == ptr[jdx - 1])
+            ans = std::min(ans, dp(idx - 1, jdx - 1, str, ptr, cache, suf, suf_2));
+    }
+    int ch = ptr[jdx - 1] - 'a';
+    if (suf[ch][idx + 1] - suf_2[ch][jdx + 1] > 0)
+        ans = std::min(ans, dp(idx, jdx - 1, str, ptr, cache, suf, suf_2));
+    return ans;
+}
+
+int RotatingSubstrings(std::string str, std::string ptr)
+{
+    int len=str.size();
+    if(len<1 or len>2000 or str.size()!=ptr.size()) {
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    std::vector<std::vector<int>> cache(len + 1, std::vector<int>(len + 1, -1));
+    std::vector<std::vector<int>> suf(26, std::vector<int>(len + 2, 0));
+    std::vector<std::vector<int>> suf_2(26, std::vector<int>(len + 2, 0));
+
+    for (int i = len; i >= 1; i--)
+    {
+        for (int j = 0; j < 26; j++)
+        {
+            suf[j][i] = suf[j][i + 1];
+            suf_2[j][i] = suf_2[j][i + 1];
+        }
+        suf[str[i - 1] - 'a'][i]++;
+        suf_2[ptr[i - 1] - 'a'][i]++;
+    }
+
+    int ans = dp(len, len, str, ptr, cache, suf, suf_2);
+    if (ans > 1e9)
+        ans = -1;
+    return ans;
+}
+
+#include <cassert>
+
+int main() {
+    // TEST
+    std::string str_1 = "aaaa";
+    std::string ptr_1 = "avja";
+    int expected_1 = -1;
+    int result_1 = RotatingSubstrings(str_1, ptr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "abc";
+    std::string ptr_2 = "cab";
+    int expected_2 = 1;
+    int result_2 = RotatingSubstrings(str_2, ptr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abab";
+    std::string ptr_3 = "baba";
+    int expected_3 = 1;
+    int result_3 = RotatingSubstrings(str_3, ptr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "xyzxyz";
+    std::string ptr_4 = "xyzzyx";
+    int expected_4 = 2;
+    int result_4 = RotatingSubstrings(str_4, ptr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "iiss";
+    std::string ptr_5 = "issi";
+    int expected_5 = 2;
+    int result_5 = RotatingSubstrings(str_5, ptr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "raab";
+    std::string ptr_6 = "abra";
+    int expected_6 = 2;
+    int result_6 = RotatingSubstrings(str_6, ptr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "fed";
+    std::string ptr_7 = "def";
+    int expected_7 = 2;
+    int result_7 = RotatingSubstrings(str_7, ptr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "heoll";
+    std::string ptr_8 = "hello";
+    int expected_8 = 2;
+    int result_8 = RotatingSubstrings(str_8, ptr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    std::string ptr_9 = "hello";
+    try
+    {
+        RotatingSubstrings(str_9, ptr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "";
+    std::string ptr_10 = "";
+    try
+    {
+        RotatingSubstrings(str_10, ptr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(5005,'a');
+    std::string ptr_11 = "a";
+    try
+    {
+        RotatingSubstrings(str_11, ptr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout<<"YESSS";
+    return 0;
+}
