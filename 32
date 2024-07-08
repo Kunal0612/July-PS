@@ -1,0 +1,171 @@
+// https://codeforces.com/problemset/problem/1909/G
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <stdexcept>
+
+
+std::vector<int> ZAlgo(const std::string& str) {
+    int len = str.size(), left = 0, right = 0;
+    std::vector<int> z_arr(len);
+    z_arr[0] = len;
+    for (int i = 1; i < len; i++) {
+        if (right > i) {
+            z_arr[i] = std::min(right - i, z_arr[i - left]);
+        }
+        while (i + z_arr[i] < len && str[z_arr[i]] == str[i + z_arr[i]])
+            z_arr[i]++;
+        if (i + z_arr[i] > right) {
+            left = i;
+            right = i + z_arr[i];
+        }
+    }
+    return z_arr;
+}
+
+long long PumpingLemma(std::string str,std::string ptr){
+    int len=str.size(), lem=ptr.size();
+    if(len>=lem or len<1 or lem>10000000){
+        throw std::invalid_argument("Invalid constraint.");
+    }
+    int lcp = 0;
+    while (lcp < len && str[lcp] == ptr[lcp]) ++lcp;
+
+    int lcs = 0;
+    while (lcs < len && str[len - 1 - lcs] == ptr[lem - 1 - lcs]) ++lcs;
+
+    std::string left = ptr.substr(0, lcp);
+    std::string right = ptr.substr(lcp, lem - lcp);
+    std::string revl = left;
+    std::reverse(revl.begin(), revl.end());
+
+    std::vector<int> z_left = ZAlgo(revl);
+    std::vector<int> z_right = ZAlgo(right + "$" + ptr);
+
+    long long ans = 0;
+    for (int d = 1; d <= lcp; d++) {
+        if ((lem - len) % d == 0) {
+            int low = std::max(len - lcs - d, lcp - d - (d == lcp ? 0 : z_left[d]));
+            int res = z_right[lem - d + 1] + lcp - 1;
+            int high = std::min(lcp - d, res - lem + len - d + 1);
+            if (low <= high) ans += high - low + 1;
+        }
+    }
+
+    return ans;
+}
+
+
+#include <cassert>
+
+
+
+int main() {
+    // TEST
+    std::string str_1 = "aaaaaaa";
+    std::string ptr_1 = "aaaaaaaaa";
+    long long int expected_1 = 13;
+    long long int result_1 = PumpingLemma(str_1, ptr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "ababababab";
+    std::string ptr_2 = "abababababa";
+    long long int expected_2 = 0;
+    long long int result_2 = PumpingLemma(str_2, ptr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abcdabcdabcd";
+    std::string ptr_3 = "ababaababaaabcd";
+    long long int expected_3 = 0;
+    long long int result_3 = PumpingLemma(str_3, ptr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "abbababacaab";
+    std::string ptr_4 = "abbababababacaab";
+    long long int expected_4 = 8;
+    long long int result_4 = PumpingLemma(str_4, ptr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "nnnnnnnnnn";
+    std::string ptr_5 = "nnnnnnnnnnnnnnnnnn";
+    long long int expected_5 = 29;
+    long long int result_5 = PumpingLemma(str_5, ptr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "abracadabra";
+    std::string ptr_6 = "abracadabraaaa";
+    long long int expected_6 = 1;
+    long long int result_6 = PumpingLemma(str_6, ptr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "abcdefgabcdefg";
+    std::string ptr_7 = "abcdefgabcdefgaaaa";
+    long long int expected_7 = 0;
+    long long int result_7 = PumpingLemma(str_7, ptr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "hellohellohello";
+    std::string ptr_8 = "hellohellohellohello";
+    long long int expected_8 = 11;
+    long long int result_8 = PumpingLemma(str_8, ptr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    std::string ptr_9 = "hello";
+    try
+    {
+        PumpingLemma(str_9, ptr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "";
+    std::string ptr_10 = "";
+    try
+    {
+        PumpingLemma(str_10, ptr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(10000005,'a');
+    std::string ptr_11 = "a";
+    try
+    {
+        PumpingLemma(str_11, ptr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout<<"ALl testcase passed";
+    return 0;
+}
