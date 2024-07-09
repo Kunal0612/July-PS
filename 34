@@ -1,0 +1,58 @@
+// https://codeforces.com/problemset/problem/1854/C
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+
+int ExpectedDestruction(std::vector<int> nums,int bound){
+    if(nums.size()>bound or bound>500 or nums.size()<1){
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    for(int i=0;i<nums.size()-1;i++){
+        if(nums[i]>=nums[i+1]){
+            throw std::invalid_argument("Invalid Constraints");
+        }
+    }
+    int mod = 1e9 + 7;
+    int mx = 505;
+    int len=nums.size();
+    std::vector<std::vector<int>> dp_table(mx, std::vector<int>(mx, 0));
+    long long ans = 0;
+    for (int i = bound; i >= 1; i--) {
+        dp_table[i][bound+1] = bound - i + 1;
+        for (int j = bound; j > i; j--) {
+            dp_table[i][j] = (500000004LL * (dp_table[i+1][j] + dp_table[i][j+1] + 1)) % mod;
+        }
+    }
+
+    std::vector<int> arr(len + 2);
+    for (int i = 1; i <= len; i++) {
+        arr[i]=nums[i-1];
+    }
+    arr[len + 1] = bound + 1;
+
+    for (int i = 1; i <= len; i++) {
+        ans = (ans + dp_table[arr[i]][arr[i+1]]) % mod;
+    }
+
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    return 0;
+}
