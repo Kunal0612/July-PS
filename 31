@@ -5,7 +5,7 @@ https://codeforces.com/problemset/problem/1870/F
 Write a C++ Solution FancyArrays to find the number of fancy arrays of length len , 
 taken modulo 10^9+7.
 
-Let's define an array nums of n non-negative integers as fancy if the following 
+Let's define an array nums of len non-negative integers as fancy if the following 
 conditions hold:
 
 Existence Condition: At least one number from the set {x,x+1,…,x+k−1} appears 
@@ -97,6 +97,12 @@ int FancyArrays(int len, int val, int lex) {
 
     return ans;
 }
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <stdexcept>
+#include <cassert>
 
 int main() {
     // TEST 1
