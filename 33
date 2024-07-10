@@ -1,5 +1,52 @@
-// https://codeforces.com/problemset/problem/1363/F
+/*
 
+https://codeforces.com/problemset/problem/1363/F
+
+Write a C++ Solution RotatingSubstrings to find the minimum number of 
+operations to convert str to ptr. If it is not possible to convert str to 
+ptr, return −1 instead.
+
+
+Given two strings, str and ptr, of equal length len consisting of lowercase 
+Latin alphabets, find the minimum number of operations required to make str equal to ptr.
+
+Operation:
+
+You can perform a single operation on str any number of times:
+
+Rotate a substring clockwise: Choose a substring s[l, l+1, ..., r] of s. 
+The substring becomes s[r, l, l+1, ..., r-1], with all remaining characters 
+staying in their positions.
+
+All the remaining characters of s stay in their position.
+
+For example, on rotating the substring [2,4] , string "abcde" becomes "adbce".
+
+Find the minimum number of operations required to convert str to ptr , or 
+determine that it's impossible.
+
+
+Input:
+
+A string str.
+A string ptr.
+
+Output:
+
+An integer ans to the the minimum number of operations to convert str to ptr. If it is not possible to convert str to ptr, return −1 instead.
+
+Constraints:
+
+ptr.size()==str.size() : ranges from 1 to 2000. 
+str , ptr : consists of lowercase English alphabets.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+
+*/
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -7,7 +54,7 @@
 #include <climits>
 #include <stdexcept>
 
-int dp(int idx, int jdx, const std::string& str, const std::string& ptr, std::vector<std::vector<int>>& cache, std::vector<std::vector<int>>& suf, std::vector<std::vector<int>>& suf_2) {
+int Helper(int idx, int jdx, const std::string& str, const std::string& ptr, std::vector<std::vector<int>>& cache, std::vector<std::vector<int>>& suf, std::vector<std::vector<int>>& suf_2) {
     if (jdx == 0)
         return 0;
     int &ans = cache[idx][jdx];
@@ -15,13 +62,13 @@ int dp(int idx, int jdx, const std::string& str, const std::string& ptr, std::ve
         return ans;
     ans = 2e9;
     if (idx > 0) {
-        ans = 1 + dp(idx - 1, jdx, str, ptr, cache, suf, suf_2);
+        ans = 1 + Helper(idx - 1, jdx, str, ptr, cache, suf, suf_2);
         if (str[idx - 1] == ptr[jdx - 1])
-            ans = std::min(ans, dp(idx - 1, jdx - 1, str, ptr, cache, suf, suf_2));
+            ans = std::min(ans, Helper(idx - 1, jdx - 1, str, ptr, cache, suf, suf_2));
     }
-    int ch = ptr[jdx - 1] - 'a';
-    if (suf[ch][idx + 1] - suf_2[ch][jdx + 1] > 0)
-        ans = std::min(ans, dp(idx, jdx - 1, str, ptr, cache, suf, suf_2));
+    int chr = ptr[jdx - 1] - 'a';
+    if (suf[chr][idx + 1] - suf_2[chr][jdx + 1] > 0)
+        ans = std::min(ans, Helper(idx, jdx - 1, str, ptr, cache, suf, suf_2));
     return ans;
 }
 
@@ -46,13 +93,19 @@ int RotatingSubstrings(std::string str, std::string ptr)
         suf_2[ptr[i - 1] - 'a'][i]++;
     }
 
-    int ans = dp(len, len, str, ptr, cache, suf, suf_2);
+    int ans = Helper(len, len, str, ptr, cache, suf, suf_2);
     if (ans > 1e9)
         ans = -1;
     return ans;
 }
 
 #include <cassert>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
+#include <stdexcept>
 
 int main() {
     // TEST
@@ -157,7 +210,20 @@ int main() {
         assert(true);
     }
     // TEST_END
+    // TEST
+    std::string str_12 = "abaa";
+    std::string ptr_12 = "avf";
+    try
+    {
+        RotatingSubstrings(str_12, ptr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
 
-    std::cout<<"YESSS";
+    std::cout<<"All tests passed."<<std::endl;
     return 0;
 }
