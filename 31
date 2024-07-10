@@ -1,4 +1,43 @@
-// https://codeforces.com/problemset/problem/1895/F
+/*
+
+https://codeforces.com/problemset/problem/1870/F
+
+Write a C++ Solution FancyArrays to find the number of fancy arrays of length len , 
+taken modulo 10^9+7.
+
+Let's define an array nums of n non-negative integers as fancy if the following 
+conditions hold:
+
+Existence Condition: At least one number from the set {x,x+1,…,x+k−1} appears 
+in the array.
+
+Difference Condition: The absolute difference between consecutive elements of 
+the array is at most k (i.e., ∣a[i]−a[i−1]∣≤k for each i∈[2,len]).
+
+You are given the integers len, val, and lex. Your task is to calculate the number 
+of fancy arrays of length len. Since the answer can be very large, print it modulo 10^9+7.
+
+
+Input:
+
+An integer len.
+An integer val.
+An integer lex.
+
+Output:
+
+An integer ans to find the number of fancy arrays of length len , taken modulo 10^9+7.
+
+Constraints:
+
+len : ranges from 1 to 10^9.
+val : ranges from 1 to 10^9.
+lex : ranges from 0 to 40.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
