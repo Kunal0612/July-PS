@@ -1,5 +1,38 @@
-// https://codeforces.com/problemset/problem/1909/G
+/*
 
+https://codeforces.com/problemset/problem/1909/G
+
+Write a C++ Solution PumpingLemma to find the number of valid triples (x,y,z).
+
+You are given two strings str and ptr of lengths len and lem respectively. Both strings consist of lowercase letters of the English alphabet.
+
+Count the number of triples (x,y,z) of strings such that the following conditions are met:
+
+str=x+y+z (where ptr=x+y+⋯+y (k times) + z for some integer k≥1.
+
+Input:
+
+A string str.
+A string ptr.
+
+Output:
+
+An long long integer ans to the number of valid triples (x,y,z).
+
+Constraints:
+
+str.size() : ranges from 1 to ptr.size()-1.
+ptr.size() : ranges from str.size() to 10^7.
+str , ptr : consists of lowercase English alphabets.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -59,6 +92,12 @@ long long PumpingLemma(std::string str,std::string ptr){
 
 
 #include <cassert>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <stdexcept>
+
 
 
 
@@ -158,6 +197,19 @@ int main() {
     try
     {
         PumpingLemma(str_11, ptr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_12 = "jnfvjknv";
+    std::string ptr_12 = "hello";
+    try
+    {
+        PumpingLemma(str_12, ptr_12);
         assert(false);
     }
     catch (const std::invalid_argument &e)
