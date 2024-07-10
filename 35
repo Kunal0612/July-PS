@@ -1,4 +1,52 @@
-// https://codeforces.com/problemset/problem/1984/F
+/*
+
+https://codeforces.com/problemset/problem/1984/F
+
+Write a C++ Solution Reconstruction to find the number of valid reconstructions modulo 998244353.
+
+You are given three arrays of the same length len:
+
+arr :  A hidden array of integers between -bound and bound (inclusive) that we need to find.
+nums :  A known array of integers.
+str : A string containing characters P, S, and ?.
+
+The relationship between these arrays is defined by the characters in str:
+
+P (Prefix): If str[i] is P, then nums[i] must be the sum of arr[1] to arr[i]. 
+In simpler terms, nums[i] equals the cumulative sum of elements in arr from index 1 to i.
+
+S (Suffix): If str[i] is S, then nums[i] must be the sum of arr[i] to arr[n]. 
+This is the cumulative sum of elements in arr from index i to the end.
+
+? (Unknown): These characters represent unknown values in s that need to be filled 
+with either P or S.
+
+Find the number of ways to replace all ? characters in str with either P or S such 
+that there exists a valid hidden array arr satisfying the constraints defined by nums 
+and the constructed string str.
+
+Input:
+
+An integer bound.
+A vector of integers nums.
+A string str.
+
+Output:
+
+An integer answer to find the number of valid reconstructions modulo 998244353.
+
+Constraints:
+
+bound : ranges from 2 to 10^9.
+nums.size() : ranges from 2 to 2000.
+nums : ranges from -bound*nums.size() to bound*nums.size().
+str : ranges from 1 to 2000 , consists of P , S , ?.
+nums.size() == str.size().
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -10,7 +58,7 @@
 
 int Reconstruction(int bound,std::string str,std::vector<int> nums) {
     int size=str.size();
-    if(size<2 or size>2000 or bound<2 or bound>1000000000){
+    if(size<2 or size>2000 or bound<2 or bound>1000000000 or nums.size()!=str.size()){
         throw std::invalid_argument("Invalid Constraints");
     }
     for(int i=0;i<size;i++){
@@ -82,5 +130,203 @@ int Reconstruction(int bound,std::string str,std::vector<int> nums) {
 #include <stdexcept>
 
 int main() {
+    // TEST
+    std::vector<int> nums_1 = {1, 9, 8, 10};
+    int bound_1 = 10;
+    std::string str_1 = "PSPP";
+    int expected_1 = 1;
+    int result_1 = Reconstruction(bound_1, str_1, nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 18, 15, 22};
+    int bound_2 = 20;
+    std::string str_2 = "P?SP";
+    int expected_2 = 0;
+    int result_2 = Reconstruction(bound_2, str_2, nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {4, 12, 11, 14};
+    int bound_3 = 15;
+    std::string str_3 = "SPSP";
+    int expected_3 = 0;
+    int result_3 = Reconstruction(bound_3, str_3, nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {4,2,1,3};
+    int bound_4 = 7;
+    std::string str_4 = "PPSS";
+    int expected_4 = 1;
+    int result_4 = Reconstruction(bound_4, str_4, nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {10, 20, 25, 30};
+    int bound_5 = 25;
+    std::string str_5 = "PPP?";
+    int expected_5 = 1;
+    int result_5 = Reconstruction(bound_5, str_5, nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {5, 14, 13, 16};
+    int bound_6 = 14;
+    std::string str_6 = "?S?P";
+    int expected_6 = 0;
+    int result_6 = Reconstruction(bound_6, str_6, nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {6, 18, 15, 19};
+    int bound_7 = 20;
+    std::string str_7 = "PPSP";
+    int expected_7 = 0;
+    int result_7 = Reconstruction(bound_7, str_7, nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1,2,3,4,5,6,7,8,9};
+    int bound_8 = 20;
+    std::string str_8 = "?????????";
+    int expected_8 =14;
+    int result_8 = Reconstruction(bound_8, str_8, nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {};
+    int bound_9 = 20;
+    std::string str_9 = "?????????";
+    try
+    {
+        Reconstruction(bound_9, str_9, nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {1};
+    int bound_10 = 20;
+    std::string str_10 = "?????????";
+    try
+    {
+        Reconstruction(bound_10, str_10, nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1000000};
+    int bound_11 = 20;
+    std::string str_11 = "?????????";
+    try
+    {
+        Reconstruction(bound_11, str_11, nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {-1000000};
+    int bound_12 = 20;
+    std::string str_12 = "?????????";
+    try
+    {
+        Reconstruction(bound_12, str_12, nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {22};
+    int bound_13 = 2000000000;
+    std::string str_13 = "?";
+    try
+    {
+        Reconstruction(bound_13, str_13, nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {22};
+    int bound_14 = 0;
+    std::string str_14 = "?";
+    try
+    {
+        Reconstruction(bound_14, str_14, nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15 = {22};
+    int bound_15 = -5;
+    std::string str_15 = "?";
+    try
+    {
+        Reconstruction(bound_15, str_15, nums_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16 = {22};
+    int bound_16 = 5;
+    std::string str_16 = "?PAB";
+    try
+    {
+        Reconstruction(bound_16, str_16, nums_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_17 = {22};
+    int bound_17 = 5;
+    std::string str_17 = "";
+    try
+    {
+        Reconstruction(bound_17, str_17, nums_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
     return 0;
 }
