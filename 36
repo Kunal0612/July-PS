@@ -1,0 +1,184 @@
+// https://codeforces.com/problemset/problem/1400/F
+
+#include <iostream>
+#include <unordered_map>
+#include <string>
+#include <cassert>
+#include <vector>
+#include <stdexcept>
+
+inline int lowbit(int node) {
+    return node & (-node);
+}
+
+int dfs(int index, int state, int length, int val, const std::string &str, 
+int tmp_mask, std::vector<std::unordered_map<int, int>> &memo) {
+    if (index == length + 1) return 0;
+    if (memo[index].count(state)) return memo[index][state];
+    int result = dfs(index + 1, state, length, val, str, tmp_mask, memo) + 1;
+    int new_state = (state << (str[index] - '0') | 1) & ((1 << (val + 1)) - 1);
+    if (new_state & tmp_mask) new_state &= lowbit(new_state & tmp_mask) - 1;
+    if (!(new_state >> val)) result = std::min(result, dfs(index + 1, new_state, 
+    length, val, str, tmp_mask, memo));
+    return memo[index][state] = result;
+}
+
+int ValPrimeSubstrings(std::string str,int val){
+    int length = str.length();
+    if(length<1 or length>2000 or val<1 or val>20){
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    for(int i=0;i<length;i++){
+        if(str[i]<'0' or str[i]>'9'){
+            throw std::invalid_argument("Only Digits allowed");
+        }
+    }
+    str = ' ' + str;
+    int tmp_mask = 0;
+    for (int i = 1; i < val; ++i) {
+        if (val % i == 0) tmp_mask |= 1 << i;
+    }
+    std::vector<std::unordered_map<int, int>> memo(length + 2);
+    int ans=dfs(1, 1, length, val, str, tmp_mask, memo);
+    return ans;
+}
+
+#include <iostream>
+#include <unordered_map>
+#include <string>
+#include <cassert>
+#include <vector>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    std::string str_1 = "116285317";
+    int val_1 = 8;
+    int expected_1 = 2;
+    int result_1 = ValPrimeSubstrings(str_1, val_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "123456789";
+    int val_2 = 5;
+    int expected_2 = 2;
+    int result_2 = ValPrimeSubstrings(str_2, val_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "987654321";
+    int val_3 = 3;
+    int expected_3 = 1;
+    int result_3 = ValPrimeSubstrings(str_3, val_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "1111111111";
+    int val_4 = 10;
+    int expected_4 = 0;
+    int result_4 = ValPrimeSubstrings(str_4, val_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "3141592653";
+    int val_5 = 6;
+    int expected_5 = 1;
+    int result_5 = ValPrimeSubstrings(str_5, val_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "2222222222";
+    int val_6 = 2;
+    int expected_6 = 10;
+    int result_6 = ValPrimeSubstrings(str_6, val_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "9988776655";
+    int val_7 = 4;
+    int expected_7 = 0;
+    int result_7 = ValPrimeSubstrings(str_7, val_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "1234512345";
+    int val_8 = 7;
+    int expected_8 = 2;
+    int result_8 = ValPrimeSubstrings(str_8, val_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    int val_9 = 7;
+    try
+    {
+        ValPrimeSubstrings(str_9, val_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 =std::string(20000,'1');
+    int val_10 = 7;
+    try
+    {
+        ValPrimeSubstrings(str_10, val_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 =std::string(200,'a');
+    int val_11 = 7;
+    try
+    {
+        ValPrimeSubstrings(str_11, val_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_12 =std::string(2,'1');
+    int val_12 = -7;
+    try
+    {
+        ValPrimeSubstrings(str_12, val_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_13 =std::string(2,'1');
+    int val_13 =0;
+    try
+    {
+        ValPrimeSubstrings(str_13, val_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
