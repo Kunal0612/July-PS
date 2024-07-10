@@ -1,0 +1,315 @@
+// https://codeforces.com/problemset/problem/1814/D
+
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <algorithm>
+#include <stdexcept>
+
+struct Node
+{
+    long long distance;
+    int index;
+    bool operator<(const Node &other) const
+    {
+        return distance < other.distance;
+    }
+};
+
+int BalancingWeapons(int max_value, std::vector<int> arr, std::vector<int> brr)
+{
+    if (arr.size() <= 1 or arr.size() > 2000 or max_value < 0 or max_value > 1500 or arr.size() != brr.size())
+    {
+        throw std::invalid_argument("Invalid Length");
+    }
+    for (int i = 0; i < arr.size(); ++i)
+    {
+        if (arr[i] < 1 || arr[i] > 2000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    if (brr.size() <= 1 or brr.size() > 2000)
+    {
+        throw std::invalid_argument("Invalid Length");
+    }
+    for (int i = 0; i < brr.size(); ++i)
+    {
+        if (brr[i] < 1 || brr[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    int len = arr.size();
+    int factors[len];
+    Node elements[len], limits[len];
+    long long results[len];
+    int result;
+    for (int i = 1; i <= len; ++i)
+    {
+        factors[i] = arr[i - 1];
+    }
+
+    for (int i = 1; i <= len; ++i)
+    {
+        elements[i].distance = brr[i - 1];
+        elements[i].distance *= factors[i];
+        elements[i].index = i;
+    }
+
+    std::sort(elements + 1, elements + 1 + len);
+    result = len;
+
+    for (int i = 1; i <= len; ++i)
+    {
+        for (int j = 1; j <= len; ++j)
+        {
+            long long x = (elements[i].distance - 1) / factors[j] + 1;
+            results[j] = (x - 1) * factors[j];
+            limits[j].distance = x * factors[j] - max_value;
+            limits[j].index = j;
+        }
+
+        std::sort(limits + 1, limits + 1 + len);
+        long long right_bound = elements[i].distance;
+
+        for (int j = len; j && limits[j].distance > right_bound; --j)
+        {
+            right_bound = std::min(right_bound, results[limits[j].index]);
+        }
+
+        if (right_bound > elements[i - 1].distance)
+        {
+            for (int j = i; j <= len && elements[j].distance <= right_bound + max_value; ++j)
+            {
+                result = std::min(result, len - j + i - 1);
+            }
+        }
+    }
+
+    return result;
+}
+
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <algorithm>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {6, 3, 13, 7};
+    std::vector<int> brr_1 = {1, 2, 1, 2};
+    int max_value_1 = 2;
+    int expected_1 = 2;
+    int result_1 = BalancingWeapons(max_value_1, arr_1, brr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {1, 2, 3, 4};
+    std::vector<int> brr_2 = {1, 1, 1, 1};
+    int max_value_2 = 1;
+    int expected_2 = 2;
+    int result_2 = BalancingWeapons(max_value_2, arr_2, brr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {1000, 2000, 300};
+    std::vector<int> brr_3 = {10000, 1, 1000};
+    int max_value_3 = 1500;
+    int expected_3 = 2;
+    int result_3 = BalancingWeapons(max_value_3, arr_3, brr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {2, 2, 2, 2};
+    std::vector<int> brr_4 = {1, 1, 1, 1};
+    int max_value_4 = 0;
+    int expected_4 = 4;
+    int result_4 = BalancingWeapons(max_value_4, arr_4, brr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_5 = {1, 2, 3};
+    std::vector<int> brr_5 = {3, 2, 1};
+    int max_value_5 = 1;
+    int expected_5 = 3;
+    int result_5 = BalancingWeapons(max_value_5, arr_5, brr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_6 = {5, 10, 15, 20};
+    std::vector<int> brr_6 = {2, 2, 2, 2};
+    int max_value_6 = 3;
+    int expected_6 = 4;
+    int result_6 = BalancingWeapons(max_value_6, arr_6, brr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_7 = {7, 14, 21};
+    std::vector<int> brr_7 = {1, 3, 1};
+    int max_value_7 = 1;
+    int expected_7 = 2;
+    int result_7 = BalancingWeapons(max_value_7, arr_7, brr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_8 = {8, 16, 24, 32};
+    std::vector<int> brr_8 = {1, 2, 3, 4};
+    int max_value_8 = 4;
+    int expected_8 = 4;
+    int result_8 = BalancingWeapons(max_value_8, arr_8, brr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_9 = {9000, 16, 24, 32};
+    std::vector<int> brr_9 = {1, 2, 3, 4};
+    int max_value_9 = 4;
+    try
+    {
+        BalancingWeapons(max_value_9, arr_9, brr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_10 = {0, 16, 24, 32};
+    std::vector<int> brr_10 = {1, 2, 3, 4};
+    int max_value_10 = 4;
+    try
+    {
+        BalancingWeapons(max_value_10, arr_10, brr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_11 = {-1, 16, 24, 32};
+    std::vector<int> brr_11 = {1, 2, 3, 4};
+    int max_value_11 = 4;
+    try
+    {
+        BalancingWeapons(max_value_11, arr_11, brr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_12 = {};
+    std::vector<int> brr_12 = {1, 2, 3, 4};
+    int max_value_12 = 4;
+    try
+    {
+        BalancingWeapons(max_value_12, arr_12, brr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_13 = {1,2,3,4};
+    std::vector<int> brr_13 = {1000000002, 2, 3, 4};
+    int max_value_13 = 4;
+    try
+    {
+        BalancingWeapons(max_value_13, arr_13, brr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_14 = {1,2,3,4};
+    std::vector<int> brr_14 = {0, 2, 3, 4};
+    int max_value_14 = 4;
+    try
+    {
+        BalancingWeapons(max_value_14, arr_14, brr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_15 = {1,2,3,4};
+    std::vector<int> brr_15 = {};
+    int max_value_15 = 4;
+    try
+    {
+        BalancingWeapons(max_value_15, arr_15, brr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_16 = {1,2,3,4};
+    std::vector<int> brr_16 = {1,2};
+    int max_value_16 = 4;
+    try
+    {
+        BalancingWeapons(max_value_16, arr_16, brr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_17 = {1,2};
+    std::vector<int> brr_17 = {1,2};
+    int max_value_17 = -4;
+    try
+    {
+        BalancingWeapons(max_value_17, arr_17, brr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> arr_18 = {1,2};
+    std::vector<int> brr_18 = {1,2};
+    int max_value_18 = 40000;
+    try
+    {
+        BalancingWeapons(max_value_18, arr_18, brr_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
