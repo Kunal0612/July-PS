@@ -1,4 +1,51 @@
-// https://codeforces.com/problemset/problem/1814/D
+/*
+
+https://codeforces.com/problemset/problem/1814/D
+
+Write a C++ Solution BalancingWeapons to find the minimum number of guns for which you have to change these values to make the guns balanced.
+
+You've just landed your first big project as a game developer for a popular online shooter game. Your mission: weapon balancing!
+
+The Arsenal:
+
+The game features an arsenal of n weapons, each with its own unique characteristics:
+
+Fire Rate (arr_i): This integer represents the number of bullets a weapon can fire per second.
+Damage per Bullet (brr_i): This integer signifies the amount of damage inflicted by a single bullet from the weapon.
+Total Firepower (p_i): This is calculated by multiplying the fire rate (arr_i) and damage per bullet (brr_i) for each weapon, resulting in p_i = arr_i * br_i.
+
+The Balancing Act:
+
+Your objective is to achieve balance in the firepower of these weapons. A balanced weapon set ensures a more enjoyable experience for players by:
+
+Minimizing Firepower Discrepancy: The difference between the highest and lowest total firepower (p_i) of any two weapons should be as small as possible. This is achieved by keeping the expression max(p_i) - min(p_i) within a specified limit (max_value).
+
+The Challenge:
+
+However, there's a catch! Gamers tend to dislike drastic changes in their favorite weapons. Your task is to modify the damage per bullet (brr_i) values for the
+minimum number of weapons possible.
+
+Input:
+
+An integer max_value.
+An vector of integer arr.
+An vector of integer brr.
+
+Output:
+
+An integer result contains the minimum number of guns for which you have to change these values to make the guns balanced.
+
+Constraints:
+
+max_value : ranges from 1 to 1500.
+arr.size() == brr.size() : ranges from 1 to 2000.
+arr : ranges from 1 to 2000.
+brr : ranges from 1 to 10^9.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
