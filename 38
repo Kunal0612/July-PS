@@ -1,0 +1,367 @@
+/*
+
+https://codeforces.com/problemset/problem/1793/F
+
+Write a C++ Solution Rebrending to help Kostya and Zhenya identify the minimum height difference between any two participants within the designated group (from l_i to r_i).
+
+Kostya and Zhenya, the celebrated musicians behind "Paper's" chart-topping album, are ready for a new adventure. They're launching "Day Movers," a band pushing the boundaries of modern art. Forget guitars and drum solos - in this project, image is everything!
+
+To find the perfect bandmates, they've assembled a unique cast of len individuals for a q_len-day showcase. Each day brings a new challenge: selecting the two participants from a chosen group (between the l_i-th and r_i-th person) whose heights complement each other the best.
+
+Since musical talent isn't a priority, Kostya and Zhenya need your help finding the ideal pairs based solely on height compatibility. Imagine "Day Movers" as a living sculpture - the closer two people's heights are, the more visually striking the pairing will be!
+
+Your Mission: The Art of Height
+
+For each day of the showcase (i = 1 to q_len), help Kostya and Zhenya identify the minimum height difference between any two participants within the designated group (from l_i to r_i).
+
+Input:
+
+An vector of integers nums.
+A vector of vector of integers query.
+
+Output:
+
+An vector of integers answers contains the minimum height difference between any two participants within the designated group (from l_i to r_i).
+
+
+Constraints:
+
+nums.size() : ranges from 2 to 300000.
+nums : ranges from 1 to nums.size().
+query.size() : ranges from 1 to 1000000.
+query : query[i][0] ranges from 1 to query[i][1]-1 and query[i][1] ranges from query[i][0]+1 to nums.size().
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <algorithm>
+#include <cassert>
+#include <set>
+#include <stdexcept>
+
+
+template<class T, class Fun = std::function<T(const T&, const T&)>>
+struct SegTree {
+    Fun func;
+    std::vector<T> tree;
+    int size;
+
+    SegTree(int szz, const Fun& seg, T default_value = T()) : func(seg) {
+        size = 1;
+        while (size < szz){
+            size <<= 1;
+        }
+        tree.resize(size * 2, default_value);
+    }
+
+    SegTree(std::vector<T>& arr, const Fun& seg, T default_value = T()) : SegTree(arr.size(), seg, default_value) {
+        for (int idx = 0; idx < size; ++idx){
+            tree[idx + size] = arr[idx];
+        }
+        for (int idx = size - 1; idx >= 1; --idx){
+            tree[idx] = func(tree[idx << 1], tree[idx << 1 | 1]);
+        }
+    }
+
+    void Update(int idx, T val) {
+        idx += size;
+        tree[idx] = func(tree[idx], val);
+        for (idx >>= 1; idx > 1; idx >>= 1){
+             tree[idx] = func(tree[idx << 1], tree[idx << 1 | 1]);
+        }
+    }
+
+    T Get(int left, int right) {
+        T res_left = tree[0], res_right = tree[0];
+        for (left += size, right += size; left < right; left >>= 1, right >>= 1) {
+            if (left & 1){
+                res_left = func(res_left, tree[left++]);
+            }
+            if (right & 1){
+                res_right = func(tree[--right], res_right);
+            }
+        }
+        return func(res_left, res_right);
+    }
+};
+
+std::vector<int> Rebrending(std::vector<int> nums,std::vector<std::vector<int>> query){
+    if (nums.size() <= 1 or nums.size()>300000) {
+        throw std::invalid_argument("vec length must be positive.");
+    }
+    std::set<int> stt;
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > nums.size())
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+        stt.insert(nums[i]);
+    }
+    if(stt.size()!=nums.size()){
+        throw std::invalid_argument("Invalid nums");
+    }
+    for(int i=0;i<query.size();i++){
+        int left=query[i][0];
+        int right=query[i][1];
+        if(left<0 or left>=right or right>nums.size()){
+            throw std::invalid_argument("Invalid query");
+        }
+    }
+    int inf = 1e9 + 228;
+    int len=nums.size(), q_len=query.size();
+    std::vector<std::vector<std::pair<int, int>>> queries(len);
+    for (int idx = 0; idx < q_len; ++idx) {
+        int left=query[idx][0], right=query[idx][1];
+        left--, right--;
+        queries[right].emplace_back(left, idx);
+    }
+    
+    SegTree<int> index_tree(len + 1, [](int node_x, int node_y) { return std::max(node_x, node_y); }, -1);
+    SegTree<int> dp_tree(len + 1, [](int node_x, int node_y) { return std::min(node_x, node_y); }, inf);
+    std::vector<int> answers(q_len);
+
+    for (int idx = 0; idx < len; ++idx) {
+        {
+            int limit = len + 1;
+            while (true) {
+                int jdx = index_tree.Get(nums[idx], limit);
+                if (jdx == -1){
+                    break;
+                }
+                dp_tree.Update(jdx, std::abs(nums[jdx] - nums[idx]));
+                limit = nums[idx] + (nums[jdx] - nums[idx] + 1) / 2;
+            }
+        }
+        {
+            int limit = 0;
+            while (true) {
+                int jdx = index_tree.Get(limit, nums[idx]);
+                if (jdx == -1){
+                    break;
+                }
+                dp_tree.Update(jdx, std::abs(nums[jdx] - nums[idx]));
+                limit = nums[idx] - (nums[idx] - nums[jdx] + 1) / 2 + 1;
+            }
+        }
+        index_tree.Update(nums[idx], idx);
+        for (std::pair<int, int>& query : queries[idx]) {
+            answers[query.second] = dp_tree.Get(query.first, idx);
+        }
+    }
+    
+    return answers;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <algorithm>
+#include <cassert>
+#include <set>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {1, 3, 2};
+    std::vector<std::vector<int>> query_1 = {{1, 2}, {2, 3}, {1, 3}};
+    std::vector<int> expected_1 = {2, 1, 1};
+    std::vector<int> result_1 = Rebrending(nums_1, query_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 1, 3};
+    std::vector<std::vector<int>> query_2 = {{1, 3}};
+    std::vector<int> expected_2 = {1};
+    std::vector<int> result_2 = Rebrending(nums_2, query_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {3, 2, 1};
+    std::vector<std::vector<int>> query_3 = {{1, 2}, {2, 3}, {1, 3}};
+    std::vector<int> expected_3 = {1,1,1};
+    std::vector<int> result_3 = Rebrending(nums_3, query_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {4, 3, 2, 1};
+    std::vector<std::vector<int>> query_4 = {{1, 2}, {3, 4}, {1, 4}};
+    std::vector<int> expected_4 = {1, 1, 1};
+    std::vector<int> result_4 = Rebrending(nums_4, query_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 2, 3, 4, 5};
+    std::vector<std::vector<int>> query_5 = {{1, 3}, {2, 4}, {1, 5}};
+    std::vector<int> expected_5 ={1, 1, 1};
+    std::vector<int> result_5 = Rebrending(nums_5, query_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 3, 5, 4, 2};
+    std::vector<std::vector<int>> query_6 = {{1, 5}, {2, 4}, {2, 3}};
+    std::vector<int> expected_6 = {1,1,2};
+    std::vector<int> result_6 = Rebrending(nums_6, query_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {5, 4, 3, 2, 1};
+    std::vector<std::vector<int>> query_7 = {{1, 2}, {3, 4}, {2, 5}};
+    std::vector<int> expected_7 = {1, 1, 1};
+    std::vector<int> result_7 = Rebrending(nums_7, query_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1, 5, 4, 3, 2};
+    std::vector<std::vector<int>> query_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    std::vector<int> expected_8 = {4,1,1,1};
+    std::vector<int> result_8 = Rebrending(nums_8, query_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {1, 10, 4, 3, 2};
+    std::vector<std::vector<int>> query_9 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_9, query_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {1, 0, 4, 3, 2};
+    std::vector<std::vector<int>> query_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_10, query_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1, 5, -4, 3, 2};
+    std::vector<std::vector<int>> query_11 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_11, query_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {1, 5, 5, 3, 2};
+    std::vector<std::vector<int>> query_12 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_12, query_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {};
+    std::vector<std::vector<int>> query_13 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_13, query_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14(4000005,1);
+    std::vector<std::vector<int>> query_14 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_14, query_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(1,1);
+    std::vector<std::vector<int>> query_15 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_15, query_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16(1,1);
+    std::vector<std::vector<int>> query_16 = {{1, -1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Rebrending(nums_16, query_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_17(1,1);
+    std::vector<std::vector<int>> query_17 = {{}};
+    try
+    {
+        Rebrending(nums_17, query_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_18(1,1);
+    std::vector<std::vector<int>> query_18(500000,{1,2});
+    try
+    {
+        Rebrending(nums_18, query_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
