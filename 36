@@ -1,4 +1,73 @@
-// https://codeforces.com/problemset/problem/1400/F
+/*
+
+https://codeforces.com/problemset/problem/1793/F
+
+Write a C++ Solution ValPrimeSubstrings to find the minimum number of characters that 
+need to be erased from the string str to ensure there are no remaining "val-prime" 
+substrings. If the string str already doesn't contain any "val-prime" substrings, 
+the answer should be 0.
+
+You're tasked with helping a data scientist analyze a string str containing only 
+digits from 1 to 9. This scientist is particularly interested in a specific 
+value val and a special type of substring called an "val-prime" substring.
+
+Defining Substrings and val-prime:
+
+A substring of a string is a contiguous sequence of characters within that string.
+A function f(l, r) calculates the sum of digits within a specific substring str[l..r].
+
+An "val-prime" substring is defined as follows:
+
+f(l1, r1) = val: The sum of digits in the substring str[l1..r1] must equal the target value val.
+
+Uniqueness: There mustn't be another substring str[l2..r2] within the original 
+string that satisfies both conditions:
+
+l1 <= l2 <= r2 <= r1: This ensures the second substring falls entirely within the 
+range of the first "val-prime" substring.
+
+f(l2, r2) != val: The second substring's digit sum must not be equal to val.
+
+Indivisibility: The target value val must not be divisible by the sum of 
+digits in any other substring str[l2, r2] within the original string 
+(excluding the val-prime substring itself).
+
+The Task:
+
+You need to find the minimum number of characters that need to be 
+erased from the string str to ensure there are no remaining 
+"val-prime" substrings. If the string str already doesn't contain any 
+"val-prime" substrings, the answer should be 0.
+
+Operations Allowed:
+
+You're allowed to erase any characters from the string str. When a 
+character is erased, the two remaining parts of the string are 
+concatenated without changing their relative order
+
+Input:
+
+A string str.
+An integer val.
+
+Output:
+
+An integer ans contains the minimum number of characters 
+that need to be erased from the string str to ensure 
+there are no remaining "val-prime" substrings. If the string 
+str already doesn't contain any "val-prime" substrings, the answer should be 0.
+
+Constraints:
+
+str : contain digits from 1 to 9.
+str.size() : ranges from 1 to 1000.
+val : ranges from 1 to 20.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <unordered_map>
