@@ -1,0 +1,404 @@
+/*
+
+https://codeforces.com/contest/1601/problem/E
+
+Write a C++ Solution PhysEdOnline to find the he minimum possible amount of money they have to spend in order to go to the gym at desired days for each student.
+
+A group of q_len students from a college lacking PE classes have decided to take their fitness into their own hands. They've chosen a nearby gym for their workouts.
+
+The Gym System:
+
+The gym operates on an len-day schedule with a unique ticket system:
+
+Daily Cost: Each day (i), the cost of a ticket is nums_i.
+
+Ticket Flexibility: You can buy multiple tickets per day.
+
+Activation: Purchased tickets can be activated on the day of purchase or any day thereafter.
+
+Validity Window: An activated ticket remains valid for valid_till consecutive days.
+
+Student Needs:
+Each student (j) has a specific timeframe for gym visits, from day l_j to day r_j (inclusive).
+
+To ensure access during their designated period, each student follows this strategy:
+
+Ticket Purchase: Upon arriving on day l_j, the student visits the gym's ticket booth and buys one or more tickets at the daily price (nums_l_j).
+
+Ticket Activation: If the student already has active and valid tickets, they skip this step and proceed directly to the gym. Otherwise, they activate one of their purchased tickets (either from today or an earlier purchase).
+
+The Challenge:
+
+Your task is to help these students minimize their gym expenses! For each student, calculate the minimum amount of money they need to spend on tickets to attend the gym throughout their planned visit period.
+
+
+Input:
+
+An integer valid_till.
+An vector of integer nums.
+An vector of vector of integer query.
+
+Output:
+
+An vector of integers ans contains for each student, print the minimum possible amount of money they have to spend in order to go to the gym at desired days.
+
+Constraints:
+
+valid_till : ranges from 1 to nums.size().
+nums.size() : ranges from 1 to 300000.
+nums : ranges from 1 to 10^9.
+query.size() : ranges from 1 to 300000.
+query : query[i][0] ranges from 1 to query[i][1] and query[i][1] ranges from query[i][0] to nums.size().
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+
+#include <iostream>
+#include <functional>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+#include <deque>
+
+
+std::vector<int> PhysEdOnline(std::vector<int> nums,std::vector<std::vector<int>> query,int valid_till){
+    if (nums.size() <= 0 or nums.size()>300000) {
+        throw std::invalid_argument("Invalid Nums length");
+    }
+    if (query.size() <= 0 or query.size()>300000) {
+        throw std::invalid_argument("Invalid query length");
+    }
+    if (valid_till <= 0 or valid_till>nums.size()) {
+        throw std::invalid_argument("Invalid query length");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    for(int i=0;i<query.size();i++){
+        int left=query[i][0];
+        int right=query[i][1];
+        if(left<0 or left>right or right>nums.size()){
+            throw std::invalid_argument("Invalid query");
+        }
+    }
+    
+    int len=nums.size(), q_len=query.size();
+    std::vector<int> elements(300005), c_value(300005);
+    std::vector<std::vector<int>> next_step(20, std::vector<int>(300005));
+    std::vector<std::vector<long long>> value(20, std::vector<long long>(300005));
+    std::deque<int> deq;
+
+
+    for (int i = 1; i <= len; ++i) {
+        elements[i]=nums[i-1];
+    }
+
+    for (int i = len; i >= 1; --i) {
+        while (!deq.empty() && elements[i] <= elements[deq.back()]) {
+            deq.pop_back();
+        }
+        deq.push_back(i);
+        while (i + valid_till < deq.front()) {
+            deq.pop_front();
+        }
+        c_value[i] = elements[deq.front()];
+    }
+
+    next_step[0][len + 1] = len + 1;
+
+    for (int i = len; i >= 1; --i) {
+        next_step[0][i] = i + valid_till;
+        if (next_step[0][i] > len) {
+            next_step[0][i] = len + 1;
+        }
+        while (c_value[i] < c_value[next_step[0][i]]) {
+            next_step[0][i] = next_step[0][next_step[0][i]];
+        }
+        value[0][i] = 1LL * (next_step[0][i] - i + valid_till - 1) / valid_till * c_value[i];
+    }
+
+    for (int h = 1; h <= 19; ++h) {
+        for (int i = 1; i <= len + 1; ++i) {
+            next_step[h][i] = next_step[h - 1][next_step[h - 1][i]];
+            value[h][i] = value[h - 1][i] + value[h - 1][next_step[h - 1][i]];
+        }
+    }
+    std::vector<int> ans;
+    for(int i=0;i<query.size();i++){
+        int node_x=query[i][0], node_y=query[i][1];
+        long long result = elements[node_x];
+
+        for (int h = 19; h >= 0; --h) {
+            if (next_step[h][node_x] <= node_y) {
+                result += value[h][node_x];
+                node_x = next_step[h][node_x];
+            }
+        }
+        result += 1LL * (node_y - node_x) / valid_till * c_value[node_x];
+        ans.push_back(result);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <functional>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+#include <deque>
+
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {2,15,6,3,7,5,6};
+    std::vector<std::vector<int>> query_1 = {{1, 2}, {3,7}, {5,5},{7,7},{3,5}};
+    int valid_till_1=2;
+    std::vector<int> expected_1 = {2,12,7,6,9};
+    std::vector<int> result_1 = PhysEdOnline(nums_1, query_1,valid_till_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 1, 3};
+    std::vector<std::vector<int>> query_2 = {{1, 3}};
+    int valid_till_2=2;
+    std::vector<int> expected_2 = {3};
+    std::vector<int> result_2 = PhysEdOnline(nums_2, query_2,valid_till_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {3, 2, 1};
+    std::vector<std::vector<int>> query_3 = {{1, 2}, {2, 3}, {1, 3}};
+    int valid_till_3=3;
+    std::vector<int> expected_3 = {3,2,3};
+    std::vector<int> result_3 = PhysEdOnline(nums_3, query_3,valid_till_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {4, 3, 2, 1};
+    std::vector<std::vector<int>> query_4 = {{1, 2}, {3, 4}, {1, 4}};
+    int valid_till_4=3;
+    std::vector<int> expected_4 = {4, 2, 5};
+    std::vector<int> result_4 = PhysEdOnline(nums_4, query_4,valid_till_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 2, 3, 4, 5};
+    std::vector<std::vector<int>> query_5 = {{1, 3}, {2, 4}, {1, 5}};
+    int valid_till_5=4;
+    std::vector<int> expected_5 ={1, 2, 2};
+    std::vector<int> result_5 = PhysEdOnline(nums_5, query_5,valid_till_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 3, 5, 4, 2};
+    std::vector<std::vector<int>> query_6 = {{1, 5}, {2, 4}, {2, 3}};
+    int valid_till_6=2;
+    std::vector<int> expected_6 = {3,6,3};
+    std::vector<int> result_6 = PhysEdOnline(nums_6, query_6,valid_till_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {5, 4, 3, 2, 1};
+    std::vector<std::vector<int>> query_7 = {{1, 2}, {3, 4}, {2, 5}};
+    int valid_till_7=3;
+    std::vector<int> expected_7 = {5, 3, 5};
+    std::vector<int> result_7 = PhysEdOnline(nums_7, query_7,valid_till_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1, 5, 4, 3, 2};
+    std::vector<std::vector<int>> query_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_8=2;
+    std::vector<int> expected_8 = {1,5,4,3};
+    std::vector<int> result_8 = PhysEdOnline(nums_8, query_8,valid_till_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {1, 0, 4, 3, 2};
+    std::vector<std::vector<int>> query_9 = {{1, 2}, {2, 2}, {3, 4}, {4, 5}};
+    int valid_till_9=2;
+    try
+    {
+        PhysEdOnline(nums_9, query_9,valid_till_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {1, 1000000004, 4, 3, 2};
+    std::vector<std::vector<int>> query_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_10=2;
+    try
+    {
+        PhysEdOnline(nums_10, query_10,valid_till_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1, 5, -4, 3, 2};
+    std::vector<std::vector<int>> query_11 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_11=2;
+    try
+    {
+        PhysEdOnline(nums_11, query_11,valid_till_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    std::vector<std::vector<int>> query_12 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_12=2;
+    try
+    {
+        PhysEdOnline(nums_12, query_12,valid_till_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13(400000,5);
+    std::vector<std::vector<int>> query_13 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_13=2;
+    try
+    {
+        PhysEdOnline(nums_13, query_13,valid_till_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14(4,1);
+    std::vector<std::vector<int>> query_14 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_14=0;
+    try
+    {
+        PhysEdOnline(nums_14, query_14,valid_till_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(1,1);
+    std::vector<std::vector<int>> query_15 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_15=2;
+    try
+    {
+        PhysEdOnline(nums_15, query_15,valid_till_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16(1,1);
+    std::vector<std::vector<int>> query_16 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    int valid_till_16=-2;
+    try
+    {
+        PhysEdOnline(nums_16, query_16,valid_till_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_17(1,1);
+    std::vector<std::vector<int>> query_17 = {{1,0}};
+    int valid_till_17=1;
+    try
+    {
+        PhysEdOnline(nums_17, query_17,valid_till_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_18(1,1);
+    std::vector<std::vector<int>> query_18(500000,{1,2});
+    int valid_till_18=1;
+    try
+    {
+        PhysEdOnline(nums_18, query_18,valid_till_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_19(1,1);
+    std::vector<std::vector<int>> query_19(5,{2,1});
+    int valid_till_19=1;
+    try
+    {
+        PhysEdOnline(nums_19, query_19,valid_till_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_20(1,1);
+    std::vector<std::vector<int>> query_20(5,{1,-1});
+    int valid_till_20=1;
+    try
+    {
+        PhysEdOnline(nums_20, query_20,valid_till_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
