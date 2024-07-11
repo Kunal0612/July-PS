@@ -1,6 +1,6 @@
 /*
 
-https://codeforces.com/problemset/problem/1793/F
+https://codeforces.com/problemset/problem/1400/F
 
 Write a C++ Solution ValPrimeSubstrings to find the minimum number of characters that 
 need to be erased from the string str to ensure there are no remaining "val-prime" 
