@@ -1,0 +1,329 @@
+/*
+
+https://codeforces.com/problemset/problem/755/F
+
+Write a C++ Solution ErasingSubstrings to find minimum and maximum 
+possible number of Balls who will not get their presents, in that order.
+
+It's Christmas time in the land of PolandBalls! A group of len Balls 
+has decided to exchange presents, each assigned a specific recipient 
+through a secret permutation nums. In this permutation, nums[i] 
+represents the Ball who should receive a gift from Ball number i 
+(everyone receives a gift from someone else, and nobody receives their own gift).
+
+The Clumsy Catch:
+
+Unfortunately, these Balls are a bit clumsy, and max_swaps of them 
+will inevitably forget to bring their gifts!
+
+Receiving a Gift:
+
+For Ball number i to receive a gift, two conditions must be met:
+
+Gifting Responsibility: Ball number i must remember to bring a present (they haven't forgotten).
+
+Matching Recipient: The Ball assigned to receive Ball number i's gift 
+(Ball nums[i]) must also remember their present.
+
+The Challenge:
+
+Given the number of clumsy Balls max_swaps, your task is to determine two key values:
+
+Minimum Unfulfilled Wishes: The minimum possible number of Balls who won't receive 
+a present if exactly max_swaps Balls forget theirs.
+
+Maximum Unfulfilled Wishes: The maximum possible number of Balls who won't receive 
+a present under the same condition.
+
+
+
+Input:
+
+An integer max_swaps.
+A vector of integers nums.
+
+Output:
+
+A pair<long long,long long> ans contains minimum and maximum possible number of 
+Balls who will not get their presents, in that order.
+
+Constraints:
+
+max_swaps : ranges from 0 to nums.size().
+nums.size() : ranges from 2 to 10^6.
+nums : It is a permutaion where every number from 1 to nums.size() occurs only once.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+
+*/
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <algorithm>
+#include <set>
+#include <cassert>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
+
+
+std::pair<long long int,long long int> PolandBallAndGifts(std::vector<int> &nums,long long int max_swaps){
+    
+    if(nums.size()<2 or  nums.size()>1000000 or max_swaps<0 or max_swaps>nums.size()){
+        throw std::invalid_argument("Invalid Length");
+    }
+    std::set<int> stt;
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > nums.size())
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+        stt.insert(nums[i]);
+    }
+    if(stt.size()!=nums.size()){
+        throw std::invalid_argument("Not a Permutation");
+    }
+    long long int len=nums.size();
+    const int mx_range = 1000005;
+    std::vector<long long> positions(len + 1), count(len + 1);
+    std::vector<bool> visited(len + 1, false);
+    std::bitset<mx_range> bitset;
+    long long total_pairs = 0;
+    
+    for (int idx = 1; idx <= len; idx++) {
+       positions[idx]=nums[idx-1];
+    }
+    
+    bitset.set(0);
+    
+    for (int idx = 1; idx <= len; idx++) {
+        if (visited[idx]) {
+            continue;
+        }
+        
+        int temp = idx;
+        int length = 0;
+        
+        while (!visited[temp]) {
+            visited[temp] = true;
+            length++;
+            temp = positions[temp];
+        }
+        
+        count[length]++;
+        total_pairs += length / 2;
+    }
+    
+    for (int idx = 1; idx <= len; idx++) {
+        if (!count[idx]) {
+            continue;
+        }
+        
+        int k_copy = 1;
+        while (k_copy < count[idx]) {
+            bitset |= bitset << (k_copy * idx);
+            count[idx] -= k_copy;
+            k_copy <<= 1;
+        }
+        
+        bitset |= bitset << (count[idx] * idx);
+    }
+    std::pair<long long int,long long int> ans={};
+    if (bitset[max_swaps]) {
+        ans.first=max_swaps;
+    } else {
+        ans.first=max_swaps + 1;
+    }
+    
+    ans.second=std::min(len, max_swaps + std::min(total_pairs, max_swaps));
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <algorithm>
+#include <set>
+#include <cassert>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    long long int max_swaps_1 = 1;
+    std::vector<int> nums_1 = {2,3,4,5,6,7,8,9,10,1};
+    std::pair<long long,long long> expected_1 = {2,2};
+    std::pair<long long,long long > result_1 = PolandBallAndGifts(nums_1, max_swaps_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_2 = 2;
+    std::vector<int> nums_2 = {1,2,3,4,5};
+    std::pair<long long,long long> expected_2 = {2,2};
+    std::pair<long long,long long > result_2 = PolandBallAndGifts(nums_2, max_swaps_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_3 = 3;
+    std::vector<int> nums_3 = {1,2,3,4};
+    std::pair<long long,long long> expected_3 = {3,3};
+    std::pair<long long,long long > result_3 = PolandBallAndGifts(nums_3, max_swaps_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_4 = 4;
+    std::vector<int> nums_4 = {1,4,2,3};
+    std::pair<long long,long long> expected_4 = {4,4};
+    std::pair<long long,long long > result_4 = PolandBallAndGifts(nums_4, max_swaps_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_5 = 2;
+    std::vector<int> nums_5 = {2,1,3,5,4};
+    std::pair<long long,long long> expected_5 = {2,4};
+    std::pair<long long,long long > result_5 = PolandBallAndGifts(nums_5, max_swaps_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_6 = 3;
+    std::vector<int> nums_6 = {2, 3, 5, 7, 1, 4, 6, 8};
+    std::pair<long long,long long> expected_6 = {3,6};
+    std::pair<long long,long long > result_6 = PolandBallAndGifts(nums_6, max_swaps_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_7 = 4;
+    std::vector<int> nums_7 = {5, 1, 2, 3, 4};
+    std::pair<long long,long long> expected_7 = {5,5};
+    std::pair<long long,long long > result_7 = PolandBallAndGifts(nums_7, max_swaps_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    long long int max_swaps_8 = 5;
+    std::vector<int> nums_8 = {5, 1,2,3,4};
+    std::pair<long long,long long> expected_8 = {5,5};
+    std::pair<long long,long long > result_8 = PolandBallAndGifts(nums_8, max_swaps_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    long long int max_swaps_9 = -5;
+    std::vector<int> nums_9 = {1, 2, 4, 5,3};
+    try
+    {
+        PolandBallAndGifts(nums_9, max_swaps_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_10 = -1;
+    std::vector<int> nums_10 = {1, 2, 4, 10, 16, 32};
+    try
+    {
+        PolandBallAndGifts(nums_10, max_swaps_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_11 = 5;
+    std::vector<int> nums_11 = {1, 2, 4, 3};
+    try
+    {
+        PolandBallAndGifts(nums_11, max_swaps_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_12 =0;
+    std::vector<int> nums_12 = {};
+    try
+    {
+        PolandBallAndGifts(nums_12, max_swaps_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_13 = 200;
+    std::vector<int> nums_13 = {1,202};
+    try
+    {
+        PolandBallAndGifts(nums_13, max_swaps_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_14 = 200;
+    std::vector<int> nums_14 = {1,-2};
+    try
+    {
+        PolandBallAndGifts(nums_14, max_swaps_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_15 = 200;
+    std::vector<int> nums_15(2000000,1);
+    try
+    {
+        PolandBallAndGifts(nums_15, max_swaps_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int max_swaps_16 = 50000005;
+    std::vector<int> nums_16(2000000,1);
+    try
+    {
+        PolandBallAndGifts(nums_16, max_swaps_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All tests passed."<<std::endl;
+    return 0;
+}
