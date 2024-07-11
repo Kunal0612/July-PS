@@ -57,7 +57,7 @@ An integer result contains the minimum possible sadness that can be achieved by 
 Constraints:
 
 k_value : ranges from 1 to nums.size().
-nums.size() : ranges from k to 100000.
+nums.size() : ranges from k_value to 100000.
 nums : ranges from 1 to 1000000000.
 
 Use appropriate Error Handling using the stdexcept library for the invalid test cases.
