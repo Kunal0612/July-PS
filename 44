@@ -1,0 +1,223 @@
+/*
+
+https://codeforces.com/problemset/problem/938/F
+
+Write a C++ Solution ErasingSubstrings to find lexicographically minimal string you may obtain after performing k operations.
+
+Imagine you're given a string s containing lowercase Latin letters (a-z). You're tasked with performing a series of k operations on this string.
+
+The Operations:
+
+During each operation (i), you need to erase a specific substring from s. Here's the key rule:
+
+Erasure Length: The length of the substring you erase in the i-th operation must be exactly 2i - 1. For example, in the first operation (i = 1), you'd erase a substring of length 1 (a single character). In the second operation (i = 2), you'd erase a substring of length 3, and so on.
+The Goal:
+
+Your objective is to find the lexicographically minimal string obtainable after performing all k operations.
+
+Lexicographic Order:
+
+A string x is lexicographically smaller than a string y if either of these conditions is met:
+
+Prefix but Unequal : x is a prefix (starting portion) of y, but they are not identical strings.
+First Difference is Smaller : At the first position where x and y differ, the character in x has a lower ASCII value (comes earlier alphabetically) than the corresponding character in y.
+
+
+Input:
+
+A string str.
+
+Output:
+
+An string ans contains lexicographically minimal string you may obtain after performing k operations.
+
+Constraints:
+
+str.size() : ranges from 1 to 5000.
+str : contains only lowercase English alphabet
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+
+std::string ErasingSubstrings(const std::string& str) {
+    if(str.size()<1 or str.size()>5000){
+        throw std::invalid_argument("Invalid string length");
+    }
+    for(int i=0;i<str.size();i++){
+        if(str[i]<'a' or str[i]>'z'){
+            throw std::invalid_argument("Invalid string char");
+        }
+    }
+    int len = str.size();
+    int mx_range = 12;
+    std::vector<std::vector<bool>> dp_table(len + 1, std::vector<bool>((1 << mx_range), false));
+    std::vector<std::vector<int>> bits(1 << mx_range);
+    std::string ans;
+    dp_table[0][0] = true;
+    std::vector<std::pair<int, int>> cur;
+    cur.push_back(std::make_pair(0, 0));
+    int final_sz = len;
+    int cur_len = 1;
+    int cnt = 0;
+
+    while ((1 << cnt) < len){
+        cnt++;
+    }
+    cnt--;
+
+    for (int i = 0; i < (1 << cnt); i++) {
+        for (int j = 0; j < cnt; j++) {
+            if ((i & (1 << j)) == 0) {
+                bits[i].push_back(j);
+            }
+        }
+    }
+
+    while (final_sz > cur_len) {
+        final_sz -= cur_len;
+        cur_len *= 2;
+    }
+
+    while (ans.size() < final_sz) {
+        char min_chr = 'z';
+        for (int i = 0; i < cur.size(); i++) {
+            std::pair<int, int> node_x = cur[i];
+            for (int y : bits[node_x.second]) {
+                if (dp_table[node_x.first + (1 << y)][node_x.second ^ (1 << y)] == false) {
+                    cur.push_back(std::make_pair(node_x.first + (1 << y), node_x.second ^ (1 << y)));
+                    dp_table[node_x.first + (1 << y)][node_x.second ^ (1 << y)] = true;
+                }
+            }
+            min_chr = std::min(min_chr, str[node_x.first]);
+        }
+
+        std::vector<std::pair<int, int>> new_cur;
+        ans.push_back(min_chr);
+        for (std::pair<int, int> node_x : cur) {
+            if (str[node_x.first] == min_chr) {
+                dp_table[node_x.first + 1][node_x.second] = true;
+                new_cur.push_back(std::make_pair(node_x.first + 1, node_x.second));
+            }
+        }
+        cur = new_cur;
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    std::string str_1 = "aaaaaaaaa";
+    std::string expected_1 = "aa";
+    std::string result_1 = ErasingSubstrings(str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "ababababab";
+    std::string expected_2 = "aab";
+    std::string result_2 = ErasingSubstrings(str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abcdabcdabcd";
+    std::string expected_3 = "aabcd";
+    std::string result_3 = ErasingSubstrings(str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "xyzxyzxyzxyz";
+    std::string expected_4 = "xxxyz";
+    std::string result_4 = ErasingSubstrings(str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "mississippi";
+    std::string expected_5 = "iipi";
+    std::string result_5 = ErasingSubstrings(str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "abracadabra";
+    std::string expected_6 = "aaaa";
+    std::string result_6 = ErasingSubstrings(str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "abcdefgabcdefg";
+    std::string expected_7 = "aabcdef";
+    std::string result_7 = ErasingSubstrings(str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "hellohellohello";
+    std::string expected_8 = "eelhello";
+    std::string result_8 = ErasingSubstrings(str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    try
+    {
+        ErasingSubstrings(str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "Abc";
+    try
+    {
+        ErasingSubstrings(str_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(5005,'a');
+    try
+    {
+        ErasingSubstrings(str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+   std::cout << "All test cases passed!";
+    return 0;
+}
