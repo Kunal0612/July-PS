@@ -1,0 +1,361 @@
+/*
+
+https://codeforces.com/problemset/problem/1469/F
+
+Write a C++ Solution PowerSockets to find the minimum value the tree can have else, If there is no way to build a tree with at least white_vertices white vertices, then return -1.
+
+
+Imagine you have a collection of len "chains," each a sequence 
+of connected white vertices. The length of a chain represents 
+the number of white vertices in that sequence.
+
+Tree Construction Rules:
+
+Starting Point: You have a single white vertex, which serves as the root of your future tree.
+
+Chain Integration: You can take one of your chains and connect it to the existing 
+tree by attaching any vertex of the chain to any white vertex already in the tree 
+using a single edge.
+
+Color Change: Once a chain is integrated, both the attached vertex and the endpoint 
+it connects to become black.
+
+Chain Uniqueness: Each chain can only be used once in the tree construction.
+
+Unused Chains Allowed: You're free to leave some chains unused if desired.
+
+The Objective:
+
+Your goal is to build a tree with as minimal "value" as possible. 
+
+But before we define value, let's talk about distances:
+
+Distance: The distance between two vertices in the tree is the number of edges on 
+the shortest path connecting them.
+
+Tree Value:
+
+The value of the tree depends on a parameter white_vertices:
+White Vertices: You need to ensure the resulting tree has at least white_vertices 
+white vertices (excluding the initial root).
+Value Calculation: If there are at least white_vertices white vertices, the value of the tree 
+is the distance between the root and the white_vertices-th closest white vertex.
+
+The Challenge:
+
+Your task is to determine the minimum possible value for the tree you construct. If it's impossible to build a tree with at least k white vertices, the output should be -1.
+
+Input:
+
+An integer white_vertices.
+An vector of integer nums.
+
+Output:
+
+An integers ans contains the minimum value the tree can have else, If there is no way to build a tree with at least white_vertices white vertices, then return -1.
+
+Constraints:
+
+white_vertices : ranges from 2 to 10^9.
+nums.size() : ranges from 1 to 200000.
+nums : ranges from 3 to 200000.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+void Push(std::vector<long long>& tree, std::vector<long long>& push_sum, 
+int node, int left, int right) {
+    if (left < right - 1) {
+        push_sum[node * 2] += push_sum[node];
+        push_sum[node * 2 + 1] += push_sum[node];
+    }
+    tree[node] += push_sum[node] * (right - left);
+    push_sum[node] = 0;
+}
+
+void Update(std::vector<long long>& tree, std::vector<long long>& push_sum, 
+int node, int left, int right, int l_range, int r_range, int value) {
+    Push(tree, push_sum, node, left, right);
+    if (l_range >= r_range){
+        return;
+    }
+    if (left == l_range && right == r_range) {
+        push_sum[node] = value;
+        Push(tree, push_sum, node, left, right);
+        return;
+    }
+    int mid = (left + right) / 2;
+    Update(tree, push_sum, node * 2, left, mid, l_range, std::min(mid, r_range), value);
+    Update(tree, push_sum, node * 2 + 1, mid, right, std::max(mid, l_range), r_range, value);
+    tree[node] = tree[node * 2] + tree[node * 2 + 1];
+}
+
+long long GetSum(std::vector<long long>& tree, std::vector<long long>& push_sum, int node, int left, int right, int l_range, int r_range) {
+    Push(tree, push_sum, node, left, right);
+    if (l_range >= r_range){
+        return 0;
+    }
+    if (left == l_range && right == r_range){
+        return tree[node];
+    }
+    int mid = (left + right) / 2;
+    long long result = GetSum(tree, push_sum, node * 2, left, mid, l_range, std::min(mid, r_range)) + GetSum(tree, push_sum, node * 2 + 1, mid, right, std::max(mid, l_range), r_range);
+    tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    return result;
+}
+
+int Traverse(std::vector<long long>& tree, std::vector<long long>& push_sum, int node, int left, int right, int count) {
+    Push(tree, push_sum, node, left, right);
+    if (left == right - 1){
+        return left;
+    }
+    int mid = (left + right) / 2;
+    Push(tree, push_sum, node * 2, left, mid);
+    Push(tree, push_sum, node * 2 + 1, mid, right);
+    int inf = 1e9;
+    int result = inf;
+    if (tree[node * 2] >= count){
+        result = Traverse(tree, push_sum, node * 2, left, mid, count);
+    }
+    else if (tree[node * 2 + 1] >= count - tree[node * 2]){
+        result = Traverse(tree, push_sum, node * 2 + 1, mid, right, count - tree[node * 2]);
+    }
+    tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    return result;
+}
+
+int PowerSockets(std::vector<int> &nums,int white_vertices){
+    if(white_vertices>1000000000 or white_vertices<2 or nums.size()>200000 or nums.size()<1){
+        throw std::invalid_argument("vec length must be positive.");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 3 || nums[i] > 200000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    int len=nums.size();
+    std::sort(nums.begin(), nums.end(), std::greater<int>());
+    int lenn = nums[0] + 500;
+    std::vector<long long> tree(4 * lenn), push_sum(4 * lenn);
+    Update(tree, push_sum, 1, 0, lenn, 0, 1, 1);
+    int first = 0;
+    int inf = 1e9;
+    int answer = inf;
+    for (int i = 0; i < len; i++) {
+        while (GetSum(tree, push_sum, 1, 0, lenn, 0, first + 1) == 0){
+            ++first;
+        }
+        Update(tree, push_sum, 1, 0, lenn, first, first + 1, -1);
+        Update(tree, push_sum, 1, 0, lenn, first + 2, first + 2 + (nums[i] - 1) / 2, 1);
+        Update(tree, push_sum, 1, 0, lenn, first + 2, first + 2 + nums[i] / 2, 1);
+        answer = std::min(answer, Traverse(tree, push_sum, 1, 0, lenn, white_vertices));
+    }
+    int ans=(answer == inf ? -1 : answer);
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    int white_vertices_1 = 3;
+    std::vector<int> nums_1 = {3,3,3,3};
+    int expected_1 = 4;
+    int result_1 = PowerSockets(nums_1, white_vertices_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int white_vertices_2 = 10;
+    std::vector<int> nums_2 = {5,7};
+    int expected_2 = -1;
+    int result_2 = PowerSockets(nums_2, white_vertices_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int white_vertices_3 = 2;
+    std::vector<int> nums_3 = {3, 4, 8, 16};
+    int expected_3 = 2;
+    int result_3 = PowerSockets(nums_3, white_vertices_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int white_vertices_4 = 4;
+    std::vector<int> nums_4 = {4, 5, 10, 20};
+    int expected_4 = 3;
+    int result_4 = PowerSockets(nums_4, white_vertices_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int white_vertices_5 = 2;
+    std::vector<int> nums_5 = {5,5,5};
+    int expected_5 = 2;
+    int result_5 = PowerSockets(nums_5, white_vertices_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int white_vertices_6 = 3;
+    std::vector<int> nums_6 = {3, 3, 5, 7, 11, 13, 17, 19};
+    int expected_6 = 3;
+    int result_6 = PowerSockets(nums_6, white_vertices_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int white_vertices_7 = 4;
+    std::vector<int> nums_7 = {5, 10, 20, 25, 30};
+    int expected_7 = 3;
+    int result_7 = PowerSockets(nums_7, white_vertices_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int white_vertices_8 = 5;
+    std::vector<int> nums_8 = {5, 4,5,3,4};
+    int expected_8 = 4;
+    int result_8 = PowerSockets(nums_8, white_vertices_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int white_vertices_9 = 505;
+    std::vector<int> nums_9 = {1, 2, 4, 9, 16, 32};
+    try
+    {
+        PowerSockets(nums_9, white_vertices_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_10 = 10;
+    std::vector<int> nums_10 = {1, 2, 4, 10, 16, 32};
+    try
+    {
+        PowerSockets(nums_10, white_vertices_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_11 = -1;
+    std::vector<int> nums_11 = {1, 2, 4, 11, 16, 32};
+    try
+    {
+        PowerSockets(nums_11, white_vertices_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_12 = 200;
+    std::vector<int> nums_12 = {};
+    try
+    {
+        PowerSockets(nums_12, white_vertices_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_13 = 200;
+    std::vector<int> nums_13 = {5,2020000000};
+    try
+    {
+        PowerSockets(nums_13, white_vertices_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_14 = 200;
+    std::vector<int> nums_14 = {1,-2};
+    try
+    {
+        PowerSockets(nums_14, white_vertices_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_15 = 200;
+    std::vector<int> nums_15(200002,5);
+    try
+    {
+        PowerSockets(nums_15, white_vertices_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_16 = 0;
+    std::vector<int> nums_16(200002,5);
+    try
+    {
+        PowerSockets(nums_16, white_vertices_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int white_vertices_17 = 1000000008;
+    std::vector<int> nums_17(200002,5);
+    try
+    {
+        PowerSockets(nums_17, white_vertices_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All tests passed."<<std::endl;
+    return 0;
+}
