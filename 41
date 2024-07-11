@@ -1,0 +1,313 @@
+
+/*
+
+https://codeforces.com/problemset/problem/1699/E
+
+Write a C++ Solution ThreeDaysGrace to find the minimum possible balance.
+
+Imagine you're working with a special type of collection called a multiset, 
+named nums. Unlike a regular set, a multiset allows for duplicate elements. 
+This multiset contains n integers ranging from 1 to max_value.
+
+The Transformation Operation:
+
+You have a special operation you can perform on this multiset:
+
+Choose an Element: You select a single value, x, from the multiset nums.
+Factorization: You find two positive integers, p and q, greater than 1, 
+where their product equals the chosen value (p * q = x).
+Transformation: You remove x from the multiset and add both p and q 
+to nums. This essentially breaks down the chosen element into its 
+constituent factors.
+
+The Result:
+
+After each operation, the size of the multiset increases by 1.
+
+The Balancing Challenge:
+
+We define the "balance" of the multiset nums as the difference 
+between the largest (max(nums_i)) and smallest (min(nums_i)) elements within it.
+
+Your Mission:
+
+Your goal is to determine the minimum possible balance that can be 
+achieved for the multiset nums after performing any number of operations 
+(including zero operations, meaning no changes are made).
+
+
+Input:
+
+An integer max_value.
+An vector of integer nums.
+
+Output:
+
+An integer ans contains the minimum possible balance.
+
+Constraints:
+
+max_value : ranges from 1 to 5*10^6.
+nums.size() : ranges from 1 to 10^6.
+nums : ranges from 1 to max_value.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+
+*/
+
+
+
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
+#include <stdexcept>
+#include <map>
+
+int ThreeDaysGrace(std::vector<int> &nums, int max_value){
+    if(nums.size()<1 or  nums.size()>1000000 or max_value<1 or max_value>5000000){
+        throw std::invalid_argument("Invalid Length");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > max_value)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    int max_n = 5e6 + 5;
+    int num_elements=nums.size(), min_value = max_n, max_input = 0;
+
+    std::map<long long int, long long int> appear;
+    std::map<long long int, long long int> toggle;
+    std::map<long long int, long long int> max_val;
+
+    for (int i = 0, value; i < num_elements; i++)
+    {
+        value=nums[i];
+        appear[value] = 1;
+        toggle[value] = 1;
+        min_value = std::min(min_value, value);
+        max_input = std::max(max_input, value);
+    }
+
+    for (int i = 0; i <= max_input; i++)
+    {
+        max_val[i] = i;
+    }
+
+    int pointer = max_input, ans = max_input - min_value;
+
+    for (int i = max_input; i >= 1; i--)
+    {
+        for (long long j = static_cast<long long>(i) * i; j <= max_input; j += i)
+        {
+            if (appear[j])
+            {
+                toggle[max_val[j]]--;
+            }
+            max_val[j] = std::min(max_val[j], max_val[j / i]);
+            if (appear[j])
+            {
+                toggle[max_val[j]]++;
+            }
+        }
+        while (toggle[pointer] == 0)
+        {
+            pointer--;
+        }
+        if (i <= min_value)
+        {
+            ans = std::min(ans, pointer - i);
+        }
+    }
+    return ans;
+}
+
+
+#include <cassert>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
+#include <stdexcept>
+#include <map>
+
+
+
+int main() {
+    // TEST
+    int max_value_1 = 5;
+    std::vector<int> nums_1 = {1,5};
+    int expected_1 = 4;
+    int result_1 = ThreeDaysGrace(nums_1, max_value_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int max_value_2 = 20;
+    std::vector<int> nums_2 = {3,5,7,9,11};
+    int expected_2 = 8;
+    int result_2 = ThreeDaysGrace(nums_2, max_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int max_value_3 = 17;
+    std::vector<int> nums_3 = {2, 4, 8, 16};
+    int expected_3 = 0;
+    int result_3 = ThreeDaysGrace(nums_3, max_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int max_value_4 = 21;
+    std::vector<int> nums_4 = {1, 5, 10, 20};
+    int expected_4 = 4;
+    int result_4 = ThreeDaysGrace(nums_4, max_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int max_value_5 = 2;
+    std::vector<int> nums_5 = {1,1,1,1,2};
+    int expected_5 = 1;
+    int result_5 = ThreeDaysGrace(nums_5, max_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int max_value_6 = 30;
+    std::vector<int> nums_6 = {2, 3, 5, 7, 11, 13, 17, 19};
+    int expected_6 = 17;
+    int result_6 = ThreeDaysGrace(nums_6, max_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int max_value_7 = 40;
+    std::vector<int> nums_7 = {5, 10, 20, 25, 30};
+    int expected_7 = 3;
+    int result_7 = ThreeDaysGrace(nums_7, max_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int max_value_8 = 5;
+    std::vector<int> nums_8 = {1, 1,2,3,4};
+    int expected_8 = 2;
+    int result_8 = ThreeDaysGrace(nums_8, max_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int max_value_9 = 5;
+    std::vector<int> nums_9 = {1, 2, 4, 9, 16, 32};
+    try
+    {
+        ThreeDaysGrace(nums_9, max_value_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_10 = 0;
+    std::vector<int> nums_10 = {1, 2, 4, 10, 16, 32};
+    try
+    {
+        ThreeDaysGrace(nums_10, max_value_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_11 = -1;
+    std::vector<int> nums_11 = {1, 2, 4, 11, 16, 32};
+    try
+    {
+        ThreeDaysGrace(nums_11, max_value_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_12 = 200;
+    std::vector<int> nums_12 = {};
+    try
+    {
+        ThreeDaysGrace(nums_12, max_value_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_13 = 200;
+    std::vector<int> nums_13 = {1,202};
+    try
+    {
+        ThreeDaysGrace(nums_13, max_value_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_14 = 200;
+    std::vector<int> nums_14 = {1,-2};
+    try
+    {
+        ThreeDaysGrace(nums_14, max_value_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_15 = 200;
+    std::vector<int> nums_15(2000000,1);
+    try
+    {
+        ThreeDaysGrace(nums_15, max_value_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_value_16 = 50000005;
+    std::vector<int> nums_16(2000000,1);
+    try
+    {
+        ThreeDaysGrace(nums_16, max_value_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All tests passed."<<std::endl;
+    return 0;
+}
