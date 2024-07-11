@@ -1,0 +1,314 @@
+/*
+
+https://codeforces.com/contest/1844/problem/F2
+
+Write a C++ Solution MinCost to find ptimal permutation that minimizes the sum of differences while maintaining its lexicographically smallest form.
+
+
+Imagine you have an array of len positive integers, nums_1, nums_2, ...,nums_n. Additionally, you're given another integer, cost, which could be positive, negative, or zero.
+
+The Task:
+
+We're interested in rearranging the elements in this array to form all possible permutations. A permutation is simply a reordering of the original elements without duplicates.
+
+For each permutation, we want to calculate a specific value:
+
+Minimum Sum of Differences:
+
+Σ (ans_(i+1) - ans_i - c)  from i = 1 to n-1
+
+Here, ans_i represents the element at the i-th position in the permutation.
+
+The Challenge:
+
+Now, the real challenge begins! You need to find a specific permutation:
+
+Minimum Sum: Among all possible permutations, find the one that results in the lowest value for the calculated minimum sum of differences.
+Lexicographically Smallest: While achieving the minimum sum, you also need to ensure this permutation is the lexicographically smallest one.
+Understanding Lexicographical Order:
+
+A sequence x is considered lexicographically smaller than another sequence y if either:
+
+Prefix but not Equal: x is a starting portion (prefix) of y, but they are not identical sequences.
+First Difference is Smaller: At the first point where x and y differ, the element in x is smaller than the corresponding element in y.
+Essentially, you're looking for the permutation with the minimum sum of differences while prioritizing the one that comes "first" in alphabetical order (considering each element as a letter).
+
+Can you find this optimal permutation that minimizes the sum of differences while maintaining its lexicographically smallest form?
+
+
+Input:
+
+An integer cost.
+An vector of integer nums.
+
+Output:
+
+An vector integer result contains optimal permutation that minimizes the sum of differences while maintaining its lexicographically smallest form.
+
+Constraints:
+
+cost : ranges from -10^9 to 10^9.
+nums.size() : ranges from 1 to 200000.
+nums : ranges from 1 to 1000000000.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+std::vector<int> MinCost(std::vector<int> nums, int cost)
+{
+    int len=nums.size();
+    if(nums.size()<1 or  nums.size()>200000 or cost<-1000000000 or cost>1000000000){
+        throw std::invalid_argument("Invalid Length");
+    }
+    for (int i = 0; i < nums.size(); ++i)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid element value");
+        }
+    }
+    if (cost >= 0)
+    {
+        std::sort(nums.begin(), nums.end());
+        return nums;
+    }
+
+    std::sort(nums.begin(), nums.end(), std::greater<int>());
+
+    std::vector<int> ans(len);
+    std::vector<int> left_ind(len);
+    std::vector<int> right_ind(len);
+
+    std::set<std::pair<int, int>> pair_set;
+
+    ans[0] = nums[0];
+    for (int i = 0; i < len; ++i)
+    {
+        left_ind[i] = (i + len - 1) % len;
+        right_ind[i] = (i + 1) % len;
+    }
+
+    for (int i = 2; i < len - 1; ++i)
+    {
+        if (nums[left_ind[i]] - nums[right_ind[i]] <= -cost)
+        {
+            pair_set.insert(std::pair<int, int>(nums[i], i));
+        }
+    }
+
+    for (int i = 1; i < len; ++i)
+    {
+        int index_u;
+        auto iterator = pair_set.lower_bound(std::pair<int, int>(ans[i - 1] + cost, 0));
+        if (iterator == pair_set.end())
+        {
+            index_u = right_ind[0];
+        }
+        else
+        {
+            index_u = iterator->second;
+            pair_set.erase(iterator);
+        }
+
+        ans[i] = nums[index_u];
+        int index_x = left_ind[index_u];
+        int index_y = right_ind[index_u];
+
+        right_ind[index_x] = index_y;
+        left_ind[index_y] = index_x;
+
+        pair_set.erase(std::pair<int, int>(nums[index_x], index_x));
+        pair_set.erase(std::pair<int, int>(nums[index_y], index_y));
+
+        if (index_x != 0 && left_ind[index_x] != 0 && right_ind[index_x] != 0 && nums[left_ind[index_x]] - nums[right_ind[index_x]] <= -cost)
+        {
+            pair_set.insert(std::pair<int, int>(nums[index_x], index_x));
+        }
+        if (index_y != 0 && left_ind[index_y] != 0 && right_ind[index_y] != 0 && nums[left_ind[index_y]] - nums[right_ind[index_y]] <= -cost)
+        {
+            pair_set.insert(std::pair<int, int>(nums[index_y], index_y));
+        }
+    }
+
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    int k_value_1 = -3;
+    std::vector<int> nums_1 = {1,5,1,2,1};
+    std::vector<int> expected_1 = {5, 2, 1, 1, 1};
+    std::vector<int> result_1 = MinCost(nums_1, k_value_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int k_value_2 = -2;
+    std::vector<int> nums_2 = {3,5,7,9,11};
+    std::vector<int> expected_2 = {11, 9, 7, 5, 3};
+    std::vector<int> result_2 = MinCost(nums_2, k_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int k_value_3 = -3;
+    std::vector<int> nums_3 = {3,5,2,1,11};
+    std::vector<int> expected_3 = {11, 5, 2, 3, 1};
+    std::vector<int> result_3 = MinCost(nums_3, k_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int k_value_4 = 4;
+    std::vector<int> nums_4 = {4,5,2,1,11};
+    std::vector<int> expected_4 = {1, 2, 4, 5, 11};
+    std::vector<int> result_4 = MinCost(nums_4, k_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int k_value_5 = -5;
+    std::vector<int> nums_5 = {5,5,2,1,11};
+    std::vector<int> expected_5 = {11, 5, 2, 5, 1};
+    std::vector<int> result_5 = MinCost(nums_5, k_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int k_value_6 = -6;
+    std::vector<int> nums_6 = {6,6,2,1,11};
+    std::vector<int> expected_6 = {11, 6, 2, 6, 1};
+    std::vector<int> result_6 = MinCost(nums_6, k_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int k_value_7 = 5;
+    std::vector<int> nums_7 = {7,7,2,1,11};
+    std::vector<int> expected_7 = {1, 2, 7, 7, 11};
+    std::vector<int> result_7 = MinCost(nums_7, k_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int k_value_8 = 0;
+    std::vector<int> nums_8 = {1};
+    std::vector<int> expected_8 = {1};
+    std::vector<int> result_8 = MinCost(nums_8, k_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int k_value_9 = 1000000005;
+    std::vector<int> nums_9 = {1, 2, 4, 9, 16, 32};
+    try
+    {
+        MinCost(nums_9, k_value_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int k_value_10 = 10;
+    std::vector<int> nums_10 = {0, 2, 4, 10, 16, 32};
+    try
+    {
+        MinCost(nums_10, k_value_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // // TEST
+    int k_value_11 = -1;
+    std::vector<int> nums_11 = { 1000000005, 2, 4, 11, 16, 32};
+    try
+    {
+        MinCost(nums_11, k_value_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int k_value_12 = 200;
+    std::vector<int> nums_12 = {};
+    try
+    {
+        MinCost(nums_12, k_value_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // // TEST
+    int k_value_13 = 200;
+    std::vector<int> nums_13(500000,1);
+    try
+    {
+        MinCost(nums_13, k_value_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // // TEST
+    int k_value_14 = 200;
+    std::vector<int> nums_14 = {1,-2};
+    try
+    {
+        MinCost(nums_14, k_value_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int k_value_15 = 200;
+    std::vector<int> nums_15(400000,1);
+    try
+    {
+        MinCost(nums_15, k_value_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All tests passed."<<std::endl;
+    return 0;
+}
