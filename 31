@@ -105,56 +105,56 @@ int FancyArrays(int len, int val, int lex) {
 #include <cassert>
 
 int main() {
-    // TEST 1
+    // TEST
     int len_1 = 3, val_1 = 1, lex_1 = 0;
     int expected_1 = 9;
     int result_1 = FancyArrays(len_1, val_1, lex_1);
     assert(result_1 == expected_1);
     // TEST_END
 
-    // TEST 2
+    // TEST
     int len_2 = 5, val_2 = 2, lex_2 = 1;
     int expected_2 = 1874;
     int result_2 = FancyArrays(len_2, val_2, lex_2);
     assert(result_2 == expected_2);
     // TEST_END
 
-    // TEST 3
+    // TEST
     int len_3 = 10, val_3 = 3, lex_3 = 2;
     int expected_3 = 201767011;
     int result_3 = FancyArrays(len_3, val_3, lex_3);
     assert(result_3 == expected_3);
     // TEST_END
 
-    // TEST 4
+    // TEST
     int len_4 = 20, val_4 = 4, lex_4 = 3;
     int expected_4 = 32426544;
     int result_4 = FancyArrays(len_4, val_4, lex_4);
     assert(result_4 == expected_4);
     // TEST_END
 
-    // TEST 5
+    // TEST
     int len_5 = 15, val_5 = 5, lex_5 = 4;
     int expected_5 = 404583116;
     int result_5 = FancyArrays(len_5, val_5, lex_5);
     assert(result_5 == expected_5);
     // TEST_END
 
-    // TEST 6
+    // TEST
     int len_6 = 7, val_6 = 2, lex_6 = 2;
     int expected_6 = 62372;
     int result_6 = FancyArrays(len_6, val_6, lex_6);
     assert(result_6 == expected_6);
     // TEST_END
 
-    // TEST 7
+    // TEST 
     int len_7 = 12, val_7 = 3, lex_7 = 2;
     int expected_7 = 886629556;
     int result_7 = FancyArrays(len_7, val_7, lex_7);
     assert(result_7 == expected_7);
     // TEST_END
 
-    // TEST 8
+    // TEST
     int len_8 = 18, val_8 = 4, lex_8 = 3;
     int expected_8 = 693063604;
     int result_8 = FancyArrays(len_8, val_8, lex_8);
