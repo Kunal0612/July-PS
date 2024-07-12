@@ -1,0 +1,116 @@
+// https://codeforces.com/problemset/problem/1765/C
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int Add(int first, int second) {
+    int mod = 998244353;
+    first += second;
+    if (first >= mod) {
+        first -= mod;
+    }
+    return first;
+}
+
+int Mul(int first, int second) {
+    int mod = 998244353;
+    return first * 1LL * second % mod;
+}
+
+int BinPow(int base, int exponent) {
+    int result = 1;
+    while (exponent) {
+        if (exponent & 1) {
+            result = Mul(result, base);
+        }
+        base = Mul(base, base);
+        exponent >>= 1;
+    }
+    return result;
+}
+
+int Combination(int num, int choose, const std::vector<int>& factorials, const std::vector<int>& inverse_factorials) {
+    return Mul(factorials[num], Mul(inverse_factorials[choose], inverse_factorials[num - choose]));
+}
+
+
+int CardGuessing(int num_elements,int k_value){
+    if(num_elements<1 or num_elements>500 or k_value<1 or k_value>4*num_elements){
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    int mod = 998244353;
+    std::vector<int> factorials(4 * num_elements + 1);
+    std::vector<int> inverse_factorials(4 * num_elements + 1);
+
+    factorials[0] = 1;
+    for (int index = 1; index < factorials.size(); ++index) {
+        factorials[index] = Mul(factorials[index - 1], index);
+    }
+
+    inverse_factorials.back() = BinPow(factorials.back(), mod - 2);
+    for (int index = factorials.size() - 2; index >= 0; --index) {
+        inverse_factorials[index] = Mul(inverse_factorials[index + 1], index + 1);
+    }
+
+    std::vector<std::vector<int>> precompute_values(num_elements + 1, std::vector<int>(5));
+    for (int index = 0; index <= num_elements; ++index) {
+        for (int t_index = 0; t_index < 5; ++t_index) {
+            precompute_values[index][t_index] = Mul(BinPow(Combination(num_elements, index,factorials,inverse_factorials), t_index), inverse_factorials[t_index]);
+        }
+    }
+
+    std::vector<std::vector<std::vector<int>>> dp_table(2, std::vector<std::vector<int>>(4 * num_elements + 1, std::vector<int>(5)));
+
+    for (int index = 0; index <= num_elements; ++index) {
+        int current_index = index & 1;
+        int next_index = current_index ^ 1;
+        dp_table[next_index] = std::vector<std::vector<int>>(4 * num_elements + 1, std::vector<int>(5));
+        for (int t_index = 1; t_index <= 4; ++t_index) {
+            dp_table[next_index][index * t_index][t_index] = Mul(num_elements - index, precompute_values[index][t_index]);
+        }
+        for (int j_index = 0; j_index <= k_value; ++j_index) {
+            for (int p_index = 1; p_index <= 4; ++p_index) {
+                if (dp_table[current_index][j_index][p_index]) {
+                    dp_table[next_index][j_index][p_index] = Add(dp_table[next_index][j_index][p_index], dp_table[current_index][j_index][p_index]);
+                    for (int t_index = 1; p_index + t_index <= 4; ++t_index) {
+                        dp_table[next_index][j_index + index * t_index][p_index + t_index] = Add(dp_table[next_index][j_index + index * t_index][p_index + t_index], Mul(dp_table[current_index][j_index][p_index], precompute_values[index][t_index]));
+                    }
+                }
+            }
+        }
+    }
+
+    int final_answer = 0;
+    for (int sum_index = 0; sum_index <= k_value; ++sum_index) {
+        final_answer = Add(final_answer, Mul(
+            Mul(
+                Mul(
+                    sum_index < k_value ? 1 : 4 * num_elements - k_value,
+                    dp_table[(num_elements & 1) ^ 1][sum_index][4]),
+                Mul(BinPow(4 * num_elements - sum_index, mod - 2), Mul(inverse_factorials[4 * num_elements], factorials[4 * num_elements - sum_index]))),
+            Mul(factorials[4], factorials[sum_index])
+        ));
+    }
+
+    return final_answer;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    int ans=CardGuessing(3,2);
+    std::cout << ans << std::endl;
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
