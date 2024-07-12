@@ -1,0 +1,467 @@
+/*
+
+https://codeforces.com/problemset/problem/1823/F
+
+Write a C++ Solution RandomWalk to find the expected value of c(v) modulo 998244353 for each vertex v.
+
+Imagine a tree with num_nodes vertices and num_nodes-1 edges. Each vertex v has a 
+counter c(v) assigned to it.
+
+Initial State:
+
+A chip is placed on a starting vertex start_node.
+All counters are set to 0, except for c(start_node), which is set to 1.
+
+The Goal:
+
+Your objective is to move the chip from the starting vertex start_node to 
+a target vertex target_node.
+
+The Movement Mechanism:
+
+You achieve this by performing a series of moves:
+
+Random Neighbor Selection: While the chip is at vertex v, you randomly choose one of 
+its neighbors, to.
+Chip Movement & Counter Update: The chip is moved to the chosen neighbor to, 
+and the counter c(to) is incremented by 1.
+Repeat Until Target: You repeat these steps until the chip reaches the target 
+vertex target_node.
+
+The Challenge:
+
+For each vertex v in the tree, you need to calculate the expected value of 
+its counter c(v). This value represents the average number of times you 
+expect c(v) to be incremented during the chip movement process, 
+considering the randomness involved in neighbor selection.
+
+Modulo Operation:
+
+The final expected value needs to be calculated modulo 998244353, 
+a mathematical operation that essentially "wraps around" the result at a 
+specific value (similar to a clock).
+
+
+Input:
+
+An integer num_nodes.
+An integer start_node.
+An integer target_node.
+A vector of vector of integers edges.
+
+Output:
+
+A vector of long long integers result contains the expected value of c(v) 
+modulo 998244353 for each vertex v.
+
+Constraints:
+
+num_nodes : ranges from 2 to 200000.
+start_node : ranges from 1 to num_nodes.
+target_node : ranges from 1 to num_nodes.
+start_node!=target_node.
+edges.size() : it is equal to num_nodes-1
+edges : ranges from 1 to num_nodes , edges[i][0]!=edges[i][1].
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+std::vector<long long int> RandomWalk(int num_nodes,int start_node,int target_node,
+std::vector<std::vector<int>> edges){
+    if (num_nodes <= 1 or num_nodes>200000) {
+        throw std::invalid_argument("Invalid num_nodes");
+    }
+    if (start_node <= 0 or start_node>num_nodes) {
+        throw std::invalid_argument("Invalid num_nodes");
+    }
+    if (target_node <= 0 or target_node>num_nodes) {
+        throw std::invalid_argument("Invalid target_nodes");
+    }
+    if(edges.size()!=num_nodes-1){
+        throw std::invalid_argument("Invalid Edge size");
+    }
+    if(start_node==target_node){
+        throw std::invalid_argument("Start node should not be equal to target node");
+    }
+    start_node--, target_node--;
+    int mod = 998244353;
+    std::vector<std::vector<int>> graph(num_nodes);
+    std::vector<int> previous_node(num_nodes, -1);
+    std::vector<int> in_path(num_nodes);
+    std::vector<long long> result(num_nodes);
+
+    for (int i = 0; i < num_nodes - 1; i++) {
+        int node_a=edges[i][0], node_b=edges[i][1];
+        if (node_a <= 0 or node_a>num_nodes) {
+            throw std::invalid_argument("Invalid edges");
+        }
+        if (node_b <= 0 or node_b>num_nodes) {
+            throw std::invalid_argument("Invalid edges");
+        }
+        if(node_a==node_b){
+            throw std::invalid_argument("Invalid edges");
+        }
+        node_a--, node_b--;
+        graph[node_a].push_back(node_b);
+        graph[node_b].push_back(node_a);
+    }
+
+    std::function<void(int, int)> depth_first_search = [&] (int vertex, int parent) {
+        for (int neighbor : graph[vertex]) {
+            if (neighbor == parent){
+                continue;
+            }
+            previous_node[neighbor] = vertex;
+            depth_first_search(neighbor, vertex);
+        }
+    };
+
+    std::function<void(int, int, long long)> depth_first_search2 = [&] (int vertex, int parent, long long multiplier) {
+        result[vertex] = multiplier * (long long)graph[vertex].size();
+        for (int neighbor : graph[vertex]) {
+            if (neighbor == parent){
+                continue;
+            }
+            depth_first_search2(neighbor, vertex, multiplier);
+        }
+    };
+
+    depth_first_search(start_node, -1);
+
+    int pointer = target_node;
+    in_path[target_node] = true;
+
+    while (pointer != start_node) {
+        result[previous_node[pointer]] = result[pointer] + 2;
+        pointer = previous_node[pointer];
+        in_path[pointer] = true;
+    }
+
+    for (int vertex = 0; vertex < num_nodes; vertex++) {
+        if (in_path[vertex]) {
+            result[vertex] = result[vertex] / 2 * (long long)graph[vertex].size();
+            for (int neighbor : graph[vertex]) {
+                if (!in_path[neighbor]) {
+                    depth_first_search2(neighbor, vertex, result[vertex] / (int)graph[vertex].size());
+                }
+            }
+        }
+    }
+
+    result[target_node]++;
+
+    for (long long &value : result){
+        value=value % mod;
+    }
+    return result;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    int num_nodes_1 = 3, start_node_1 = 1, target_node_1 = 3;
+    std::vector<std::vector<int>> edges_1 = {{1, 2}, {2, 3}};
+    std::vector<long long> expected_1 = {2, 2, 1};
+    std::vector<long long> result_1 = RandomWalk(num_nodes_1, start_node_1, target_node_1, edges_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_nodes_2 = 4, start_node_2 = 1, target_node_2 = 4;
+    std::vector<std::vector<int>> edges_2 = {{1, 2}, {2, 3}, {3, 4}};
+    std::vector<long long> expected_2 = {3, 4, 2, 1};
+    std::vector<long long> result_2 = RandomWalk(num_nodes_2, start_node_2, target_node_2, edges_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_nodes_3 = 5, start_node_3 = 1, target_node_3 = 5;
+    std::vector<std::vector<int>> edges_3 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    std::vector<long long> expected_3 = {4, 6, 4, 2, 1};
+    std::vector<long long> result_3 = RandomWalk(num_nodes_3, start_node_3, target_node_3, edges_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_nodes_4 = 6, start_node_4 = 1, target_node_4 = 6;
+    std::vector<std::vector<int>> edges_4 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}};
+    std::vector<long long> expected_4 = {5, 8, 6, 4, 2, 1};
+    std::vector<long long> result_4 = RandomWalk(num_nodes_4, start_node_4, target_node_4, edges_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_nodes_5 = 7, start_node_5 = 1, target_node_5 = 7;
+    std::vector<std::vector<int>> edges_5 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}};
+    std::vector<long long> expected_5 = {6, 10, 8, 6, 4, 2, 1};
+    std::vector<long long> result_5 = RandomWalk(num_nodes_5, start_node_5, target_node_5, edges_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_nodes_6 = 8, start_node_6 = 1, target_node_6 = 8;
+    std::vector<std::vector<int>> edges_6 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}};
+    std::vector<long long> expected_6 = {7, 12, 10, 8, 6, 4, 2, 1};
+    std::vector<long long> result_6 = RandomWalk(num_nodes_6, start_node_6, target_node_6, edges_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_nodes_7 = 9, start_node_7 = 1, target_node_7 = 9;
+    std::vector<std::vector<int>> edges_7 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}};
+    std::vector<long long> expected_7 = {8, 14, 12, 10, 8, 6, 4, 2, 1};
+    std::vector<long long> result_7 = RandomWalk(num_nodes_7, start_node_7, target_node_7, edges_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_nodes_8 = 10, start_node_8 = 1, target_node_8 = 10;
+    std::vector<std::vector<int>> edges_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}, {9, 10}};
+    std::vector<long long> expected_8 = {9, 16, 14, 12, 10, 8, 6, 4, 2, 1};
+    std::vector<long long> result_8 = RandomWalk(num_nodes_8, start_node_8, target_node_8, edges_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_nodes_9 = 300000, start_node_9 = 1, target_node_9 = 10;
+    std::vector<std::vector<int>> edges_9 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 9}, {9, 9}, {9, 10}};
+    try
+    {
+        RandomWalk(num_nodes_9, start_node_9, target_node_9, edges_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_10 = 1, start_node_10 = 1, target_node_10 = 10;
+    std::vector<std::vector<int>> edges_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 10}, {10, 10}, {10, 10}};
+    try
+    {
+        RandomWalk(num_nodes_10, start_node_10, target_node_10, edges_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_11 = -1, start_node_11 = 1, target_node_11 = 11;
+    std::vector<std::vector<int>> edges_11 = {{1, 2}};
+    try
+    {
+        RandomWalk(num_nodes_11, start_node_11, target_node_11, edges_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_12 = 5, start_node_12 = 0, target_node_12 = 12;
+    std::vector<std::vector<int>> edges_12 = {{1, 2}};
+    try
+    {
+        RandomWalk(num_nodes_12, start_node_12, target_node_12, edges_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_13 = 5, start_node_13 = 9, target_node_13 = 13;
+    std::vector<std::vector<int>> edges_13 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_13, start_node_13, target_node_13, edges_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_14 = 5, start_node_14 = 0, target_node_14 = 14;
+    std::vector<std::vector<int>> edges_14 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_14, start_node_14, target_node_14, edges_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_15 = 5, start_node_15 = -5, target_node_15 = 15;
+    std::vector<std::vector<int>> edges_15 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_15, start_node_15, target_node_15, edges_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_16 = 5, start_node_16 = 4, target_node_16 = 6;
+    std::vector<std::vector<int>> edges_16 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_16, start_node_16, target_node_16, edges_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_17 = 5, start_node_17 = 4, target_node_17 = 0;
+    std::vector<std::vector<int>> edges_17 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_17, start_node_17, target_node_17, edges_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_18 = 5, start_node_18 = 4, target_node_18 = -5;
+    std::vector<std::vector<int>> edges_18 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_18, start_node_18, target_node_18, edges_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_19 = 5, start_node_19 = 4, target_node_19 = 5;
+    std::vector<std::vector<int>> edges_19 = {{1, 8},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_19, start_node_19, target_node_19, edges_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_20 = 5, start_node_20 = 4, target_node_20 = 5;
+    std::vector<std::vector<int>> edges_20 = {{0, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_20, start_node_20, target_node_20, edges_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_21 = 4, start_node_21 = 4, target_node_21 = 3;
+    std::vector<std::vector<int>> edges_21 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_21, start_node_21, target_node_21, edges_21);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_22 = 5, start_node_22 = 4, target_node_22 = 3;
+    std::vector<std::vector<int>> edges_22 = {{1, -2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_22, start_node_22, target_node_22, edges_22);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_23 = 5, start_node_23 = 4, target_node_23 = 3;
+    std::vector<std::vector<int>> edges_23 = {{-1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_23, start_node_23, target_node_23, edges_23);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_24 = 5, start_node_24 = 4, target_node_24 = 3;
+    std::vector<std::vector<int>> edges_24 = {{2, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_24, start_node_24, target_node_24, edges_24);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_25 = 5, start_node_25 = 4, target_node_25 = 4;
+    std::vector<std::vector<int>> edges_25 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RandomWalk(num_nodes_25, start_node_25, target_node_25, edges_25);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
