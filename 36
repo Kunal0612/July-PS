@@ -76,18 +76,18 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <vector>
 #include <stdexcept>
 
-inline int lowbit(int node) {
+inline int Lowbit(int node) {
     return node & (-node);
 }
 
-int dfs(int index, int state, int length, int val, const std::string &str, 
+int Dfs(int index, int state, int length, int val, const std::string &str, 
 int tmp_mask, std::vector<std::unordered_map<int, int>> &memo) {
     if (index == length + 1) return 0;
     if (memo[index].count(state)) return memo[index][state];
-    int result = dfs(index + 1, state, length, val, str, tmp_mask, memo) + 1;
+    int result = Dfs(index + 1, state, length, val, str, tmp_mask, memo) + 1;
     int new_state = (state << (str[index] - '0') | 1) & ((1 << (val + 1)) - 1);
-    if (new_state & tmp_mask) new_state &= lowbit(new_state & tmp_mask) - 1;
-    if (!(new_state >> val)) result = std::min(result, dfs(index + 1, new_state, 
+    if (new_state & tmp_mask) new_state &= Lowbit(new_state & tmp_mask) - 1;
+    if (!(new_state >> val)) result = std::min(result, Dfs(index + 1, new_state, 
     length, val, str, tmp_mask, memo));
     return memo[index][state] = result;
 }
@@ -108,7 +108,7 @@ int ValPrimeSubstrings(std::string str,int val){
         if (val % i == 0) tmp_mask |= 1 << i;
     }
     std::vector<std::unordered_map<int, int>> memo(length + 2);
-    int ans=dfs(1, 1, length, val, str, tmp_mask, memo);
+    int ans=Dfs(1, 1, length, val, str, tmp_mask, memo);
     return ans;
 }
 
