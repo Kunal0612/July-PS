@@ -48,8 +48,9 @@ std::vector<int> ZAlgo(const std::string& str) {
         if (right > i) {
             z_arr[i] = std::min(right - i, z_arr[i - left]);
         }
-        while (i + z_arr[i] < len && str[z_arr[i]] == str[i + z_arr[i]])
-            z_arr[i]++;
+        while (i + z_arr[i] < len && str[z_arr[i]] == str[i + z_arr[i]]){
+			z_arr[i]++;
+		}
         if (i + z_arr[i] > right) {
             left = i;
             right = i + z_arr[i];
@@ -63,11 +64,20 @@ long long PumpingLemma(std::string str,std::string ptr){
     if(len>=lem or len<1 or lem>10000000){
         throw std::invalid_argument("Invalid constraint.");
     }
+	for(int i=0;i<len;i++){
+        if(ptr[i]<'a' or str[i]<'a' or ptr[i]>'z' or str[i]>'z'){
+            throw std::invalid_argument("Invalid String character should be in lowercase");
+        }
+    }
     int lcp = 0;
-    while (lcp < len && str[lcp] == ptr[lcp]) ++lcp;
+    while (lcp < len && str[lcp] == ptr[lcp]){
+		++lcp;
+	}
 
     int lcs = 0;
-    while (lcs < len && str[len - 1 - lcs] == ptr[lem - 1 - lcs]) ++lcs;
+    while (lcs < len && str[len - 1 - lcs] == ptr[lem - 1 - lcs]){
+		++lcs;
+	}
 
     std::string left = ptr.substr(0, lcp);
     std::string right = ptr.substr(lcp, lem - lcp);
