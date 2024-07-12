@@ -76,6 +76,7 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <vector>
 #include <functional>
 #include <cassert>
+#include <stdexcept>
 
 
 std::string RemovingGraph(int num_nodes,int limit_l,int limit_r,std::vector<std::vector<int>> edges){
@@ -135,6 +136,12 @@ std::string RemovingGraph(int num_nodes,int limit_l,int limit_r,std::vector<std:
     }
     return "Bob";
 }
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
 
 int main() {
     // TEST
