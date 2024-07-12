@@ -73,23 +73,23 @@ int BalancingWeapons(int max_value, std::vector<int> arr, std::vector<int> brr)
     {
         if (arr[i] < 1 || arr[i] > 2000)
         {
-            throw std::invalid_argument("Invalid element value");
+            throw std::invalid_argument("Invalid element value in arr");
         }
     }
     if (brr.size() <= 1 or brr.size() > 2000)
     {
-        throw std::invalid_argument("Invalid Length");
+        throw std::invalid_argument("Invalid Length brr");
     }
     for (int i = 0; i < brr.size(); ++i)
     {
         if (brr[i] < 1 || brr[i] > 1000000000)
         {
-            throw std::invalid_argument("Invalid element value");
+            throw std::invalid_argument("Invalid element value in brr");
         }
     }
     int len = arr.size();
     int factors[len];
-    Node elements[len], limits[len];
+    Node elements[len+1], limits[len+1];
     long long results[len];
     int result;
     for (int i = 1; i <= len; ++i)
