@@ -345,7 +345,7 @@ int main() {
     // TEST_END
     // TEST
     int white_vertices_17 = 1000000008;
-    std::vector<int> nums_17(200002,5);
+    std::vector<int> nums_17(202,5);
     try
     {
         PowerSockets(nums_17, white_vertices_17);
