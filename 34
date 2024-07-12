@@ -56,7 +56,7 @@ int ExpectedDestruction(std::vector<int> nums,int bound){
     }
     for(int i=0;i<nums.size()-1;i++){
         if(nums[i]>=nums[i+1] or nums[i]>bound or nums[i+1]>bound){
-            throw std::invalid_argument("Invalid Constraints");
+            throw std::invalid_argument("Invalid nums array");
         }
     }
     int mod = 1e9 + 7;
