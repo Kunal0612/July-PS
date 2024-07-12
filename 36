@@ -99,7 +99,7 @@ int ValPrimeSubstrings(std::string str,int val){
     }
     for(int i=0;i<length;i++){
         if(str[i]<'0' or str[i]>'9'){
-            throw std::invalid_argument("Only Digits allowed");
+            throw std::invalid_argument("Only Digits are allowed");
         }
     }
     str = ' ' + str;
