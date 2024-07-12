@@ -74,7 +74,7 @@ std::vector<int> PhysEdOnline(std::vector<int> nums,std::vector<std::vector<int>
         throw std::invalid_argument("Invalid query length");
     }
     if (valid_till <= 0 or valid_till>nums.size()) {
-        throw std::invalid_argument("Invalid query length");
+        throw std::invalid_argument("Invalid valid_till");
     }
     for (int i = 0; i < nums.size(); ++i)
     {
