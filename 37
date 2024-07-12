@@ -64,82 +64,68 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <algorithm>
 #include <stdexcept>
 
-struct Node
-{
+struct Node {
     long long distance;
     int index;
-    bool operator<(const Node &other) const
-    {
+    bool operator<(const Node &other) const {
         return distance < other.distance;
     }
 };
 
-int BalancingWeapons(int max_value, std::vector<int> arr, std::vector<int> brr)
-{
-    if (arr.size() <= 1 or arr.size() > 2000 or max_value < 0 or max_value > 1500 or arr.size() != brr.size())
-    {
+int BalancingWeapons(int max_value, std::vector<int> arr, std::vector<int> brr) {
+    if (arr.size() <= 1 || arr.size() > 2000 || max_value < 0 || max_value > 1500 || arr.size() != brr.size()) {
         throw std::invalid_argument("Invalid Length");
     }
-    for (int i = 0; i < arr.size(); ++i)
-    {
-        if (arr[i] < 1 || arr[i] > 2000)
-        {
+    for (int i = 0; i < arr.size(); ++i) {
+        if (arr[i] < 1 || arr[i] > 2000) {
             throw std::invalid_argument("Invalid element value in arr");
         }
     }
-    if (brr.size() <= 1 or brr.size() > 2000)
-    {
+    if (brr.size() <= 1 || brr.size() > 2000) {
         throw std::invalid_argument("Invalid Length brr");
     }
-    for (int i = 0; i < brr.size(); ++i)
-    {
-        if (brr[i] < 1 || brr[i] > 1000000000)
-        {
+    for (int i = 0; i < brr.size(); ++i) {
+        if (brr[i] < 1 || brr[i] > 1000000000) {
             throw std::invalid_argument("Invalid element value in brr");
         }
     }
+
     int len = arr.size();
-    int factors[len];
-    Node elements[len+1], limits[len+1];
-    long long results[len];
+    std::vector<int> factors(len,0);
+    std::vector<Node> elements(len+1), limits(len+1);
+    std::vector<long long> results(len,0);
     int result;
-    for (int i = 1; i <= len; ++i)
-    {
-        factors[i] = arr[i - 1];
+
+    for (int i = 1; i <= len; ++i) {
+        factors[i - 1] = arr[i - 1];
     }
 
-    for (int i = 1; i <= len; ++i)
-    {
+    for (int i = 1; i <= len; ++i) {
         elements[i].distance = brr[i - 1];
-        elements[i].distance *= factors[i];
+        elements[i].distance *= factors[i - 1];
         elements[i].index = i;
     }
 
-    std::sort(elements + 1, elements + 1 + len);
+    std::sort(elements.begin() + 1, elements.end());
     result = len;
 
-    for (int i = 1; i <= len; ++i)
-    {
-        for (int j = 1; j <= len; ++j)
-        {
-            long long x = (elements[i].distance - 1) / factors[j] + 1;
-            results[j] = (x - 1) * factors[j];
-            limits[j].distance = x * factors[j] - max_value;
+    for (int i = 1; i <= len; ++i) {
+        for (int j = 1; j <= len; ++j) {
+            long long x = (elements[i].distance - 1) / factors[j - 1] + 1;
+            results[j - 1] = (x - 1) * factors[j - 1];
+            limits[j].distance = x * factors[j - 1] - max_value;
             limits[j].index = j;
         }
 
-        std::sort(limits + 1, limits + 1 + len);
+        std::sort(limits.begin() + 1, limits.end());
         long long right_bound = elements[i].distance;
 
-        for (int j = len; j && limits[j].distance > right_bound; --j)
-        {
-            right_bound = std::min(right_bound, results[limits[j].index]);
+        for (int j = len; j && limits[j].distance > right_bound; --j) {
+            right_bound = std::min(right_bound, results[limits[j].index - 1]);
         }
 
-        if (right_bound > elements[i - 1].distance)
-        {
-            for (int j = i; j <= len && elements[j].distance <= right_bound + max_value; ++j)
-            {
+        if (right_bound > elements[i - 1].distance) {
+            for (int j = i; j <= len && elements[j].distance <= right_bound + max_value; ++j) {
                 result = std::min(result, len - j + i - 1);
             }
         }
@@ -185,9 +171,9 @@ int main()
 
     // TEST
     std::vector<int> arr_4 = {2, 2, 2, 2};
-    std::vector<int> brr_4 = {1, 1, 1, 1};
+    std::vector<int> brr_4 = {1, 2, 3, 1};
     int max_value_4 = 0;
-    int expected_4 = 4;
+    int expected_4 = 2;
     int result_4 = BalancingWeapons(max_value_4, arr_4, brr_4);
     assert(result_4 == expected_4);
     // TEST_END
@@ -196,7 +182,7 @@ int main()
     std::vector<int> arr_5 = {1, 2, 3};
     std::vector<int> brr_5 = {3, 2, 1};
     int max_value_5 = 1;
-    int expected_5 = 3;
+    int expected_5 = 0;
     int result_5 = BalancingWeapons(max_value_5, arr_5, brr_5);
     assert(result_5 == expected_5);
     // TEST_END
