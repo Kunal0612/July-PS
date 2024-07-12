@@ -1,0 +1,75 @@
+// https://codeforces.com/problemset/problem/1808/E2
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+long long GCD(long long first, long long sec) {
+    while (sec != 0) {
+        long long temp = sec;
+        sec = first % sec;
+        first = temp;
+    }
+    return first;
+}
+
+long long Power(long long base, long long exponent, long long mod) {
+    long long result = 1;
+    for (exponent %= (mod - 1); exponent; base = base * base % mod, exponent >>= 1) {
+        if (exponent & 1) {
+            result = result * base % mod;
+        }
+    }
+    return result;
+}
+
+long long FindTickets(long long num_nodes,long long k_value,long long prime_mod){
+    if (num_nodes == 1) {
+        return 1;
+    }
+    long long gcd_value, result_value;
+    if (k_value & 1) {
+        gcd_value = GCD(num_nodes - 2, k_value);
+        result_value = Power(k_value, num_nodes, prime_mod);
+        result_value = (result_value - Power(k_value - 1, num_nodes, prime_mod) + prime_mod) % prime_mod;
+        if (num_nodes & 1) {
+            result_value = (result_value + gcd_value - 1) % prime_mod;
+        } else {
+            result_value = (result_value - gcd_value + 1 + prime_mod) % prime_mod;
+        }
+    } else {
+        gcd_value = GCD(num_nodes - 2, k_value >> 1);
+        result_value = Power(k_value, num_nodes, prime_mod);
+        result_value = (result_value - Power(k_value - 2, num_nodes, prime_mod) + prime_mod) % prime_mod;
+        result_value = (result_value + Power(prime_mod - 2, num_nodes, prime_mod)) % prime_mod;
+        if (result_value & 1) {
+            result_value = (result_value + prime_mod) >> 1;
+        } else {
+            result_value >>= 1;
+        }
+        if (num_nodes & 1) {
+            result_value = (result_value + Power(2, num_nodes - 1, prime_mod) * gcd_value % prime_mod) % prime_mod;
+        } else {
+            result_value = (result_value - Power(2, num_nodes - 1, prime_mod) * gcd_value % prime_mod + prime_mod) % prime_mod;
+        }
+    }
+
+    return result_value;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    
+
+
+    return 0;
+}
