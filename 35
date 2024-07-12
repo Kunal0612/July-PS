@@ -82,15 +82,21 @@ int Reconstruction(int bound,std::string str,std::vector<int> nums) {
 
     for (int index = 0; index < size + 1; ++index) {
         long long sum = b_values[index] + b_values[index + 1];
-        if (done_sums.count(sum)) continue;
+        if (done_sums.count(sum)){
+			continue;
+		}
 
         std::vector<std::vector<int>> dpp(size + 2, std::vector<int>(2, -1));
         dpp[0][0] = 1;
 
         for (int j = 1; j < size + 2; ++j) {
             bool transitions[2] = {true, true};
-            if (str[j] == 'P') transitions[1] = false;
-            else if (str[j] == 'S') transitions[0] = false;
+            if (str[j] == 'P'){
+				transitions[1] = false;
+			}
+            else if (str[j] == 'S'){
+				transitions[0] = false;
+			}
 
             if (std::abs(b_values[j] - b_values[j - 1]) <= bound) {
                 for (int k = 0; k < 2; ++k) {
@@ -101,7 +107,9 @@ int Reconstruction(int bound,std::string str,std::vector<int> nums) {
             }
 
             if (dpp[j - 1][0] > -1 && transitions[1] && sum == b_values[j] + b_values[j - 1]) {
-                if (dpp[j][1] < 0) dpp[j][1] = 0;
+                if (dpp[j][1] < 0){
+					dpp[j][1] = 0;
+				}
                 dpp[j][1] = (dpp[j][1] + dpp[j - 1][0]) % mod;
             }
 
@@ -109,13 +117,17 @@ int Reconstruction(int bound,std::string str,std::vector<int> nums) {
                 long long add = b_values[j] + b_values[j - 1] - sum;
                 long long large = std::max(std::abs(add / 2), std::abs(add - add / 2));
                 if (large <= bound) {
-                    if (dpp[j][0] < 0) dpp[j][0] = 0;
+                    if (dpp[j][0] < 0) {
+						dpp[j][0] = 0;
+					}
                     dpp[j][0] = (dpp[j][0] + dpp[j - 1][1]) % mod;
                 }
             }
         }
 
-        if (dpp[size + 1][1] < 0) continue;
+        if (dpp[size + 1][1] < 0){
+			continue;
+		}
         answer = (answer + dpp[size + 1][1]) % mod;
         done_sums.insert(sum);
     }
