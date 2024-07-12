@@ -3,7 +3,7 @@
 https://codeforces.com/problemset/problem/1891/E
 
 Write a C++ Solution BrukhovichAndExams to find the minimum possible sadness 
-that can be achieved by performing no more than k operations.
+that can be achieved by performing no more than k_value operations.
 
 
 In the bustling Academy of Arcana, Smilo, a young boy with a mop of unruly brown 
@@ -31,7 +31,7 @@ he limited himself to performing this magic trick a maximum of k_value times.
 
 Here's where you, the legendary problem solver, come in! Your task was to help 
 Brukhovich strategize. You needed to determine the minimum number of exams 
-Brukhovich had to adjust to zero (using at most k adjustments) such that no 
+Brukhovich had to adjust to zero (using at most k_value adjustments) such that no 
 consecutive exams would have a GCD of 1. This would pave the way for a smooth 
 learning journey for Smilo, minimizing his "Sadness of Sudden Shifts" and 
 allowing him to conquer the world of algorithms with confidence.
@@ -84,13 +84,13 @@ int Gcd(int first, int sec) {
 
 int BrukhovichAndExams(std::vector<int> nums,int k_value) {
     if(k_value>nums.size() or k_value<0 or nums.size()>100000){
-        throw std::invalid_argument("vec length must be positive.");
+        throw std::invalid_argument("Invalis Constraints");
     }
     for (int i = 0; i < nums.size(); ++i)
     {
         if (nums[i] < 0 || nums[i] > 1000000000)
         {
-            throw std::invalid_argument("Invalid element value");
+            throw std::invalid_argument("Invalid nums value");
         }
     }
     int len=nums.size();
