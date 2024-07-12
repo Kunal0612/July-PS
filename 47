@@ -1,0 +1,427 @@
+
+/*
+
+https://codeforces.com/contest/1823/problem/E
+
+Write a C++ Solution RemovingGraph to find who will if both Alice and Bob play optimally.
+
+Alice and Bob are engaged in a strategic game played on a specific type of graph. 
+Here are the key characteristics of the graph:
+
+Undirected: No distinction between "in" and "out" directions for edges.
+
+No Self-Loops: Vertices don't connect to themselves.
+
+Multiple Edges Allowed: Edges can connect the same pair of vertices multiple times.
+
+Degree 2: Each vertex has exactly two connections (edges) to other vertices.
+
+Components: The graph might be divided into separate, unconnected sections (components).
+
+The Gameplay:
+
+The game involves taking turns erasing connected subgraphs from the graph. Alice 
+starts the game.
+
+Erasure Action: During each turn, a player chooses k vertices (where l <= k <= r, with l < r) 
+that form a connected subgraph (all connected by edges) and removes them from the graph, 
+along with all the edges connecting those vertices.
+
+Winning Condition:
+
+The player who cannot make a valid move (no connected subgraph with k vertices remaining) 
+loses the game.
+
+Example:
+
+Imagine the graph above and the parameters l = 2 and r = 3. Alice has several valid 
+starting moves (erasing connected subgraphs with 2 or 3 vertices). Bob also has options 
+for responding with his own erasure action.
+
+The Challenge:
+
+Given the graph size num_nodes, starting and ending values for k (limit_l and limit_r), 
+determine who will win the game (Alice or Bob) assuming both players make optimal choices.
+
+Can you analyze the game dynamics and predict the winner based on the graph structure 
+and the allowed range for erasing connected subgraphs?
+
+
+Input:
+
+An integer num_nodes.
+An integer limit_l.
+An integer limit_r.
+A vector of vector of integers edges.
+
+Output:
+
+A string consist who will if both Alice and Bob play optimally.
+
+Constraints:
+
+num_nodes : ranges from 2 to 200000.
+limit_l : ranges from 1 to num_nodes.
+limit_r : ranges from 1 to num_nodes.
+edges.size() : it is equal to num_nodes
+edges : ranges from 1 to num_nodes , edges[i][0]!=edges[i][1].
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+
+
+std::string RemovingGraph(int num_nodes,int limit_l,int limit_r,std::vector<std::vector<int>> edges){
+     if (num_nodes <= 1 or num_nodes>200000) {
+        throw std::invalid_argument("Invalid num_nodes");
+    }
+    if (limit_l <= 0 or limit_l>num_nodes) {
+        throw std::invalid_argument("Invalid num_nodes");
+    }
+    if (limit_r <= 0 or limit_r>num_nodes) {
+        throw std::invalid_argument("Invalid limit_rs");
+    }
+    if(edges.size()!=num_nodes){
+        throw std::invalid_argument("Invalid Edge size");
+    }
+    std::vector<std::vector<int>> graph(num_nodes);
+    
+    for (int i = 0; i < num_nodes; i++) {
+        int node_a=edges[i][0], node_b=edges[i][1];
+        if (node_a <= 0 or node_a>num_nodes) {
+            throw std::invalid_argument("Invalid edges");
+        }
+        if (node_b <= 0 or node_b>num_nodes) {
+            throw std::invalid_argument("Invalid edges");
+        }
+        if(node_a==node_b){
+            throw std::invalid_argument("Invalid edges");
+        }
+        node_a--, node_b--;
+        graph[node_a].push_back(node_b);
+        graph[node_b].push_back(node_a);
+    }
+
+    int result = 0, component_size;
+    std::vector<int> visited(num_nodes);
+    std::function<void(int)> dfs = [&](int vertex) {
+        visited[vertex] = true;
+        component_size++;
+        for (int neighbor : graph[vertex]) {
+            if (!visited[neighbor])
+                dfs(neighbor);
+        }
+    };
+
+    for (int i = 0; i < num_nodes; i++) {
+        if (!visited[i]) {
+            component_size = 0;
+            dfs(i);
+            if (component_size <= limit_l + limit_r - 1) {
+                result ^= component_size / limit_l;
+            }
+        }
+    }
+
+    if (result){
+        return "Alice";
+    }
+    return "Bob";
+}
+
+int main() {
+    // TEST
+    int num_nodes_1 = 6, limit_l_1 = 2, limit_r_1 = 3;
+    std::vector<std::vector<int>> edges_1 = {{1, 2}, {2, 3},{3,1},{4,5},{5,6},{6,4}};
+    std::string expected_1 = "Bob";
+    std::string result_1 = RemovingGraph(num_nodes_1, limit_l_1, limit_r_1, edges_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_nodes_2 = 4, limit_l_2 = 1, limit_r_2 = 4;
+    std::vector<std::vector<int>> edges_2 = {{1, 2}, {2, 3}, {3, 4},{4,1}};
+    std::string expected_2 = "Alice";
+    std::string result_2 = RemovingGraph(num_nodes_2, limit_l_2, limit_r_2, edges_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_nodes_3 = 5, limit_l_3 = 1, limit_r_3 = 5;
+    std::vector<std::vector<int>> edges_3 = {{1, 2}, {2, 3}, {3, 4}, {4, 5},{5,1}};
+    std::string expected_3 = "Alice";
+    std::string result_3 = RemovingGraph(num_nodes_3, limit_l_3, limit_r_3, edges_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_nodes_4 = 6, limit_l_4 = 1, limit_r_4 = 6;
+    std::vector<std::vector<int>> edges_4 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 2},{6,3}};
+    std::string expected_4 = "Alice";
+    std::string result_4 = RemovingGraph(num_nodes_4, limit_l_4, limit_r_4, edges_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_nodes_5 = 7, limit_l_5 = 1, limit_r_5 = 7;
+    std::vector<std::vector<int>> edges_5 = {{1, 2},{2,1},{2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}};
+    std::string expected_5 = "Alice";
+    std::string result_5 = RemovingGraph(num_nodes_5, limit_l_5, limit_r_5, edges_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_nodes_6 = 7, limit_l_6 = 1, limit_r_6 = 7;
+    std::vector<std::vector<int>> edges_6 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 2}};
+    std::string expected_6 = "Alice";
+    std::string result_6 = RemovingGraph(num_nodes_6, limit_l_6, limit_r_6, edges_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_nodes_7 = 8, limit_l_7 = 4, limit_r_7 = 7;
+    std::vector<std::vector<int>> edges_7 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 6}};
+    std::string expected_7 = "Alice";
+    std::string result_7 = RemovingGraph(num_nodes_7, limit_l_7, limit_r_7, edges_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_nodes_8 = 9, limit_l_8 = 1, limit_r_8 = 4;
+    std::vector<std::vector<int>> edges_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 4}, {9, 7}};
+    std::string expected_8 = "Bob";
+    std::string result_8 = RemovingGraph(num_nodes_8, limit_l_8, limit_r_8, edges_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_nodes_9 = 300000, limit_l_9 = 1, limit_r_9 = 10;
+    std::vector<std::vector<int>> edges_9 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 9}, {9, 9}, {9, 10}};
+    try
+    {
+        RemovingGraph(num_nodes_9, limit_l_9, limit_r_9, edges_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_10 = 1, limit_l_10 = 1, limit_r_10 = 10;
+    std::vector<std::vector<int>> edges_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 10}, {10, 10}, {10, 10}};
+    try
+    {
+        RemovingGraph(num_nodes_10, limit_l_10, limit_r_10, edges_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_11 = -1, limit_l_11 = 1, limit_r_11 = 11;
+    std::vector<std::vector<int>> edges_11 = {{1, 2}};
+    try
+    {
+        RemovingGraph(num_nodes_11, limit_l_11, limit_r_11, edges_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_12 = 5, limit_l_12 = 0, limit_r_12 = 12;
+    std::vector<std::vector<int>> edges_12 = {{1, 2}};
+    try
+    {
+        RemovingGraph(num_nodes_12, limit_l_12, limit_r_12, edges_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_nodes_13 = 5, limit_l_13 = 9, limit_r_13 = 13;
+    std::vector<std::vector<int>> edges_13 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_13, limit_l_13, limit_r_13, edges_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_14 = 5, limit_l_14 = 0, limit_r_14 = 14;
+    std::vector<std::vector<int>> edges_14 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_14, limit_l_14, limit_r_14, edges_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_15 = 5, limit_l_15 = -5, limit_r_15 = 15;
+    std::vector<std::vector<int>> edges_15 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_15, limit_l_15, limit_r_15, edges_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_16 = 5, limit_l_16 = 4, limit_r_16 = 6;
+    std::vector<std::vector<int>> edges_16 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_16, limit_l_16, limit_r_16, edges_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_17 = 5, limit_l_17 = 4, limit_r_17 = 0;
+    std::vector<std::vector<int>> edges_17 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_17, limit_l_17, limit_r_17, edges_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_18 = 4, limit_l_18 = 4, limit_r_18 = -5;
+    std::vector<std::vector<int>> edges_18 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_18, limit_l_18, limit_r_18, edges_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_19 = 5, limit_l_19 = 4, limit_r_19 = 5;
+    std::vector<std::vector<int>> edges_19 = {{1, 8},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_19, limit_l_19, limit_r_19, edges_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_20 = 5, limit_l_20 = 4, limit_r_20 = 5;
+    std::vector<std::vector<int>> edges_20 = {{0, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_20, limit_l_20, limit_r_20, edges_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_21 = 4, limit_l_21 = 4, limit_r_21 = 3;
+    std::vector<std::vector<int>> edges_21 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_21, limit_l_21, limit_r_21, edges_21);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_22 = 4, limit_l_22 = 4, limit_r_22 = 3;
+    std::vector<std::vector<int>> edges_22 = {{1, -2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_22, limit_l_22, limit_r_22, edges_22);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_23 = 4, limit_l_23 = 4, limit_r_23 = 3;
+    std::vector<std::vector<int>> edges_23 = {{-1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_23, limit_l_23, limit_r_23, edges_23);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_24 = 4, limit_l_24 = 4, limit_r_24 = 3;
+    std::vector<std::vector<int>> edges_24 = {{2, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_24, limit_l_24, limit_r_24, edges_24);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_nodes_25 = 4, limit_l_25 = 4, limit_r_25 = 4;
+    std::vector<std::vector<int>> edges_25 = {{1, 2},{2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        RemovingGraph(num_nodes_25, limit_l_25, limit_r_25, edges_25);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
+
