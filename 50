@@ -1,5 +1,73 @@
-// https://codeforces.com/problemset/problem/1540/C1
+/*
 
+https://codeforces.com/problemset/problem/1540/C1
+
+Write a C++ Solution ConvergingArray to count the number of "good" arrays arr 
+where F(arr, brr) >= threshold . 
+The final count needs to be printed modulo 10^9 + 7 (to handle very large numbers).
+
+Imagine two arrays arr (length len) and brr (length len-1). 
+An infinite process operates on these arrays:
+
+Random Index Selection: In each operation, a random integer i (1 <= i <= len-1) is chosen.
+
+Simultaneous Update:
+
+arr[i] is assigned the minimum value between itself and the expression 
+arr[i] + arr[i+1] - brr[i]^2 (no rounding).
+arr[i+1] is assigned the maximum value between itself and the expression 
+arr[i] + arr[i+1] + brr[i]^2 (no rounding).
+
+Convergence:
+
+It's proven that after repeated operations, the values in a converge 
+to a limit for each index i.
+
+The Function F(arr, brr):
+
+This function takes arrays arr and brr and returns the limit that arr[1] 
+converges to after the infinite process.
+
+
+You're given an array brr but not arr. Additionally, you have a third array 
+crr. An array arr is considered "good" if it meets two conditions:
+
+Integer Values: All elements in a must be integers.
+
+Value Constraint: For each index i (1 <= i <= n), 0 <= arr[i] <= crr[i].
+
+Your Task:
+
+Given array crr, array brr, and threshold, count the number of 
+"good" arrays a where F(arr, brr) >= threshold . The final count needs to 
+be printed modulo 10^9 + 7 (to handle very large numbers).
+
+Input:
+
+An integer threshold.
+An vector of integers crr.
+An vector of integers brr.
+
+Output:
+
+A integer answer that consist the count of the number of 
+good" arrays a where F(arr, brr) >= threshold. The final 
+count needs to be printed modulo 10^9 + 7 (to handle very large numbers).
+
+
+Constraints:
+
+threshold : ranges from -100000 to 100000.
+crr : ranges from 2 to 100.
+brr : equal to crr.size() - 1.
+crr.size() : ranges from 0 to 100.
+brr.size() : ranges from 0 to 100.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -7,47 +75,59 @@
 #include <cassert>
 #include <stdexcept>
 
+int ConvergingArray(std::vector<int> crr, std::vector<int> brr, int threshold)
+{
 
-int ConvergingArray(std::vector<int> arr,std::vector<int> brr,int threshold){
-    
-    int num_elements = arr.size();
-    if (num_elements <= 1 or num_elements>100) {
-        throw std::invalid_argument("Invalid arr length");
+    int len = crr.size();
+    if (len <= 1 or len > 100)
+    {
+        throw std::invalid_argument("Invalid crr length");
     }
-    if (num_elements-1!=brr.size()) {
+    if (len - 1 != brr.size())
+    {
         throw std::invalid_argument("Invalid brr length");
     }
-    for(int i=0;i<num_elements;i++){
-        if(arr[i]<0 or arr[i]>100){
-            throw std::invalid_argument("Invalid arr");
+    for (int i = 0; i < len; i++)
+    {
+        if (crr[i] < 0 or crr[i] > 100)
+        {
+            throw std::invalid_argument("Invalid crr");
         }
     }
-    for(int i=0;i<num_elements-1;i++){
-        if(brr[i]<0 or brr[i]>100){
+    for (int i = 0; i < len - 1; i++)
+    {
+        if (brr[i] < 0 or brr[i] > 100)
+        {
             throw std::invalid_argument("Invalid brr");
         }
     }
-    if(threshold<-100000 or threshold>100000){
+    if (threshold < -100000 or threshold > 100000)
+    {
         throw std::invalid_argument("Invalid threshold");
     }
-    std::vector<int> elements_c(num_elements + 1);
-    for (int i = 1; i <= num_elements; i++) {
-        elements_c[i]=arr[i-1];
+    std::vector<int> elements_c(len + 1);
+    for (int i = 1; i <= len; i++)
+    {
+        elements_c[i] = crr[i - 1];
     }
     int mod = 1e9 + 7;
 
-    std::vector<int> elements_b(num_elements + 1);
-    for (int i = 2; i <= num_elements; i++) {
-        elements_b[i]=brr[i-2];
+    std::vector<int> elements_b(len + 1);
+    for (int i = 2; i <= len; i++)
+    {
+        elements_b[i] = brr[i - 2];
         elements_b[i] += elements_b[i - 1];
     }
-    std::vector<std::vector<int>> dp_table(num_elements + 1, std::vector<int>(num_elements * num_elements + 1, 0));
+    std::vector<std::vector<int>> dp_table(len + 1, std::vector<int>(len * len + 1, 0));
     dp_table[0][0] = 1;
 
     int min_value = 0, max_value = 0;
-    for (int i = 1; i <= num_elements; i++) {
-        for (int j = std::max(min_value, 0); j <= max_value; j++) {
-            for (int k = 0; k <= elements_c[i]; k++) {
+    for (int i = 1; i <= len; i++)
+    {
+        for (int j = std::max(min_value, 0); j <= max_value; j++)
+        {
+            for (int k = 0; k <= elements_c[i]; k++)
+            {
                 dp_table[i][j + k] = (dp_table[i][j + k] + dp_table[i - 1][j]) % mod;
             }
         }
@@ -55,19 +135,241 @@ int ConvergingArray(std::vector<int> arr,std::vector<int> brr,int threshold){
         max_value += elements_c[i];
     }
 
-    long long answer = 0;
-    for (int i = std::max(min_value, 0); i <= max_value; i++) {
-        answer = (answer + dp_table[num_elements][i]) % mod;
+    int answer = 0;
+    for (int i = std::max(min_value, 0); i <= max_value; i++)
+    {
+        answer = (answer + dp_table[len][i]) % mod;
     }
     return answer;
 }
 
-int main() {
-    std::vector<int> arr={2,3,4};
-    std::vector<int> brr={2,1};
-    int threshold = -1;
-    long long answer=ConvergingArray(arr,brr,threshold);
-    std::cout<<answer<<std::endl;
+int main()
+{
+    // TEST
+    std::vector<int> crr_1 = {2, 3, 4};
+    std::vector<int> brr_1 = {2, 1};
+    int threshold_1 = -1;
+    int expected_1 = 56;
+    int result_1 = ConvergingArray(crr_1, brr_1, threshold_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_2 = {1, 2};
+    std::vector<int> brr_2 = {1};
+    int threshold_2 = 0;
+    int expected_2 = 5;
+    int result_2 = ConvergingArray(crr_2, brr_2, threshold_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_3 = {1,2,3,4};
+    std::vector<int> brr_3 = {1, 2, 3};
+    int threshold_3 = 5;
+    int expected_3 = 0;
+    int result_3 = ConvergingArray(crr_3, brr_3, threshold_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_4 = {2,3,4,5};
+    std::vector<int> brr_4 = {2, 3, 5};
+    int threshold_4 = 10;
+    int expected_4 = 0;
+    int result_4 = ConvergingArray(crr_4, brr_4, threshold_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_5 = {1,2,3,4};
+    std::vector<int> brr_5 = {2,6,7};
+    int threshold_5 = 4;
+    int expected_5 = 0;
+    int result_5 = ConvergingArray(crr_5, brr_5, threshold_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_6 = {2,3,4,5};
+    std::vector<int> brr_6 = {3,2,1};
+    int threshold_6 = -1;
+    int expected_6 = 64;
+    int result_6 = ConvergingArray(crr_6, brr_6, threshold_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_7 = {2,3,4,5,6};
+    std::vector<int> brr_7 = {4,3,2,1};
+    int threshold_7 = -1;
+    int expected_7 = 0;
+    int result_7 = ConvergingArray(crr_7, brr_7, threshold_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> crr_8 = {1,2,3,4,5,6,7,8};
+    std::vector<int> brr_8 = {1,2,3,4,5,6,7};
+    int threshold_8 = 3;
+    int expected_8 =0;
+    int result_8 = ConvergingArray(crr_8, brr_8, threshold_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> crr_9 = {1,2,3,4,5,6,7,1000};
+    std::vector<int> brr_9 = {1,2,3,4,5,6,7};
+    int threshold_9 = 3;
+     try
+    {
+        ConvergingArray(crr_9, brr_9, threshold_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_10 = {1,2,3,4,5,6,7,-1};
+    std::vector<int> brr_10 = {1,2,3,4,5,6,7};
+    int threshold_10 = 3;
+     try
+    {
+        ConvergingArray(crr_10, brr_10, threshold_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_11 = {1,2,3,4,5,6,7,8};
+    std::vector<int> brr_11 = {1,2,3,4,5,6,1000};
+    int threshold_11 = 3;
+     try
+    {
+        ConvergingArray(crr_11, brr_11, threshold_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_12 = {1,2,3,4,5,6,7,8};
+    std::vector<int> brr_12 = {1,2,3,4,5,6,-1};
+    int threshold_12 = 3;
+     try
+    {
+        ConvergingArray(crr_12, brr_12, threshold_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_13(105,1);
+    std::vector<int> brr_13 = {1,2,3,4,5,6,-1};
+    int threshold_13 = 3;
+     try
+    {
+        ConvergingArray(crr_13, brr_13, threshold_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_14(100,1);
+    std::vector<int> brr_14(105,1);
+    int threshold_14 = 3;
+     try
+    {
+        ConvergingArray(crr_14, brr_14, threshold_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_15={};
+    std::vector<int> brr_15(105,1);
+    int threshold_15 = 3;
+     try
+    {
+        ConvergingArray(crr_15, brr_15, threshold_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_16={2,3};
+    std::vector<int> brr_16={};
+    int threshold_16 = 3;
+     try
+    {
+        ConvergingArray(crr_16, brr_16, threshold_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_17={2,3,4};
+    std::vector<int> brr_17={1};
+    int threshold_17 = 3;
+     try
+    {
+        ConvergingArray(crr_17, brr_17, threshold_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_18={2,3,4};
+    std::vector<int> brr_18={1};
+    int threshold_18 = 300000;
+     try
+    {
+        ConvergingArray(crr_18, brr_18, threshold_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> crr_19={2,3,4};
+    std::vector<int> brr_19={1};
+    int threshold_19 = -300000;
+     try
+    {
+        ConvergingArray(crr_19, brr_19, threshold_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
