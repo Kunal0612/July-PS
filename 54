@@ -1,0 +1,130 @@
+// https://codeforces.com/contest/1956/problem/F
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int Find(int node, std::vector<int>& par) {
+    while (node != par[node]) node = par[node] = par[par[node]];
+    return node;
+}
+
+int NeneAndThePassingGame(int len,std::vector<std::vector<int>> interval) {
+
+    if (len <= 1 or len > 2000000 or len!=interval.size())
+    {
+        throw std::invalid_argument("Invalid len length");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (interval[i][0]<0 or interval[i][0]>interval[i][1] or interval[i][1]>len)  
+        {
+            throw std::invalid_argument("Invalid Intervals");
+        }
+    }
+    int tot;
+    std::vector<int> left(len + 1), right(len + 1);
+    std::vector<int> par(2 * len + 2), srr(len + 2), trr(len + 2), pre(len + 2), suf(len + 2);
+
+    for (int i = 1; i <= 2 * len + 1; i++){
+        par[i] = i;
+    }
+    for (int i = 0; i <= len + 1; i++){
+        srr[i] = trr[i] = pre[i] = suf[i] = 0;
+    }
+
+    for (int i = 1; i <= len; i++) {
+        left[i]=interval[i-1][0];
+        right[i]=interval[i-1][1];
+        srr[std::max(1, i - right[i])]++;
+        srr[std::max(0, i - left[i]) + 1]--;
+        trr[std::min(len + 1, i + left[i])]++;
+        trr[std::min(len, i + right[i]) + 1]--;
+    }
+
+    tot = len;
+    for (int i = 1; i <= len; i++) {
+        srr[i] += srr[i - 1];
+        trr[i] += trr[i - 1];
+        if (srr[i] && trr[i]){
+            suf[i] = pre[i] = ++tot;
+        }
+    }
+
+    suf[len + 1] = 0;
+    for (int i = 1; i <= len; i++){
+        pre[i] = (pre[i] ? pre[i] : pre[i - 1]);
+    }
+    for (int i = len; i >= 1; i--){
+        suf[i] = (suf[i] ? suf[i] : suf[i + 1]);
+    }
+
+    for (int i = 1; i <= len; i++) {
+        int lft = std::max(1, i - right[i]), rgt = std::max(0, i - left[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt) {
+                for (int j = Find(lft, par); j < rgt; j = Find(j, par)){
+                    par[j] = j + 1;
+                }
+            }
+        }
+        lft = std::min(len + 1, i + left[i]);
+        rgt = std::min(len, i + right[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt) {
+                for (int j = Find(lft, par); j < rgt; j = Find(j, par)){
+                    par[j] = j + 1;
+                }
+            }
+        }
+    }
+
+    for (int i = 1; i <= len; i++) {
+        int lft = std::max(1, i - right[i]), rgt = std::max(0, i - left[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt){
+                par[Find(i, par)] = Find(lft, par);
+            }
+        }
+        lft = std::min(len + 1, i + left[i]);
+        rgt = std::min(len, i + right[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt) {
+                par[Find(i, par)] = Find(lft, par);
+            }
+        }
+    }
+
+    int ans = 0;
+    for (int i = 1; i <= tot; i++){
+        if (par[i] == i){
+            ans++;
+        }
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+
+    return 0;
+}
