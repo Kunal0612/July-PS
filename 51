@@ -1,0 +1,91 @@
+// https://codeforces.com/problemset/problem/1716/F
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+int Add(int first, int sec) {
+    int mod = 998244353;
+    first += sec;
+    while (first >= mod) first -= mod;
+    while (first < 0) first += mod;
+    return first;
+}
+
+int Sub(int first, int sec) {
+    return Add(first, -sec);
+}
+
+int Mul(int first, int sec) {
+    int mod = 998244353;
+    return (first * 1ll * sec) % mod;
+}
+
+int BinPow(int base, int exp) {
+    int result = 1;
+    while (exp > 0) {
+        if (exp % 2 == 1) result = Mul(result, base);
+        base = Mul(base, base);
+        exp /= 2;
+    }
+    return result;
+}
+
+int inv(int first) {
+    int mod = 998244353;
+    return BinPow(first, mod - 2);
+}
+
+int divide(int first, int sec) {
+    return Mul(first, inv(sec));
+}
+
+std::vector<std::vector<int>> Precalc() {
+    int n_max = 2043;
+    std::vector<std::vector<int>> dp(n_max, std::vector<int>(n_max, 0));
+    dp[1][1] = 1;
+    for (int i = 1; i < n_max - 1; i++) {
+        for (int j = 1; j <= i; j++) {
+            dp[i + 1][j] = Add(dp[i + 1][j], Mul(dp[i][j], j));
+            dp[i + 1][j + 1] = Add(dp[i + 1][j + 1], dp[i][j]);
+        }
+    }
+    return dp;
+}
+
+int BagsWithBalls(int len, int lem, int k_value) {
+    std::vector<std::vector<int>> dp = Precalc();
+    int way_chosen = (lem / 2) + (lem % 2);
+    int cur_a = len;
+    int ans = 0;
+    int ways_chosen = way_chosen;
+    int ways_other = BinPow(lem, len - 1);
+    int inv_m = inv(lem);
+    for (int i = 1; i <= k_value; i++) {
+        ans = Add(ans, Mul(Mul(cur_a, dp[k_value][i]), Mul(ways_chosen, ways_other)));
+        cur_a = Mul(cur_a, Sub(len, i));
+        ways_chosen = Mul(way_chosen, ways_chosen);
+        ways_other = Mul(ways_other, inv_m);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    int testCases;
+    std::cin >> testCases;
+    
+    for (int i = 0; i < testCases; i++) {
+        int len, lem, k_value;
+        std::cin >> len >> lem >> k_value;
+        std::cout << BagsWithBalls(len, lem, k_value) << std::endl;
+    }
+}
