@@ -1,4 +1,54 @@
-// https://codeforces.com/problemset/problem/1765/C
+/*
+
+https://codeforces.com/problemset/problem/1765/C
+
+Write a C++ Solution CardGuessing to find the expected number of correct 
+guesses Monocarp makes after drawing all 4*num cards from the deck.
+
+
+Consider a deck of cards. Each card has one of 4 suits, and there are exactly 
+num cards for each suit — so, the total number of cards in the deck is 4*num. 
+The deck is shuffled randomly so that each of (4*num)! possible orders of cards 
+in the deck has the same probability of being the result of shuffling. 
+Let c_i be the i-th card of the deck (from top to bottom).
+
+Monocarp starts drawing the cards from the deck one by one. Before drawing a card, 
+he tries to guess its suit. Monocarp remembers the suits of the k_value
+last cards, and his guess is the suit that appeared the least often among the last 
+k_value cards he has drawn. So, while drawing the i-th 
+card, Monocarp guesses that its suit is the suit that appears the minimum number 
+of times among the cards c[i−k_value],c[i−k_value+1],…,c[i−1](if i≤k_value, 
+Monocarp considers all previously drawn cards, that is, the cards c[1],c[2],…,c[i−1]). 
+
+If there are multiple suits that appeared the minimum number of times among the 
+previous cards Monocarp remembers, he chooses a random suit out of those for 
+his guess (all suits that appeared the minimum number of times have the same 
+probability of being chosen).
+
+After making a guess, Monocarp draws a card and compares its suit to his guess. 
+If they match, then his guess was correct; otherwise it was incorrect.
+
+Your task is to calculate the expected number of correct guesses Monocarp makes 
+after drawing all 4*num cards from the deck.
+
+Input:
+
+An integer num.
+An integer k_value.
+
+Output:
+
+A integer ans that consist the expected number of correct guesses Monocarp makes after drawing all 4*num cards from the deck.
+
+Constraints:
+
+num : ranges from 1 to 500.
+k_value : ranges from 1 to 4*num.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 
 #include <iostream>
@@ -40,13 +90,13 @@ int Combination(int num, int choose, const std::vector<int>& factorials, const s
 }
 
 
-int CardGuessing(int num_elements,int k_value){
-    if(num_elements<1 or num_elements>500 or k_value<1 or k_value>4*num_elements){
+int CardGuessing(int num,int k_value){
+    if(num<1 or num>500 or k_value<1 or k_value>4*num){
         throw std::invalid_argument("Invalid Constraints");
     }
     int mod = 998244353;
-    std::vector<int> factorials(4 * num_elements + 1);
-    std::vector<int> inverse_factorials(4 * num_elements + 1);
+    std::vector<int> factorials(4 * num + 1);
+    std::vector<int> inverse_factorials(4 * num + 1);
 
     factorials[0] = 1;
     for (int index = 1; index < factorials.size(); ++index) {
@@ -58,21 +108,21 @@ int CardGuessing(int num_elements,int k_value){
         inverse_factorials[index] = Mul(inverse_factorials[index + 1], index + 1);
     }
 
-    std::vector<std::vector<int>> precompute_values(num_elements + 1, std::vector<int>(5));
-    for (int index = 0; index <= num_elements; ++index) {
+    std::vector<std::vector<int>> precompute_values(num + 1, std::vector<int>(5));
+    for (int index = 0; index <= num; ++index) {
         for (int t_index = 0; t_index < 5; ++t_index) {
-            precompute_values[index][t_index] = Mul(BinPow(Combination(num_elements, index,factorials,inverse_factorials), t_index), inverse_factorials[t_index]);
+            precompute_values[index][t_index] = Mul(BinPow(Combination(num, index,factorials,inverse_factorials), t_index), inverse_factorials[t_index]);
         }
     }
 
-    std::vector<std::vector<std::vector<int>>> dp_table(2, std::vector<std::vector<int>>(4 * num_elements + 1, std::vector<int>(5)));
+    std::vector<std::vector<std::vector<int>>> dp_table(2, std::vector<std::vector<int>>(4 * num + 1, std::vector<int>(5)));
 
-    for (int index = 0; index <= num_elements; ++index) {
+    for (int index = 0; index <= num; ++index) {
         int current_index = index & 1;
         int next_index = current_index ^ 1;
-        dp_table[next_index] = std::vector<std::vector<int>>(4 * num_elements + 1, std::vector<int>(5));
+        dp_table[next_index] = std::vector<std::vector<int>>(4 * num + 1, std::vector<int>(5));
         for (int t_index = 1; t_index <= 4; ++t_index) {
-            dp_table[next_index][index * t_index][t_index] = Mul(num_elements - index, precompute_values[index][t_index]);
+            dp_table[next_index][index * t_index][t_index] = Mul(num - index, precompute_values[index][t_index]);
         }
         for (int j_index = 0; j_index <= k_value; ++j_index) {
             for (int p_index = 1; p_index <= 4; ++p_index) {
@@ -91,9 +141,9 @@ int CardGuessing(int num_elements,int k_value){
         final_answer = Add(final_answer, Mul(
             Mul(
                 Mul(
-                    sum_index < k_value ? 1 : 4 * num_elements - k_value,
-                    dp_table[(num_elements & 1) ^ 1][sum_index][4]),
-                Mul(BinPow(4 * num_elements - sum_index, mod - 2), Mul(inverse_factorials[4 * num_elements], factorials[4 * num_elements - sum_index]))),
+                    sum_index < k_value ? 1 : 4 * num - k_value,
+                    dp_table[(num & 1) ^ 1][sum_index][4]),
+                Mul(BinPow(4 * num - sum_index, mod - 2), Mul(inverse_factorials[4 * num], factorials[4 * num - sum_index]))),
             Mul(factorials[4], factorials[sum_index])
         ));
     }
@@ -109,8 +159,133 @@ int CardGuessing(int num_elements,int k_value){
 #include <stdexcept>
 
 int main() {
-    int ans=CardGuessing(3,2);
-    std::cout << ans << std::endl;
+    // TEST
+    int num_1 = 3, k_value_1 = 2;
+    int expected_1 = 567184295;
+    int result_1 = CardGuessing(num_1, k_value_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 1, k_value_2 = 1;
+    int expected_2 = 748683266;
+    int result_2 = CardGuessing(num_2, k_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 10, k_value_3 = 5;
+    int expected_3 =397530062;
+    int result_3 = CardGuessing(num_3, k_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 20, k_value_4 = 10;
+    int expected_4 = 89940351;
+    int result_4 = CardGuessing(num_4, k_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 50, k_value_5 = 25;
+    int expected_5 = 206710042;
+    int result_5 = CardGuessing(num_5, k_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 100, k_value_6 = 50;
+    int expected_6 = 773490215;
+    int result_6 = CardGuessing(num_6, k_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 30, k_value_7 = 15;
+    int expected_7 = 297655347;
+    int result_7 = CardGuessing(num_7, k_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 40, k_value_8 = 20;
+    int expected_8 = 271527093;
+    int result_8 = CardGuessing(num_8, k_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = 40, k_value_9 = 205;
+    try
+    {
+        CardGuessing(num_9, k_value_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = 40, k_value_10 = 0;
+    try
+    {
+        CardGuessing(num_10, k_value_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = 40, k_value_11 = -2;
+    try
+    {
+        CardGuessing(num_11, k_value_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_12 = 0, k_value_12 = -2;
+    try
+    {
+        CardGuessing(num_12, k_value_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_13 = -5, k_value_13 = -2;
+    try
+    {
+        CardGuessing(num_13, k_value_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_14 = 1000000004, k_value_14 = -2;
+    try
+    {
+        CardGuessing(num_14, k_value_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
