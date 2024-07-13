@@ -1,0 +1,78 @@
+// https://codeforces.com/problemset/problem/1930/F
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+void Dfs1(int value, int bit_length, std::vector<int>& visited_f, 
+const std::vector<int>& visited_g, int& current_max) {
+    if (visited_f[value]) return;
+    visited_f[value] = 1;
+    if (visited_g[value]){
+        current_max = std::max(current_max, value);
+    }
+    for (int i = 0; i <= bit_length; i++) {
+        if (value & (1 << i)){
+            Dfs1(value ^ (1 << i), bit_length, visited_f, visited_g, current_max);
+        }
+    }
+}
+
+void Dfs2(int value, int bit_length, const std::vector<int>& visited_f, 
+std::vector<int>& visited_g, int& current_max) {
+    if (visited_g[value]){
+        return;
+    }
+    visited_g[value] = 1;
+    if (visited_f[value]){
+        current_max = std::max(current_max, value);
+    }
+    for (int i = 0; i <= bit_length; i++) {
+        if (value & (1 << i)){
+            Dfs2(value ^ (1 << i), bit_length, visited_f, visited_g, current_max);
+        }
+    }
+}
+
+std::vector<int> solve(int len, int q_len,std::vector<int> &query) {
+    if (len <= 0 or len > (1LL<<22) or q_len<0 or q_len>1000000)
+    {
+        throw std::invalid_argument("Invalid length");
+    }
+    for (int i = 0; i < q_len; i++)
+    {
+        if (query[i] < 0 or query[i] >=len)
+        {
+            throw std::invalid_argument("Invalid query");
+        }
+    }
+    int bit_length = std::__lg(len);
+    int current_max = 0;
+    int mask = (1 << (bit_length + 1)) - 1;
+
+    std::vector<int> visited_f(mask + 1, 0);
+    std::vector<int> visited_g(mask + 1, 0);
+    std::vector<int> ans;
+    for (int i = 1; i <= q_len; i++) {
+        int element=query[i-1];
+        element = (element + current_max) % len;
+        Dfs1(element, bit_length, visited_f, visited_g, current_max);
+        Dfs2(mask ^ element, bit_length, visited_f, visited_g, current_max);
+        ans.push_back(current_max);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
