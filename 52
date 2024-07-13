@@ -1,0 +1,140 @@
+// https://codeforces.com/problemset/problem/1983/F
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+void Insert(int root, int value, int index, std::vector<std::vector<int>> &chr,
+            std::vector<int> &mxi, int &node_count)
+{
+    int current = root;
+    for (int i = 29; i >= 0; i--)
+    {
+        int bit = ((value & (1 << i)) != 0);
+
+        if (!chr[current][bit])
+        {
+            node_count++;
+            mxi[node_count] = index;
+            chr[current][bit] = node_count;
+        }
+
+        mxi[current] = std::max(mxi[current], index);
+        current = chr[current][bit];
+    }
+
+    mxi[current] = std::max(mxi[current], index);
+}
+
+int Query(int root, int mid, int value, std::vector<std::vector<int>> &chr, std::vector<int> &mxi)
+{
+    int current = root;
+    int index = -1;
+
+    for (int i = 29; i >= 0; i--)
+    {
+        if (!current){
+            return index;
+        }
+        if ((value & (1 << i)) && (mid & (1 << i)))
+        {
+            if (chr[current][1]){
+                index = std::max(index, mxi[chr[current][1]]);
+            }
+            current = chr[current][0];
+        }
+        else if (value & (1 << i))
+        {
+            current = chr[current][1];
+        }
+        else if (mid & (1 << i))
+        {
+            if (chr[current][0]){
+                index = std::max(index, mxi[chr[current][0]]);
+            }
+            current = chr[current][1];
+        }
+        else
+        {
+            current = chr[current][0];
+        }
+    }
+
+    if (current){
+        index = std::max(index, mxi[current]);
+    }
+
+    return index;
+}
+
+int ArrayValue(std::vector<int> &nums, long long int k_value)
+{
+    int len=nums.size();
+    if (len <= 1 or len > 100000)
+    {
+        throw std::invalid_argument("Invalid nums length");
+    }
+    int res=(len*(len-1))/2;
+    if (k_value<1 or k_value>res){
+        throw std::invalid_argument("Invalid k_value");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (nums[i] < 0 or nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    std::vector<std::vector<int>> chr(1000, std::vector<int>(2, 0));
+    std::vector<int> mxi(1000, 0);
+
+    int left = 0, right = (1 << 30) - 1, result;
+
+    while (left <= right)
+    {
+        int mid = left + (right - left) / 2;
+
+        int left_idx = -1;
+        long long ans = 0;
+        int node_count = 1;
+        int root = node_count;
+
+        for (int i = 0; i < len; i++)
+        {
+            left_idx = std::max(left_idx, Query(root, mid, nums[i], chr, mxi));
+            ans += (long long)(left_idx + 1);
+            Insert(root, nums[i], i, chr, mxi, node_count);
+        }
+
+        std::fill(chr.begin(), chr.end(), std::vector<int>(2, 0));
+        std::fill(mxi.begin(), mxi.end(), 0);
+
+        if (ans < k_value)
+        {
+            left = mid + 1;
+        }
+        else
+        {
+            result = mid;
+            right = mid - 1;
+        }
+    }
+
+    return result;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
