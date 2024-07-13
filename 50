@@ -1,0 +1,73 @@
+// https://codeforces.com/problemset/problem/1540/C1
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+int ConvergingArray(std::vector<int> arr,std::vector<int> brr,int threshold){
+    
+    int num_elements = arr.size();
+    if (num_elements <= 1 or num_elements>100) {
+        throw std::invalid_argument("Invalid arr length");
+    }
+    if (num_elements-1!=brr.size()) {
+        throw std::invalid_argument("Invalid brr length");
+    }
+    for(int i=0;i<num_elements;i++){
+        if(arr[i]<0 or arr[i]>100){
+            throw std::invalid_argument("Invalid arr");
+        }
+    }
+    for(int i=0;i<num_elements-1;i++){
+        if(brr[i]<0 or brr[i]>100){
+            throw std::invalid_argument("Invalid brr");
+        }
+    }
+    if(threshold<-100000 or threshold>100000){
+        throw std::invalid_argument("Invalid threshold");
+    }
+    std::vector<int> elements_c(num_elements + 1);
+    for (int i = 1; i <= num_elements; i++) {
+        elements_c[i]=arr[i-1];
+    }
+    int mod = 1e9 + 7;
+
+    std::vector<int> elements_b(num_elements + 1);
+    for (int i = 2; i <= num_elements; i++) {
+        elements_b[i]=brr[i-2];
+        elements_b[i] += elements_b[i - 1];
+    }
+    std::vector<std::vector<int>> dp_table(num_elements + 1, std::vector<int>(num_elements * num_elements + 1, 0));
+    dp_table[0][0] = 1;
+
+    int min_value = 0, max_value = 0;
+    for (int i = 1; i <= num_elements; i++) {
+        for (int j = std::max(min_value, 0); j <= max_value; j++) {
+            for (int k = 0; k <= elements_c[i]; k++) {
+                dp_table[i][j + k] = (dp_table[i][j + k] + dp_table[i - 1][j]) % mod;
+            }
+        }
+        min_value += elements_b[i] + threshold;
+        max_value += elements_c[i];
+    }
+
+    long long answer = 0;
+    for (int i = std::max(min_value, 0); i <= max_value; i++) {
+        answer = (answer + dp_table[num_elements][i]) % mod;
+    }
+    return answer;
+}
+
+int main() {
+    std::vector<int> arr={2,3,4};
+    std::vector<int> brr={2,1};
+    int threshold = -1;
+    long long answer=ConvergingArray(arr,brr,threshold);
+    std::cout<<answer<<std::endl;
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
