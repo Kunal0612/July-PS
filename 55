@@ -41,7 +41,6 @@ Output: Print the calculated f(a) value for each query.
 Input:
 
 An integer len.
-An integer q_len.
 A vector of integers query.
 
 Output:
@@ -51,7 +50,7 @@ An vector of integer ans to find f(a) value for each query.
 Constraints:
 
 len : ranges from 1 to 2^22.
-q_len : ranges from 1 to 1000000.
+query.size() : ranges from 1 to 1000000.
 query : ranges from 0 to len.
 
 
@@ -66,44 +65,56 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <cassert>
 #include <stdexcept>
 
-void Dfs1(int value, int bit_length, std::vector<int>& visited_f, 
-const std::vector<int>& visited_g, int& current_max) {
-    if (visited_f[value]) return;
+void Dfs1(int value, int bit_length, std::vector<int> &visited_f,
+          const std::vector<int> &visited_g, int &current_max)
+{
+    if (visited_f[value])
+        return;
     visited_f[value] = 1;
-    if (visited_g[value]){
+    if (visited_g[value])
+    {
         current_max = std::max(current_max, value);
     }
-    for (int i = 0; i <= bit_length; i++) {
-        if (value & (1 << i)){
+    for (int i = 0; i <= bit_length; i++)
+    {
+        if (value & (1 << i))
+        {
             Dfs1(value ^ (1 << i), bit_length, visited_f, visited_g, current_max);
         }
     }
 }
 
-void Dfs2(int value, int bit_length, const std::vector<int>& visited_f, 
-std::vector<int>& visited_g, int& current_max) {
-    if (visited_g[value]){
+void Dfs2(int value, int bit_length, const std::vector<int> &visited_f,
+          std::vector<int> &visited_g, int &current_max)
+{
+    if (visited_g[value])
+    {
         return;
     }
     visited_g[value] = 1;
-    if (visited_f[value]){
+    if (visited_f[value])
+    {
         current_max = std::max(current_max, value);
     }
-    for (int i = 0; i <= bit_length; i++) {
-        if (value & (1 << i)){
+    for (int i = 0; i <= bit_length; i++)
+    {
+        if (value & (1 << i))
+        {
             Dfs2(value ^ (1 << i), bit_length, visited_f, visited_g, current_max);
         }
     }
 }
 
-std::vector<int> MaximizeTheDifference(int len, int q_len,std::vector<int> &query) {
-    if (len <= 0 or len > (1LL<<22) or q_len<0 or q_len>1000000)
+std::vector<int> MaximizeTheDifference(int len, std::vector<int> &query)
+{
+    int q_len = query.size();
+    if (len <= 0 or len > (1LL << 22) or q_len < 1 or q_len > 1000000)
     {
         throw std::invalid_argument("Invalid length");
     }
     for (int i = 0; i < q_len; i++)
     {
-        if (query[i] < 0 or query[i] >=len)
+        if (query[i] < 0 or query[i] >= len)
         {
             throw std::invalid_argument("Invalid query");
         }
@@ -115,8 +126,9 @@ std::vector<int> MaximizeTheDifference(int len, int q_len,std::vector<int> &quer
     std::vector<int> visited_f(mask + 1, 0);
     std::vector<int> visited_g(mask + 1, 0);
     std::vector<int> ans;
-    for (int i = 1; i <= q_len; i++) {
-        int element=query[i-1];
+    for (int i = 1; i <= q_len; i++)
+    {
+        int element = query[i - 1];
         element = (element + current_max) % len;
         Dfs1(element, bit_length, visited_f, visited_g, current_max);
         Dfs2(mask ^ element, bit_length, visited_f, visited_g, current_max);
@@ -131,8 +143,162 @@ std::vector<int> MaximizeTheDifference(int len, int q_len,std::vector<int> &quer
 #include <cassert>
 #include <stdexcept>
 
-int main() {
-    
+int main()
+{
+    // TEST
+    int len_1 = 5;
+    std::vector<int> query_1 = {2, 1};
+    std::vector<int> expected_1 = {0, 2};
+    std::vector<int> result_1 = MaximizeTheDifference(len_1, query_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int len_2 = 10;
+    std::vector<int> query_2 = {3, 5, 9};
+    std::vector<int> expected_2 = {0, 4, 4};
+    std::vector<int> result_2 = MaximizeTheDifference(len_2, query_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int len_3 = 7;
+    std::vector<int> query_3 = {0, 6};
+    std::vector<int> expected_3 = {0, 6};
+    std::vector<int> result_3 = MaximizeTheDifference(len_3, query_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int len_4 = 4;
+    std::vector<int> query_4 = {1, 3};
+    std::vector<int> expected_4 = {0, 2};
+    std::vector<int> result_4 = MaximizeTheDifference(len_4, query_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int len_5 = 8;
+    std::vector<int> query_5 = {7, 0};
+    std::vector<int> expected_5 = {0, 7};
+    std::vector<int> result_5 = MaximizeTheDifference(len_5, query_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int len_6 = 15;
+    std::vector<int> query_6 = {8, 14};
+    std::vector<int> expected_6 = {0, 6};
+    std::vector<int> result_6 = MaximizeTheDifference(len_6, query_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int len_7 = 6;
+    std::vector<int> query_7 = {5, 2};
+    std::vector<int> expected_7 = {0, 5};
+    std::vector<int> result_7 = MaximizeTheDifference(len_7, query_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int len_8 = 9;
+    std::vector<int> query_8 = {1, 8, 4};
+    std::vector<int> expected_8 = {0, 8, 8};
+    std::vector<int> result_8 = MaximizeTheDifference(len_8, query_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int len_9 = 0;
+    std::vector<int> query_9 = {1, 9, 4};
+     try
+    {
+        MaximizeTheDifference(len_9, query_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_10 = 1<<23;
+    std::vector<int> query_10 = {1, 10, 4};
+     try
+    {
+        MaximizeTheDifference(len_10, query_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_11 = -1;
+    std::vector<int> query_11 = {1, 11, 4};
+     try
+    {
+        MaximizeTheDifference(len_11, query_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_12 = 5;
+    std::vector<int> query_12 = {-1};
+     try
+    {
+        MaximizeTheDifference(len_12, query_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_13 = 5;
+    std::vector<int> query_13 = {5};
+     try
+    {
+        MaximizeTheDifference(len_13, query_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_14 = 5;
+    std::vector<int> query_14 = {};
+     try
+    {
+        MaximizeTheDifference(len_14, query_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_15 = 5;
+    std::vector<int> query_15 = {5};
+     try
+    {
+        MaximizeTheDifference(len_15, query_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
