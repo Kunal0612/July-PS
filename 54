@@ -1,5 +1,27 @@
-// https://codeforces.com/contest/1956/problem/E2
-
+/*
+https://codeforces.com/contest/1956/problem/E2
+Write a C++ Solution ArrayValue to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+Nene is in a battle against len monsters arranged in a circle. Each monster is assigned an energy level nums_i (1 <= i <= n). Faced with these formidable opponents, Nene decides to use a special spell called "Attack Your Neighbour."
+The Attack Your Neighbour Spell:
+When Nene casts this spell, a series of attacks occur in a specific order:
+Monster 1 attacks Monster 2.
+Monster 2 attacks Monster 3. ... n-1. Monster (n-1) attacks Monster n. n. Monster n attacks Monster 1 (back to the beginning).
+Attack Mechanics:
+During an attack, the following happens:
+Monster with energy x attacks Monster with energy y.
+The defending monster's (Monster y) energy level becomes max(0, y - x).
+The attacking monster's (Monster x) energy remains unchanged.
+Nene's Challenge:
+Nene plans to cast the "Attack Your Neighbour" spell 10100 times. Your task is to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+Input:
+A vector of integers nums.
+Output:
+A vector of integer ans to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+Constraints:
+nums.size() : ranges from 2 to 100000.
+nums : ranges from 0 to 10^9.
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+*/
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -8,8 +30,6 @@
 #include <functional>
 #include <cassert>
 #include <stdexcept>
-
-
 bool Check(int len, std::vector<int>& arr) {
     arr[len + 1] = arr[1];
     arr[len + 2] = arr[2];
@@ -21,12 +41,10 @@ bool Check(int len, std::vector<int>& arr) {
     }
     return false;
 }
-
 long long Attack(long long first, long long sec) {
     long long k_value = first / sec;
     return (2 * first - (k_value + 1) * sec) * k_value / 2;
 }
-
 std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
     int len=nums.size();
     if (len <= 1 or len > 200000)
@@ -42,11 +60,10 @@ std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
     }
     std::vector<int> arr(len + 4, 0);
     std::vector<bool> brr(len + 1, false);
-
+    
     for (int i = 1; i <= len; i++) {
         arr[i]=nums[i-1];
     }
-
     if (len == 2) {
         while (arr[1] && arr[2]) {
             arr[2] = std::max(0, arr[2] - arr[1]);
@@ -70,9 +87,7 @@ std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
                 arr[i % len + 1] = std::max(0, arr[i % len + 1] - arr[i]);
             }
         }
-
         for (int i = 1; i <= len; i++) brr[i] = false;
-
         for (int p = 1; p <= len; p++) {
             if (arr[p] && arr[p % len + 1]) {
                 arr[p % len + 1] = std::max(0, arr[p % len + 1] - arr[p]);
@@ -80,7 +95,6 @@ std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
                 break;
             }
         }
-
         for (int i = 1; i <= len; i++) {
             if (!arr[i] && arr[i % len + 1]) {
                 brr[i % len + 1] = true;
@@ -96,7 +110,6 @@ std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
     };
     return ans;
 }
-
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -108,8 +121,123 @@ std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
 
 
 int main() {
+     // TEST
+    std::vector<int> nums_1 = {1, 1, 1, 1, 1, 1};
+    std::vector<int> expected_1 = {1,3,5};
+    std::vector<int> result_1 = NeneVsMonsters(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
+    // TES
+    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    std::vector<int> expected_2 = {2, 5, 7, 9};
+    std::vector<int> result_2 = NeneVsMonsters(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
 
+    // TEST
+    std::vector<int> nums_3 = {1000,2};
+    std::vector<int> expected_3 = {1};
+    std::vector<int> result_3 = NeneVsMonsters(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    std::vector<int> expected_4 = {2, 4};
+    std::vector<int> result_4 = NeneVsMonsters(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    std::vector<int> expected_5 = {2, 4};
+    std::vector<int> result_5 = NeneVsMonsters(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    std::vector<int> expected_6 = {1, 3, 5};
+    std::vector<int> result_6 = NeneVsMonsters(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    std::vector<int> expected_7 = {3, 5};
+    std::vector<int> result_7 = NeneVsMonsters(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    std::vector<int> expected_8 = {3, 5, 7};
+    std::vector<int> result_8 = NeneVsMonsters(nums_8);
+
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {-1};
+    try
+    {
+        NeneVsMonsters(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(600000,0);
+    try
+    {
+        NeneVsMonsters(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        NeneVsMonsters(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,1000000005);
+    try
+    {
+        NeneVsMonsters(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        NeneVsMonsters(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
