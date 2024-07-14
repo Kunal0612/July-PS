@@ -1,4 +1,43 @@
-// https://codeforces.com/problemset/problem/1983/F
+/*
+
+https://codeforces.com/problemset/problem/1716/F
+
+Write a C++ Solution ArrayValue to find the k-th smallest value among all subarray values calculated for subarrays of length at least 2 in the given array nums.
+
+
+You're given an array of non-negative integers nums[1], nums[2], ..., nums[len]. We define a new value for each subarray of length at least 2:
+
+Subarray Value: nums[l, r] (where l and r represent starting and ending indices) is the minimum XOR (exclusive-or) of any two elements nums[i] and nums[j] within the subarray, considering l <= i < j <= r.
+
+XOR Operation:
+
+The XOR operation (^ or ⊕) is a bitwise operation that returns 1 if the corresponding bits of the operands are different and 0 if they are the same.
+
+The Challenge:
+
+Your task is to find the k-th smallest value among all subarray values calculated for subarrays of length at least 2 in the given array a.
+
+
+Input:
+
+A vector of integers nums.
+A long long integer k_value.
+
+Output:
+
+A integer result that consist the k-th smallest value among all subarray values calculated for subarrays of length at least 2 in the given array nums.
+
+Constraints:
+
+nums.size() : ranges from 2 to 100000.
+nums : ranges from 0 to 10^9.
+k_value : ranges from 1 to (len*(len-1))/2.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 
 #include <iostream>
