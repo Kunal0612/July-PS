@@ -1,4 +1,44 @@
-// https://codeforces.com/contest/1956/problem/F
+/*
+
+https://codeforces.com/contest/1956/problem/F
+
+Write a C++ Solution NeneAndThePassingGame to determine the minimum number of rounds of assessment Nene needs to complete her work.
+
+Nene, a basketball coach, is training len players (numbered 1 to len). Each player has an "arm interval" [l_i, r_i]. Two players i and j can pass the ball to each other if and only if the absolute value of the difference between their player numbers (|i - j|) falls within the range [l_i + l_j, r_i + r_j].
+
+Nene's Challenge:
+
+Nene wants to assess her team's cooperation skills by organizing several rounds of passing drills. In each round, she selects a sequence of players (p_1, p_2, ..., p_m) such that:
+
+Consecutive Players Can Pass: Any two consecutive players (p_i and p_{i+1}) in the sequence can pass the ball to each other based on their arm intervals.
+Sequence Length: Nene can choose the length m of the sequence.
+Player Participation: Each player can appear in the sequence multiple times or not at all.
+
+The Goal:
+
+Nene wants every player (all len players) to participate in at least one round of assessment. However, she has a date after school, so she wants to minimize the total number of rounds needed to achieve this goal.
+
+The
+
+Input:
+
+An integer len.
+A vector of vector of integer interval.
+
+Output:
+
+An integer ans to determine the minimum number of rounds of assessment Nene needs to complete her work.
+
+Constraints:
+
+len : ranges from 1 to 2000000.
+interval : interval[i][0] ranges from 1 to interval[i][1] , interval[i][1] ranges from interval[i][0] to len.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
