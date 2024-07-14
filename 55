@@ -1,4 +1,64 @@
-// https://codeforces.com/problemset/problem/1930/F
+/*
+
+https://codeforces.com/problemset/problem/1930/F
+
+Write a C++ Solution MaximizeTheDifference to find f(a) value for each query.
+
+You're given an array b of m non-negative integers. We define a function f(b) that calculates a value based on another non-negative integer x.
+
+f(b) Calculation:
+
+f(b) is the maximum value obtained across all possible values of x by finding the difference between the following two expressions:
+
+max(i=1,m) (b_i | x): This expression finds the maximum bitwise OR (denoted by |) among all elements b_i in the array when bitwise OR'd with x.
+min(i=1,m) (b_i | x): This expression finds the minimum bitwise OR among all elements b_i in the array when bitwise OR'd with x.
+
+The Challenge:
+
+You're provided with two integers len and q_len:
+
+len: Represents a range of non-negative integer values (0 to len-1).
+q_len: Represents the number of queries to be processed.
+
+Query Processing:
+
+You'll be given q_len queries in a modified format:
+
+Encrypted Value (query_i): You'll receive an integer query_i (0 <= query_i < len).
+
+Decrypting the Value: The actual value v_i for the i-th query is calculated as (query_i + last_i) % n, where last_i represents the output of the previous query (or 0 for the first query).
+
+Essentially, the encrypted value query_i is combined with the previous output using the modulo operation (%) to obtain the actual value v_i for processing.
+
+The Task:
+
+Your program needs to handle the following for each query:
+
+Append v_i: Add the value v_i to the end of an initially empty array a.
+Calculate f(a): Find the maximum value of f(a) using the updated array a and considering all possible values of x.
+Output: Print the calculated f(a) value for each query.
+
+Input:
+
+An integer len.
+An integer q_len.
+A vector of integers query.
+
+Output:
+
+An vector of integer ans to find f(a) value for each query.
+
+Constraints:
+
+len : ranges from 1 to 2^22.
+q_len : ranges from 1 to 1000000.
+query : ranges from 0 to len.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -36,7 +96,7 @@ std::vector<int>& visited_g, int& current_max) {
     }
 }
 
-std::vector<int> solve(int len, int q_len,std::vector<int> &query) {
+std::vector<int> MaximizeTheDifference(int len, int q_len,std::vector<int> &query) {
     if (len <= 0 or len > (1LL<<22) or q_len<0 or q_len>1000000)
     {
         throw std::invalid_argument("Invalid length");
