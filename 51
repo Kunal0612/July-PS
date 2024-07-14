@@ -51,49 +51,64 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 #include <cassert>
 #include <stdexcept>
 
-
-int Add(int first, int sec) {
+int Add(int first, int sec)
+{
     int mod = 998244353;
     first += sec;
-    while (first >= mod) first -= mod;
-    while (first < 0) first += mod;
+    while (first >= mod){
+        first -= mod;
+    }
+    while (first < 0){
+        first += mod;
+    }
     return first;
 }
 
-int Sub(int first, int sec) {
+int Sub(int first, int sec)
+{
     return Add(first, -sec);
 }
 
-int Mul(int first, int sec) {
+int Mul(int first, int sec)
+{
     int mod = 998244353;
     return (first * 1ll * sec) % mod;
 }
 
-int BinPow(int base, int exp) {
+int BinPow(int base, int exp)
+{
     int result = 1;
-    while (exp > 0) {
-        if (exp % 2 == 1) result = Mul(result, base);
+    while (exp > 0)
+    {
+        if (exp % 2 == 1){
+            result = Mul(result, base);
+        }
         base = Mul(base, base);
         exp /= 2;
     }
     return result;
 }
 
-int Inv(int first) {
+int Inv(int first)
+{
     int mod = 998244353;
     return BinPow(first, mod - 2);
 }
 
-int Divide(int first, int sec) {
+int Divide(int first, int sec)
+{
     return Mul(first, Inv(sec));
 }
 
-std::vector<std::vector<int>> Precalc() {
+std::vector<std::vector<int>> Precalc()
+{
     int n_max = 2043;
     std::vector<std::vector<int>> dpp(n_max, std::vector<int>(n_max, 0));
     dpp[1][1] = 1;
-    for (int i = 1; i < n_max - 1; i++) {
-        for (int j = 1; j <= i; j++) {
+    for (int i = 1; i < n_max - 1; i++)
+    {
+        for (int j = 1; j <= i; j++)
+        {
             dpp[i + 1][j] = Add(dpp[i + 1][j], Mul(dpp[i][j], j));
             dpp[i + 1][j + 1] = Add(dpp[i + 1][j + 1], dpp[i][j]);
         }
@@ -101,7 +116,8 @@ std::vector<std::vector<int>> Precalc() {
     return dpp;
 }
 
-int BagsWithBalls(int len, int lem, int k_value) {
+int BagsWithBalls(int len, int lem, int k_value)
+{
     if (len <= 0 or len > 998244352)
     {
         throw std::invalid_argument("Invalid len");
@@ -121,7 +137,8 @@ int BagsWithBalls(int len, int lem, int k_value) {
     int ways_chosen = way_chosen;
     int ways_other = BinPow(lem, len - 1);
     int inv_m = Inv(lem);
-    for (int i = 1; i <= k_value; i++) {
+    for (int i = 1; i <= k_value; i++)
+    {
         ans = Add(ans, Mul(Mul(cur_a, dpp[k_value][i]), Mul(ways_chosen, ways_other)));
         cur_a = Mul(cur_a, Sub(len, i));
         ways_chosen = Mul(way_chosen, ways_chosen);
@@ -136,13 +153,190 @@ int BagsWithBalls(int len, int lem, int k_value) {
 #include <cassert>
 #include <stdexcept>
 
-int main() {
-    int testCases;
-    std::cin >> testCases;
-    
-    for (int i = 0; i < testCases; i++) {
-        int len, lem, k_value;
-        std::cin >> len >> lem >> k_value;
-        std::cout << BagsWithBalls(len, lem, k_value) << std::endl;
+
+int main()
+{
+    // TEST
+    int len_1 = 2;
+    int lem_1 = 3;
+    int k_value_1 = 8;
+    int expected_1 = 1028;
+    int result_1 = BagsWithBalls(len_1, lem_1, k_value_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int len_2 = 1;
+    int lem_2 = 1;
+    int k_value_2 = 1;
+    int expected_2 = 1;
+    int result_2 = BagsWithBalls(len_2, lem_2, k_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int len_3 = 4;
+    int lem_3 = 5;
+    int k_value_3 = 10;
+    int expected_3 = 97910520;
+    int result_3 = BagsWithBalls(len_3, lem_3, k_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int len_4 = 3;
+    int lem_4 = 4;
+    int k_value_4 = 6;
+    int expected_4 = 7392;
+    int result_4 = BagsWithBalls(len_4, lem_4, k_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int len_5 = 5;
+    int lem_5 = 7;
+    int k_value_5 = 12;
+    int expected_5 = 61601686;
+    int result_5 = BagsWithBalls(len_5, lem_5, k_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int len_6 = 6;
+    int lem_6 = 8;
+    int k_value_6 = 15;
+    int expected_6 = 124850742;
+    int result_6 = BagsWithBalls(len_6, lem_6, k_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int len_7 = 7;
+    int lem_7 = 9;
+    int k_value_7 = 18;
+    int expected_7 = 60556583;
+    int result_7 = BagsWithBalls(len_7, lem_7, k_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int len_8 = 8;
+    int lem_8 = 10;
+    int k_value_8 = 20;
+    int expected_8 = 732362799;
+    int result_8 = BagsWithBalls(len_8, lem_8, k_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    int len_9 = 0;
+    int lem_9 = 10;
+    int k_value_9 = 20;
+    try{
+        BagsWithBalls(len_9, lem_9, k_value_9);
     }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_10 = 998244353;
+    int lem_10 = 10;
+    int k_value_10 = 20;
+    try{
+        BagsWithBalls(len_10, lem_10, k_value_10);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_11 = -1;
+    int lem_11 = 11;
+    int k_value_11 = 20;
+    try{
+        BagsWithBalls(len_11, lem_11, k_value_11);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_12 = 1;
+    int lem_12 = 0;
+    int k_value_12 = 20;
+    try{
+        BagsWithBalls(len_12, lem_12, k_value_12);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_13 = 1;
+    int lem_13 = 998244353;
+    int k_value_13 = 20;
+    try{
+        BagsWithBalls(len_13, lem_13, k_value_13);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_14 = 1;
+    int lem_14 = -1;
+    int k_value_14 = 20;
+    try{
+        BagsWithBalls(len_14, lem_14, k_value_14);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_15 = 1;
+    int lem_15 = 2;
+    int k_value_15 = 0;
+    try{
+        BagsWithBalls(len_15, lem_15, k_value_15);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_16 = 1;
+    int lem_16 = 2;
+    int k_value_16 = -1;
+    try{
+        BagsWithBalls(len_16, lem_16, k_value_16);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_17 = 1;
+    int lem_17 = 2;
+    int k_value_17 = 2005;
+    try{
+        BagsWithBalls(len_17, lem_17, k_value_17);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
 }
