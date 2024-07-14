@@ -1,4 +1,49 @@
-// https://codeforces.com/problemset/problem/1716/F
+/*
+
+https://codeforces.com/problemset/problem/1716/F
+
+Write a C++ Solution BagsWithBalls to find the sum of F^k_value over all possible ways to take len balls, one from each bag. Since it can be huge, print it modulo 998244353.
+
+
+Imagine you have a collection of len distinct bags. Each bag is a unique "color" and contains m distinct balls numbered from 1 to lem. This ensures at least one ball with an odd number exists in every bag.
+
+The Challenge:
+
+Your task is to determine the sum of a specific value, F^k_value, across all possible scenarios. Here's how F and k_value are defined:
+
+F: For a single scenario, F represents the number of odd-numbered balls you select, one from each bag.
+k_value: This is a constant exponent applied to F in each scenario.
+
+The Twist:
+
+There are no restrictions on which ball you choose from a bag. Selecting a ball from one bag doesn't affect the balls available in other bags.
+
+Objective:
+
+We need to calculate the total sum of F^k_value considering all possible ways to select exactly one ball from each bag. Due to the potentially large number of scenarios, the answer might require a modulo operation (e.g., modulo 998244353) for efficient handling.
+
+Input:
+
+An integer len.
+An integer lem.
+An integer k_value.
+
+Output:
+
+A integer ans that consist the the sum of Fk over all possible ways to take len balls, one from each bag. Since it can be huge, print it modulo 998244353.
+
+Constraints:
+
+len : ranges from 1 to 998244352.
+lem : ranges from 1 to 998244352.
+k_value : ranges from 1 to 2000.
+
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -34,38 +79,50 @@ int BinPow(int base, int exp) {
     return result;
 }
 
-int inv(int first) {
+int Inv(int first) {
     int mod = 998244353;
     return BinPow(first, mod - 2);
 }
 
-int divide(int first, int sec) {
-    return Mul(first, inv(sec));
+int Divide(int first, int sec) {
+    return Mul(first, Inv(sec));
 }
 
 std::vector<std::vector<int>> Precalc() {
     int n_max = 2043;
-    std::vector<std::vector<int>> dp(n_max, std::vector<int>(n_max, 0));
-    dp[1][1] = 1;
+    std::vector<std::vector<int>> dpp(n_max, std::vector<int>(n_max, 0));
+    dpp[1][1] = 1;
     for (int i = 1; i < n_max - 1; i++) {
         for (int j = 1; j <= i; j++) {
-            dp[i + 1][j] = Add(dp[i + 1][j], Mul(dp[i][j], j));
-            dp[i + 1][j + 1] = Add(dp[i + 1][j + 1], dp[i][j]);
+            dpp[i + 1][j] = Add(dpp[i + 1][j], Mul(dpp[i][j], j));
+            dpp[i + 1][j + 1] = Add(dpp[i + 1][j + 1], dpp[i][j]);
         }
     }
-    return dp;
+    return dpp;
 }
 
 int BagsWithBalls(int len, int lem, int k_value) {
-    std::vector<std::vector<int>> dp = Precalc();
+    if (len <= 0 or len > 998244352)
+    {
+        throw std::invalid_argument("Invalid len");
+    }
+    if (lem <= 0 or lem > 998244352)
+    {
+        throw std::invalid_argument("Invalid lem");
+    }
+    if (k_value <= 0 or k_value > 2000)
+    {
+        throw std::invalid_argument("Invalid k_value");
+    }
+    std::vector<std::vector<int>> dpp = Precalc();
     int way_chosen = (lem / 2) + (lem % 2);
     int cur_a = len;
     int ans = 0;
     int ways_chosen = way_chosen;
     int ways_other = BinPow(lem, len - 1);
-    int inv_m = inv(lem);
+    int inv_m = Inv(lem);
     for (int i = 1; i <= k_value; i++) {
-        ans = Add(ans, Mul(Mul(cur_a, dp[k_value][i]), Mul(ways_chosen, ways_other)));
+        ans = Add(ans, Mul(Mul(cur_a, dpp[k_value][i]), Mul(ways_chosen, ways_other)));
         cur_a = Mul(cur_a, Sub(len, i));
         ways_chosen = Mul(way_chosen, ways_chosen);
         ways_other = Mul(ways_other, inv_m);
