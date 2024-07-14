@@ -1,4 +1,48 @@
-// https://codeforces.com/contest/1956/problem/E2
+/*
+
+https://codeforces.com/contest/1956/problem/E2
+
+Write a C++ Solution ArrayValue to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+
+
+Nene is in a battle against len monsters arranged in a circle. Each monster is assigned an energy level nums_i (1 <= i <= n). Faced with these formidable opponents, Nene decides to use a special spell called "Attack Your Neighbour."
+
+The Attack Your Neighbour Spell:
+
+When Nene casts this spell, a series of attacks occur in a specific order:
+
+Monster 1 attacks Monster 2.
+Monster 2 attacks Monster 3. ... n-1. Monster (n-1) attacks Monster n. n. Monster n attacks Monster 1 (back to the beginning).
+
+Attack Mechanics:
+
+During an attack, the following happens:
+
+Monster with energy x attacks Monster with energy y.
+The defending monster's (Monster y) energy level becomes max(0, y - x).
+The attacking monster's (Monster x) energy remains unchanged.
+Nene's Challenge:
+
+Nene plans to cast the "Attack Your Neighbour" spell 10100 times. Your task is to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+
+Input:
+
+A vector of integers nums.
+
+Output:
+
+A vector of integer ans to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+
+Constraints:
+
+nums.size() : ranges from 2 to 100000.
+nums : ranges from 0 to 10^9.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
