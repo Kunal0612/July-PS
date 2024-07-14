@@ -1,42 +1,37 @@
 /*
 
-https://codeforces.com/contest/1956/problem/E2
+https://codeforces.com/contest/1956/problem/F
 
-Write a C++ Solution ArrayValue to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+Write a C++ Solution NeneAndThePassingGame to determine the minimum number of rounds of assessment Nene needs to complete her work.
 
+Nene, a basketball coach, is training len players (numbered 1 to len). Each player has an "arm interval" [l_i, r_i]. Two players i and j can pass the ball to each other if and only if the absolute value of the difference between their player numbers (|i - j|) falls within the range [l_i + l_j, r_i + r_j].
 
-Nene is in a battle against len monsters arranged in a circle. Each monster is assigned an energy level nums_i (1 <= i <= n). Faced with these formidable opponents, Nene decides to use a special spell called "Attack Your Neighbour."
-
-The Attack Your Neighbour Spell:
-
-When Nene casts this spell, a series of attacks occur in a specific order:
-
-Monster 1 attacks Monster 2.
-Monster 2 attacks Monster 3. ... n-1. Monster (n-1) attacks Monster n. n. Monster n attacks Monster 1 (back to the beginning).
-
-Attack Mechanics:
-
-During an attack, the following happens:
-
-Monster with energy x attacks Monster with energy y.
-The defending monster's (Monster y) energy level becomes max(0, y - x).
-The attacking monster's (Monster x) energy remains unchanged.
 Nene's Challenge:
 
-Nene plans to cast the "Attack Your Neighbour" spell 10100 times. Your task is to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+Nene wants to assess her team's cooperation skills by organizing several rounds of passing drills. In each round, she selects a sequence of players (p_1, p_2, ..., p_m) such that:
+
+Consecutive Players Can Pass: Any two consecutive players (p_i and p_{i+1}) in the sequence can pass the ball to each other based on their arm intervals.
+Sequence Length: Nene can choose the length m of the sequence.
+Player Participation: Each player can appear in the sequence multiple times or not at all.
+
+The Goal:
+
+Nene wants every player (all len players) to participate in at least one round of assessment. However, she has a date after school, so she wants to minimize the total number of rounds needed to achieve this goal.
+
+The
 
 Input:
 
-A vector of integers nums.
+A vector of vector of integer interval.
 
 Output:
 
-A vector of integer ans to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+An integer ans to determine the minimum number of rounds of assessment Nene needs to complete her work.
 
 Constraints:
 
-nums.size() : ranges from 2 to 100000.
-nums : ranges from 0 to 10^9.
+interval.size() : ranges from 1 to 2000000.
+interval : interval[i][0] ranges from 1 to interval[i][1] , interval[i][1] ranges from interval[i][0] to interval.size().
 
 
 Use appropriate Error Handling using the stdexcept library for the invalid test cases.
@@ -46,198 +41,190 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <random>
-#include <ctime>
 #include <functional>
 #include <cassert>
 #include <stdexcept>
 
-
-bool Check(int len, std::vector<int>& arr) {
-    arr[len + 1] = arr[1];
-    arr[len + 2] = arr[2];
-    arr[len + 3] = arr[3];
-    for (int i = 1; i <= len; i++) {
-        if (arr[i] and arr[i + 1] and arr[i + 2] and arr[i + 3]){
-            return true;
-        }
+int Find(int node, std::vector<int>& par) {
+    while (node != par[node]){
+        node = par[node] = par[par[node]];
     }
-    return false;
+    return node;
 }
 
-long long Attack(long long first, long long sec) {
-    long long k_value = first / sec;
-    return (2 * first - (k_value + 1) * sec) * k_value / 2;
-}
+int NeneAndThePassingGame(std::vector<std::vector<int>> interval) {
 
-std::vector<int> NeneVsMonsters(std::vector<int> &nums) {
-    int len=nums.size();
-    if (len <= 1 or len > 200000)
+    int len=interval.size();
+    if (len <= 1 or len > 2000000)
     {
-        throw std::invalid_argument("Invalid nums length");
+        throw std::invalid_argument("Invalid len length");
     }
     for (int i = 0; i < len; i++)
     {
-        if (nums[i] < 0 or nums[i] > 1000000000)
+        if (interval[i][0]<0 or interval[i][0]>interval[i][1] or interval[i][1]>len)  
         {
-            throw std::invalid_argument("Invalid nums");
+            throw std::invalid_argument("Invalid Intervals");
         }
     }
-    std::vector<int> arr(len + 4, 0);
-    std::vector<bool> brr(len + 1, false);
-    
+    int tot;
+    std::vector<int> left(len + 1), right(len + 1);
+    std::vector<int> par(2 * len + 2), srr(len + 2), trr(len + 2), pre(len + 2), suf(len + 2);
+
+    for (int i = 1; i <= 2 * len + 1; i++){
+        par[i] = i;
+    }
+    for (int i = 0; i <= len + 1; i++){
+        srr[i] = trr[i] = pre[i] = suf[i] = 0;
+    }
+
     for (int i = 1; i <= len; i++) {
-        arr[i]=nums[i-1];
+        left[i]=interval[i-1][0];
+        right[i]=interval[i-1][1];
+        srr[std::max(1, i - right[i])]++;
+        srr[std::max(0, i - left[i]) + 1]--;
+        trr[std::min(len + 1, i + left[i])]++;
+        trr[std::min(len, i + right[i]) + 1]--;
     }
 
-    if (len == 2) {
-        while (arr[1] && arr[2]) {
-            arr[2] = std::max(0, arr[2] - arr[1]);
-            arr[1] = std::max(0, arr[1] - arr[2]);
-        }
-        brr[1] = (arr[1] > 0);
-        brr[2] = (arr[2] > 0);
-    } 
-    else if (len == 3) {
-        while (arr[1] && arr[2] && arr[3]) {
-            arr[2] = std::max(0, arr[2] - arr[1]);
-            arr[3] = std::max(0, arr[3] - arr[2]);
-            arr[1] = std::max(0, arr[1] - arr[3]);
-        }
-        brr[1] = (!arr[3] && arr[1]);
-        brr[2] = (!arr[1] && arr[2]);
-        brr[3] = (!arr[2] && arr[3]);
-    } else {
-        while (Check(len, arr)) {
-            for (int i = 1; i <= len; i++) {
-                arr[i % len + 1] = std::max(0, arr[i % len + 1] - arr[i]);
-            }
-        }
-
-        for (int i = 1; i <= len; i++) brr[i] = false;
-
-        for (int p = 1; p <= len; p++) {
-            if (arr[p] && arr[p % len + 1]) {
-                arr[p % len + 1] = std::max(0, arr[p % len + 1] - arr[p]);
-            } else {
-                break;
-            }
-        }
-
-        for (int i = 1; i <= len; i++) {
-            if (!arr[i] && arr[i % len + 1]) {
-                brr[i % len + 1] = true;
-                brr[(i + 2) % len + 1] = (arr[(i + 2) % len + 1] > Attack(arr[(i + 1) % len + 1], arr[i % len + 1]));
-            }
-        }
-    }
-    std::vector<int> ans;
+    tot = len;
     for (int i = 1; i <= len; i++) {
-        if (brr[i]){
-            ans.push_back(i);
+        srr[i] += srr[i - 1];
+        trr[i] += trr[i - 1];
+        if (srr[i] && trr[i]){
+            suf[i] = pre[i] = ++tot;
         }
-    };
+    }
+
+    suf[len + 1] = 0;
+    for (int i = 1; i <= len; i++){
+        pre[i] = (pre[i] ? pre[i] : pre[i - 1]);
+    }
+    for (int i = len; i >= 1; i--){
+        suf[i] = (suf[i] ? suf[i] : suf[i + 1]);
+    }
+
+    for (int i = 1; i <= len; i++) {
+        int lft = std::max(1, i - right[i]), rgt = std::max(0, i - left[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt) {
+                for (int j = Find(lft, par); j < rgt; j = Find(j, par)){
+                    par[j] = j + 1;
+                }
+            }
+        }
+        lft = std::min(len + 1, i + left[i]);
+        rgt = std::min(len, i + right[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt) {
+                for (int j = Find(lft, par); j < rgt; j = Find(j, par)){
+                    par[j] = j + 1;
+                }
+            }
+        }
+    }
+
+    for (int i = 1; i <= len; i++) {
+        int lft = std::max(1, i - right[i]), rgt = std::max(0, i - left[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt){
+                par[Find(i, par)] = Find(lft, par);
+            }
+        }
+        lft = std::min(len + 1, i + left[i]);
+        rgt = std::min(len, i + right[i]);
+        if (lft <= rgt) {
+            lft = suf[lft];
+            rgt = pre[rgt];
+            if (lft && rgt && lft <= rgt) {
+                par[Find(i, par)] = Find(lft, par);
+            }
+        }
+    }
+
+    int ans = 0;
+    for (int i = 1; i <= tot; i++){
+        if (par[i] == i){
+            ans++;
+        }
+    }
     return ans;
 }
 
+
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <random>
-#include <ctime>
 #include <functional>
 #include <cassert>
 #include <stdexcept>
 
 
 int main() {
-     // TEST
-    std::vector<int> nums_1 = {1, 1, 1, 1, 1, 1};
-    std::vector<int> expected_1 = {1,3,5};
-    std::vector<int> result_1 = NeneVsMonsters(nums_1);
+    // TEST
+    std::vector<std::vector<int>> query_1 = {{1, 2}, {2, 3}, {1, 3}};
+    int expected_1 = 2;
+    int result_1 = NeneAndThePassingGame( query_1);
     assert(result_1 == expected_1);
     // TEST_END
 
-    // TES
-    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
-    std::vector<int> expected_2 = {2, 5, 7, 9};
-    std::vector<int> result_2 = NeneVsMonsters(nums_2);
+    // TEST
+    std::vector<std::vector<int>> query_2 = {{1, 2},{2,2}};
+    int expected_2 = 2;
+    int result_2 = NeneAndThePassingGame( query_2);
     assert(result_2 == expected_2);
     // TEST_END
 
     // TEST
-    std::vector<int> nums_3 = {1000,2};
-    std::vector<int> expected_3 = {1};
-    std::vector<int> result_3 = NeneVsMonsters(nums_3);
+    std::vector<std::vector<int>> query_3 = {{1, 2}, {2, 3}, {1, 3}};
+    int expected_3 = 2;
+    int result_3 = NeneAndThePassingGame(query_3);
     assert(result_3 == expected_3);
     // TEST_END
 
     // TEST
-    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
-    std::vector<int> expected_4 = {2, 4};
-    std::vector<int> result_4 = NeneVsMonsters(nums_4);
+    std::vector<std::vector<int>> query_4 = {{1, 2}, {2, 3}, {1, 1}};
+    int expected_4 = 2;
+    int result_4 = NeneAndThePassingGame(query_4);
     assert(result_4 == expected_4);
     // TEST_END
 
     // TEST
-    std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
-    std::vector<int> expected_5 = {2, 4};
-    std::vector<int> result_5 = NeneVsMonsters(nums_5);
+    std::vector<std::vector<int>> query_5 = {{1, 3}, {2, 3}, {1, 3}};
+    int expected_5 =2;
+    int result_5 = NeneAndThePassingGame( query_5);
     assert(result_5 == expected_5);
     // TEST_END
 
     // TEST
-    std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
-    std::vector<int> expected_6 = {1, 3, 5};
-    std::vector<int> result_6 = NeneVsMonsters(nums_6);
+    std::vector<std::vector<int>> query_6 = {{1, 5}, {2, 4}, {2, 3},{4,4},{5,5}};
+    int expected_6 = 5;
+    int result_6 = NeneAndThePassingGame( query_6);
     assert(result_6 == expected_6);
     // TEST_END
 
     // TEST
-    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
-    std::vector<int> expected_7 = {3, 5};
-    std::vector<int> result_7 = NeneVsMonsters(nums_7);
+    std::vector<std::vector<int>> query_7 = {{1, 2}, {3, 4}, {2, 5},{5,5},{4,5}};
+    int expected_7 = 5;
+    int result_7 = NeneAndThePassingGame( query_7);
     assert(result_7 == expected_7);
     // TEST_END
 
     // TEST
-    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
-    std::vector<int> expected_8 = {3, 5, 7};
-    std::vector<int> result_8 = NeneVsMonsters(nums_8);
-
+    std::vector<std::vector<int>> query_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5},{4,4}};
+    int expected_8 = 5;
+    int result_8 = NeneAndThePassingGame(query_8);
     assert(result_8 == expected_8);
     // TEST_END
-
     // TEST
-    std::vector<int> nums_9 = {-1};
+    std::vector<std::vector<int>> query_9 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
     try
     {
-        NeneVsMonsters(nums_9);
-        assert(false);
-    }
-    catch (const std::invalid_argument &e)
-    {
-        assert(true);
-    }
-    // TEST_END
-     // TEST
-    std::vector<int> nums_10(600000,0);
-    try
-    {
-        NeneVsMonsters(nums_10);
-        assert(false);
-    }
-    catch (const std::invalid_argument &e)
-    {
-        assert(true);
-    }
-    // TEST_END
-     // TEST
-    std::vector<int> nums_11(6,-1);
-    try
-    {
-        NeneVsMonsters(nums_11);
+        NeneAndThePassingGame(query_9);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -246,10 +233,10 @@ int main() {
     }
     // TEST_END
     // TEST
-    std::vector<int> nums_12(6,1000000005);
+    std::vector<std::vector<int>> query_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
     try
     {
-        NeneVsMonsters(nums_12);
+        NeneAndThePassingGame( query_10);
         assert(false);
     }
     catch (const std::invalid_argument &e)
@@ -258,10 +245,95 @@ int main() {
     }
     // TEST_END
     // TEST
-    std::vector<int> nums_13={};
+    std::vector<std::vector<int>> query_11 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
     try
     {
-        NeneVsMonsters(nums_13);
+        NeneAndThePassingGame(query_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> query_12 = {{1, -2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        NeneAndThePassingGame(query_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> query_13 = {{-1, -2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        NeneAndThePassingGame(query_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> query_14 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        NeneAndThePassingGame(query_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(1,1);
+    std::vector<std::vector<int>> query_15 = {{1, 1}, {2, 3}, {3, 4}, {4, 100}};
+    try
+    {
+        NeneAndThePassingGame(query_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> query_16 = {{1, -1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        NeneAndThePassingGame( query_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> query_17 = {{}};
+    try
+    {
+        NeneAndThePassingGame(query_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> query_18(5000000,{1,2});
+    try
+    {
+        NeneAndThePassingGame(query_18);
         assert(false);
     }
     catch (const std::invalid_argument &e)
