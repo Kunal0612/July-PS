@@ -1,0 +1,198 @@
+// https://codeforces.com/problemset/problem/1704/F
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+std::string ColouringGame(std::string str)
+{
+    int len = str.size();
+    if (len < 2 or len > 500000)
+    {
+        throw std::invalid_argument("Invalid str length");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (str[i] != 'B' and str[i] != 'R')
+        {
+            throw std::invalid_argument("Invalid str");
+        }
+    }
+    std::vector<int> frr(500005, 0);
+    std::vector<int> vis(500005, 0);
+    std::vector<char> cstr(500005);
+
+    for (int i = 1; i <= 1000; ++i)
+    {
+        for (int j = 0; j <= i - 2; ++j)
+        {
+            vis[frr[j] ^ frr[i - 2 - j]] = 1;
+        }
+
+        int j;
+        for (j = 0; vis[j]; ++j)
+            ;
+        frr[i] = j;
+
+        for (int j = 0; j <= i; ++j)
+        {
+            vis[j] = 0;
+        }
+    }
+
+    for (int i = 1001; i < 500005; ++i)
+    {
+        frr[i] = frr[i - 34];
+    }
+    for (int i = 1; i <= len; i++)
+    {
+        cstr[i] = str[i];
+    }
+
+    int sum = 0;
+    for (int i = 1; i <= len; ++i)
+    {
+        if (cstr[i] == 'R')
+        {
+            ++sum;
+        }
+        else
+        {
+            --sum;
+        }
+    }
+
+    if (sum > 0)
+    {
+        return "Alice";
+    }
+    else if (sum < 0)
+    {
+        return "Bob";
+    }
+    else
+    {
+        int ans = 0;
+        for (int i = 1; i <= len;)
+        {
+            int j = i + 1;
+            for (; j <= len && cstr[j] != cstr[j - 1]; ++j)
+                ;
+            ans ^= frr[j - i];
+            i = j;
+        }
+        if (ans)
+        {
+            return "Alice";
+        }
+        else
+        {
+            return "Bob";
+        }
+    }
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+    // TEST
+    std::string str_1 = "BRB";
+    std::string expected_1 = "Bob";
+    std::string result_1 = ColouringGame(str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::string str_2 = "RRBBB";
+    std::string expected_2 = "Bob";
+    std::string result_2 = ColouringGame(str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::string str_3 = "RBRBRB";
+    std::string expected_3 = "Bob";
+    std::string result_3 = ColouringGame(str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::string str_4 = "BBRRBRRB";
+    std::string expected_4 = "Alice";
+    std::string result_4 = ColouringGame(str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::string str_5 = "BBRRBRRB";
+    std::string expected_5 = "Alice";
+    std::string result_5 = ColouringGame(str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::string str_6 = "BRRBRRB";
+    std::string expected_6 = "Alice";
+    std::string result_6 = ColouringGame(str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+    // TEST
+    std::string str_7 = "BBRRBRRRB";
+    std::string expected_7 = "Alice";
+    std::string result_7 = ColouringGame(str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::string str_8 = "BBRRRBRRRB";
+    std::string expected_8 = "Alice";
+    std::string result_8 = ColouringGame(str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::string str_9 = std::string(500005,'B');
+    try
+    {
+        ColouringGame(str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "";
+    try
+    {
+        ColouringGame(str_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = "ABC";
+    try
+    {
+        ColouringGame(str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!";
+    return 0;
+}
