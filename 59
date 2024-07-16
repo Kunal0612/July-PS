@@ -1,0 +1,84 @@
+// https://codeforces.com/problemset/problem/1580/B
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+
+int Add(int first, int sec, int mod) {
+    return first + sec < mod ? first + sec : first + sec - mod;
+}
+
+void Helper(int size, int cnt, int dep, int lem, int mod, std::vector<std::vector<std::vector<int>>>& dpp, const std::vector<int>& fac, const std::vector<std::vector<int>>& cpp) {
+    if (dpp[dep][size][cnt] != -1) return;
+    int& res = dpp[dep][size][cnt] = 0;
+    if (!size) {
+        res = 1;
+        return;
+    }
+    if ((lem - dep < 7 && (1 << (lem - dep)) < cnt) || (cnt && size < lem - dep)) return;
+    if (dep == lem) {
+        res = (cnt == 1 ? fac[size] : 0);
+        return;
+    }
+    for (int i = 0; i < size; i++) {
+        int fidx = 0;
+        std::vector<int>& f_left = dpp[dep + 1][i];
+        std::vector<int>& f_right = dpp[dep + 1][size - i - 1];
+        for (int j = std::max(0, cnt + i + 1 - size); j <= std::min(cnt, i); j++) {
+            if (f_left[j] && f_right[cnt - j]) {
+                Helper(i, j, dep + 1, lem, mod, dpp, fac, cpp);
+                Helper(size - i - 1, cnt - j, dep + 1, lem, mod, dpp, fac, cpp);
+                fidx = (fidx + 1ll * f_left[j] * f_right[cnt - j]) % mod;
+            }
+        }
+        res = (res + 1ll * fidx * cpp[size - 1][i]) % mod;
+    }
+}
+
+int MathematicsCurriculum(int len,int lem,int k_value,int mod){
+    if(len<1 or len>100 or lem<1 or lem>len or k_value<1 or k_value>len or mod<1 or mod>1000000009){
+        throw std::invalid_argument("Invalid crr length");
+    }
+    lem--;
+    int MAX_N = 100 + 5;
+    int MIN_SIZE = 4;
+    std::vector<int> fac(std::max(len + 1, MIN_SIZE), 1);
+    std::vector<std::vector<int>> cpp(std::max(len + 1, MIN_SIZE), std::vector<int>(std::max(len + 1, MIN_SIZE), 0));
+    std::vector<std::vector<std::vector<int>>> dpp(std::max(lem + 1, MIN_SIZE), std::vector<std::vector<int>>(std::max(len + 1, MIN_SIZE), std::vector<int>(std::max(len + 1, MIN_SIZE), -1)));
+    for (int i = 0; i <= len; i++) {
+        cpp[i][0] = cpp[i][i] = 1;
+        if (i > 0) fac[i] = 1ll * fac[i - 1] * i % mod;
+        for (int j = 1; j < i; j++) {
+            cpp[i][j] = Add(cpp[i - 1][j - 1], cpp[i - 1][j], mod);
+        }
+    }
+    Helper(len, k_value, 0, lem, mod, dpp, fac, cpp);
+    int ans=dpp[0][len][k_value];
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    int len_1=4,lem_1=3,k_value_1=2,mod_1=10007;
+    int threshold_1 = 4;
+    int expected_1 = 4;
+    int result_1 = MathematicsCurriculum(len_1,lem_1,k_value_1,mod_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
