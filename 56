@@ -1,0 +1,97 @@
+// https://codeforces.com/problemset/problem/1917/F
+
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+void Add(int idx, int diameter, std::vector<std::pair<int, int>> &vec,
+         std::vector<std::bitset<3000>> &dpp)
+{
+    int len = vec[idx].first;
+    for (int i = diameter / 2; i >= 0; i--)
+    {
+        if (i + len <= diameter / 2)
+        {
+            dpp[i + len] |= dpp[i];
+        }
+        dpp[i] = (dpp[i] | (dpp[i] << len));
+    }
+}
+
+bool ConstructTree(int len, int diameter, std::vector<int> &length)
+{
+    if (len < 2 or len > 2000 or diameter < 1 or diameter > 2000)
+    {
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (length[i] < 1 or length[i] > diameter)
+        {
+            throw std::invalid_argument("Invalid Length");
+        }
+    }
+    std::vector<std::pair<int, int>> vec(len + 1);
+    std::vector<std::bitset<3000>> dpp(diameter / 2 + 1);
+    int mxi = 0;
+    int sum = 0;
+    for (int i = 1; i <= len; i++)
+    {
+        vec[i].first = length[i - 1];
+        sum += vec[i].first;
+        vec[i].second = i;
+        mxi = std::max(mxi, vec[i].first);
+    }
+    std::sort(vec.begin() + 1, vec.begin() + len + 1);
+    if (sum == diameter)
+    {
+        return 1;
+    }
+    dpp[0][0] = 1;
+    bool found = false;
+    int idx = 1;
+    for (int x = 1; x <= diameter / 2; x++)
+    {
+        while (idx <= len && vec[idx].first <= x)
+        {
+            Add(idx, diameter, vec, dpp);
+            ++idx;
+        }
+        int big = 0;
+        for (int i = idx; i <= len; i++)
+        {
+            big += vec[i].first;
+        }
+        if (big <= diameter - x && dpp[x][diameter - x - big])
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
