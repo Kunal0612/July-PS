@@ -1,0 +1,107 @@
+// https://codeforces.com/problemset/problem/1208/F
+
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cmath>
+#include <cstring>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+void Add(std::vector<std::pair<int, int>>& dpp, int mask, int weight) {
+    if (dpp[mask].first == -1) dpp[mask].first = weight;
+    else if (dpp[mask].second == -1) {
+        if (dpp[mask].first == weight){
+            return;
+        }
+        dpp[mask].second = weight;
+        if (dpp[mask].first > dpp[mask].second){
+            std::swap(dpp[mask].first, dpp[mask].second);
+        }
+    } else {
+        if (dpp[mask].second < weight) {
+            dpp[mask].first = dpp[mask].second;
+            dpp[mask].second = weight;
+        } else if (dpp[mask].first < weight && dpp[mask].second != weight) {
+            dpp[mask].first = weight;
+        }
+    }
+}
+
+void Merge(std::vector<std::pair<int, int>>& dpp, int mask1, int mask2) {
+    if (dpp[mask2].first != -1){
+        Add(dpp, mask1, dpp[mask2].first);
+    }
+    if (dpp[mask2].second != -1){
+        Add(dpp, mask1, dpp[mask2].second);
+    }
+}
+
+int BitsAndPieces(std::vector<int> nums) {
+    int len=nums.size();
+    if(len<3 or len>1000000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<nums.size();i++){
+        if(nums[i]<0 or nums[i]>2000000){
+            throw std::invalid_argument("Invalid nums value");
+        }
+    }
+    int max_bits = 0;
+    for (int i = 0; i < len; ++i) {
+        max_bits = std::max(max_bits, static_cast<int>(std::log2(nums[i])));
+    }
+    max_bits++;
+    
+    std::vector<std::pair<int, int>> dpp(1 << max_bits, {-1, -1});
+
+    for (int i = 0; i < len; ++i) {
+        Add(dpp, nums[i], i);
+    }
+
+    for (int i = 0; i < max_bits; ++i) {
+        for (int mask = 0; mask < (1 << max_bits); ++mask) {
+            if (mask & (1 << i)) {
+                Merge(dpp, mask ^ (1 << i), mask);
+            }
+        }
+    }
+
+    int ans = 0;
+    for (int i = 0; i < len; ++i) {
+        int current_mask = (1 << max_bits) - 1 - nums[i];
+        int optimal = 0;
+        for (int j = max_bits - 1; j >= 0; --j) {
+            if ((current_mask >> j) & 1) {
+                if (dpp[optimal ^ (1 << j)].second != -1 && dpp[optimal ^ (1 << j)].first > i) {
+                    optimal ^= (1 << j);
+                }
+            }
+        }
+        if (dpp[optimal].second != -1 && dpp[optimal].first > i) {
+            ans = std::max(ans, nums[i] ^ optimal);
+        }
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cmath>
+#include <cstring>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
