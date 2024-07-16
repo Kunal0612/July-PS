@@ -1,0 +1,173 @@
+// https://codeforces.com/problemset/problem/1677/D
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+
+int TokitsukazeAndPermutations(int k_value, std::vector<int> &nums)
+{
+    int len=nums.size(), ans;
+    if (len <1 or len > 1000000 or k_value<0 or k_value>len-1)
+    {
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0; i<len; i++){
+        if(nums[i]<-1 or nums[i]>i){
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    int mod = 998244353;
+    std::vector<int> arr(len + 1);
+    ans = 1;
+    for (int i = 1; i <= len; ++i)
+    {
+        arr[i]=nums[i-1];
+        if (i >= len - k_value + 1 && arr[i] > 0){
+            ans = 0;
+        }
+    }
+    for (int i = 1; i <= len; ++i)
+    {
+        if (i <= k_value){
+            ans = 1LL * ans * i % mod;
+        }
+        else if (arr[i - k_value] == -1){
+            ans = 1LL * ans * i % mod;
+        }
+        else if (arr[i - k_value] == 0){
+            ans = 1LL * ans * (k_value + 1) % mod;
+        }
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cstdio>
+#include <cassert>
+#include <stdexcept>
+
+
+// std::cout<<result_5<<std::endl;
+
+int main()
+{
+    // TEST
+    std::vector<int> nums_1 = {0,1,2,3,4};
+    int k_value_1=0;
+    int expected_1 = 1;
+    int result_1 = TokitsukazeAndPermutations(k_value_1,nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_2 = {-1,1,2,0,0};
+    int k_value_2=2;
+    int expected_2 =6;
+    int result_2 = TokitsukazeAndPermutations(k_value_2,nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_3 = {0,1,1,0,0};
+    int k_value_3=2;
+    int expected_3 =6;
+    int result_3 = TokitsukazeAndPermutations(k_value_3,nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_4 = {0,1,1,0};
+    int k_value_4=2;
+    int expected_4 =0;
+    int result_4 = TokitsukazeAndPermutations(k_value_4,nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_5 = {0,1,1,2};
+    int k_value_5=2;
+    int expected_5 =0;
+    int result_5 = TokitsukazeAndPermutations(k_value_5,nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_6 = {-1,1,2,0,0};
+    int k_value_6=2;
+    int expected_6 =6;
+    int result_6 = TokitsukazeAndPermutations(k_value_6,nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+        // TEST
+    std::vector<int> nums_7 = {-1,1,2,2,0};
+    int k_value_7=2;
+    int expected_7 =0;
+    int result_7 = TokitsukazeAndPermutations(k_value_7,nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_8 = {-1,1,-1,0,0};
+    int k_value_8=2;
+    int expected_8 =30;
+    int result_8 = TokitsukazeAndPermutations(k_value_8,nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {-1,1,5,0,0};
+    int k_value_9=2;
+    try
+    {
+        TokitsukazeAndPermutations(k_value_9,nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {};
+    int k_value_10=2;
+    try
+    {
+        TokitsukazeAndPermutations(k_value_10,nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11(1000005,0);
+    int k_value_11=2;
+    try
+    {
+        TokitsukazeAndPermutations(k_value_11,nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {-1,1,-2,0,0};
+    int k_value_12=2;
+    try
+    {
+        TokitsukazeAndPermutations(k_value_12,nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
