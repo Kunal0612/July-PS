@@ -17,7 +17,7 @@ Resulting Sequence a:
 
 After performing the operation k_value times, a new permutation a is formed.
 
-Value Sequence v:
+Value Sequence nums :
 
 Based on permutation a, Tokitsukaze calculates a value sequence nums of length len. 
 Each element nums_i represents the number of elements greater than a_i that appear 
