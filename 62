@@ -1,0 +1,63 @@
+//https://codeforces.com/problemset/problem/285/E
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int PositionsInPermutations(int num_elements,int min_elements){
+    if(num_elements<1 or num_elements>1000 or min_elements<0 or min_elements>num_elements){
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    std::vector<std::vector<int>> binomial_coeff(num_elements + 1, std::vector<int>(num_elements + 1, 0));
+    std::vector<std::vector<std::vector<std::vector<int>>>> dp_table(num_elements + 1, std::vector<std::vector<std::vector<int>>>(num_elements + 1, std::vector<std::vector<int>>(2, std::vector<int>(2, 0))));
+    std::vector<int> factorial(num_elements + 1, 1);
+    int mod = 1e9 + 7;
+    int answer = 0;
+    binomial_coeff[0][0] = 1;
+    for (int i = 1; i <= num_elements; i++) {
+        binomial_coeff[i][0] = 1;
+        for (int j = 1; j <= i; j++) {
+            binomial_coeff[i][j] = (binomial_coeff[i - 1][j] + binomial_coeff[i - 1][j - 1]) % mod;
+        }
+    }
+
+    dp_table[1][0][0][0] = dp_table[1][1][0][1] = 1;
+    for (int i = 2; i <= num_elements; i++) {
+        for (int j = 0; j <= i; j++) {
+            dp_table[i][j][0][0] = (dp_table[i - 1][j][0][0] + dp_table[i - 1][j][1][0]) % mod;
+            dp_table[i][j][1][0] = (dp_table[i - 1][j][0][1] + dp_table[i - 1][j][1][1]) % mod;
+            if (j) {
+                dp_table[i][j][0][0] = (dp_table[i - 1][j - 1][0][0] + dp_table[i][j][0][0]) % mod;
+                dp_table[i][j][1][0] = (dp_table[i - 1][j - 1][0][1] + dp_table[i][j][1][0]) % mod;
+                dp_table[i][j][0][1] = (dp_table[i - 1][j - 1][0][0] + dp_table[i - 1][j - 1][1][0]) % mod;
+                dp_table[i][j][1][1] = (dp_table[i - 1][j - 1][0][1] + dp_table[i - 1][j - 1][1][1]) % mod;
+            }
+        }
+    }
+
+    for (int i = 1; i <= num_elements; i++) {
+        factorial[i] = 1LL * factorial[i - 1] * i % mod;
+    }
+    for (int i = min_elements; i <= num_elements; i++) {
+        answer = (answer + 1LL * binomial_coeff[i][min_elements] * (dp_table[num_elements][i][0][0] + dp_table[num_elements][i][1][0]) % mod * factorial[num_elements - i] % mod * ((i - min_elements) & 1 ? mod - 1 : 1)) % mod;
+    }
+    return answer;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int main() {
+    int ans=PositionsInPermutations(7,4);
+    std::cout<<ans<<std::endl;
+    return 0;
+}
