@@ -39,12 +39,12 @@ permutations modulo 998244353 (a prime number used for modular arithmetic).
 
 Input:
 
-A integer k_value.
+An integer k_value.
 A vector of integer nums.
 
 Output:
 
-A string ans to find the number of possible permutations modulo 998244353 (a prime number used for modular arithmetic).
+An integer ans to find the number of possible permutations modulo 998244353 (a prime number used for modular arithmetic).
 
 Constraints:
 
