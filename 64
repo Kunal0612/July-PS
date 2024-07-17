@@ -1,0 +1,176 @@
+// https://codeforces.com/contest/813/problem/D
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int TwoMelodies(std::vector<int> &nums){
+    long long len=nums.size(), max_value = 0;
+    if(len<2 or len>5000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<nums.size();i++){
+        if(nums[i]<1 or nums[i]>100000){
+            throw std::invalid_argument("Invalid nums value");
+        }
+    }
+    std::vector<long long> array_a(len + 1);
+    std::vector<std::vector<long long>> dp_table(len + 1, std::vector<long long>(len + 1, 0));
+    std::vector<long long> modulo_x(8, 0);
+    std::vector<long long> value_y(100010, 0);
+    for (long long i = 1; i <= len; i++) {
+        array_a[i]=nums[i-1];
+    }
+    for (long long i = 0; i <= len; i++) {
+        std::fill(modulo_x.begin(), modulo_x.end(), 0);
+        std::fill(value_y.begin(), value_y.end(), 0);
+        for (long long j = 1; j <= len; j++) {
+            value_y[array_a[j]] = 0;
+        }
+        for (long long j = 1; j < i; j++) {
+            modulo_x[array_a[j] % 7] = std::max(modulo_x[array_a[j] % 7], dp_table[i][j]);
+            value_y[array_a[j]] = std::max(value_y[array_a[j]], dp_table[i][j]);
+        }
+        for (long long j = i + 1; j <= len; j++) {
+            dp_table[i][j] = std::max({value_y[array_a[j] + 1], value_y[array_a[j] - 1], modulo_x[array_a[j] % 7], dp_table[i][0]}) + 1;
+            dp_table[j][i] = dp_table[i][j];
+            modulo_x[array_a[j] % 7] = std::max(modulo_x[array_a[j] % 7], dp_table[i][j]);
+            value_y[array_a[j]] = std::max(value_y[array_a[j]], dp_table[i][j]);
+            max_value = std::max(max_value, dp_table[i][j]);
+        }
+    }
+    return max_value;
+}
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {1,2,4,5};
+    int expected_1 = 4;
+    int result_1 = TwoMelodies(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    // int expected_2 = 31;
+    // int result_2 = TwoMelodies(nums_2);
+    // assert(result_2 == expected_2);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_3 = {1000000,5,5};
+    // int expected_3 = 1000005;
+    // int result_3 = TwoMelodies(nums_3);
+    // assert(result_3 == expected_3);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    // int expected_4 = 7;
+    // int result_4 = TwoMelodies(nums_4);
+    // assert(result_4 == expected_4);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    // int expected_5 = 62;
+    // int result_5 = TwoMelodies(nums_5);
+    // assert(result_5 == expected_5);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    // int expected_6 =5;
+    // int result_6 = TwoMelodies(nums_6);
+    // assert(result_6 == expected_6);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    // int expected_7 = 7;
+    // int result_7 = TwoMelodies(nums_7);
+    // assert(result_7 == expected_7);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    // int expected_8 = 3;
+    // int result_8 = TwoMelodies(nums_8);
+    // assert(result_8 == expected_8);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_9 = {0};
+    // try
+    // {
+    //     TwoMelodies(nums_9);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    //  // TEST
+    // std::vector<int> nums_10(6000000,0);
+    // try
+    // {
+    //     TwoMelodies(nums_10);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    //  // TEST
+    // std::vector<int> nums_11(6,-1);
+    // try
+    // {
+    //     TwoMelodies(nums_11);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    // // TEST
+    // std::vector<int> nums_12(6,100000000);
+    // try
+    // {
+    //     TwoMelodies(nums_12);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    // // TEST
+    // std::vector<int> nums_13={};
+    // try
+    // {
+    //     TwoMelodies(nums_13);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
