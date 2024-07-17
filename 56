@@ -1,5 +1,57 @@
-// https://codeforces.com/problemset/problem/1917/F
+/*
 
+https://codeforces.com/problemset/problem/1917/F
+
+Write a C++ Solution ConstructTree to determine whether it's possible to 
+construct a tree that fulfills all three requirements for the given set 
+of edge lengths (length_1 to length_len) and the desired diameter (diameter).
+
+You're given an array of integers length_1, length_2, ..., length_len and 
+another integer diameter. These integers represent potential edge lengths 
+in a tree you want to construct.
+
+Tree Construction Requirements:
+
+The tree you build needs to meet three specific criteria:
+
+Number of Nodes: The tree must have exactly len + 1 nodes.
+
+Edge Lengths: Each edge in the tree can have a length corresponding to one of 
+the values in the provided array length_1, length_2, ..., length_len. In simpler 
+terms, the edge lengths must come from the given set of possible lengths.
+
+Diameter: The diameter (the longest path between any two nodes) of the constructed 
+tree must be equal to the given value diameter.
+
+The Challenge:
+
+Your task is to determine whether it's possible to construct a tree that 
+fulfills all three requirements for the given set of edge lengths (length_1 to length_len) 
+and the desired diameter (diameter).
+
+Input:
+
+An integer len.
+An integer diameter.
+A vector of integers length.
+
+Output:
+
+An Boolean answer to determine whether it's possible to construct a tree that 
+fulfills all three requirements for the given set of edge lengths (length_1 to length_n) 
+and the desired diameter (diameter).
+
+Constraints:
+
+len : ranges from 2 to 2000.
+diameter : ranges from 1 to 2000.
+length : ranges from 1 to diameter.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 #include <iostream>
 #include <vector>
 #include <bitset>
@@ -25,7 +77,7 @@ void Add(int idx, int diameter, std::vector<std::pair<int, int>> &vec,
 
 bool ConstructTree(int len, int diameter, std::vector<int> &length)
 {
-    if (len < 2 or len > 2000 or diameter < 1 or diameter > 2000)
+    if (len < 2 or len > 2000 or diameter < 1 or diameter > 2000 or length.size()!=len)
     {
         throw std::invalid_argument("Invalid Constraints");
     }
@@ -91,7 +143,231 @@ bool ConstructTree(int len, int diameter, std::vector<int> &length)
 
 int main()
 {
+    // TEST
+    int len_1 = 4;
+    int diameter_1 = 10;
+    std::vector<int> length_1 = {1, 2, 3, 4};
+    bool expected_1 = 1;
+    bool result_1 = ConstructTree(len_1, diameter_1, length_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
+    // TEST
+    int len_2 = 5;
+    int diameter_2 = 15;
+    std::vector<int> length_2 = {2, 3, 4, 5, 6};
+    bool expected_2 = 1;
+    bool result_2 = ConstructTree(len_2, diameter_2, length_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int len_3 = 3;
+    int diameter_3 = 8;
+    std::vector<int> length_3 = {1, 4, 6};
+    bool expected_3 = 0;
+    bool result_3 = ConstructTree(len_3, diameter_3, length_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int len_4 = 6;
+    int diameter_4 = 20;
+    std::vector<int> length_4 = {2, 5, 10, 15, 18, 20};
+    bool expected_4 = 0;
+    bool result_4 = ConstructTree(len_4, diameter_4, length_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int len_5 = 7;
+    int diameter_5 = 25;
+    std::vector<int> length_5 = {1, 3, 5, 7, 9, 11, 13};
+    bool expected_5 = 1;
+    bool result_5 = ConstructTree(len_5, diameter_5, length_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int len_6 = 2;
+    int diameter_6 = 5;
+    std::vector<int> length_6 = {2, 4};
+    bool expected_6 = 0;
+    bool result_6 = ConstructTree(len_6, diameter_6, length_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int len_7 = 10;
+    int diameter_7 = 50;
+    std::vector<int> length_7 = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+    bool expected_7 = 0;
+    bool result_7 = ConstructTree(len_7, diameter_7, length_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int len_8 = 8;
+    int diameter_8 = 12;
+    std::vector<int> length_8 = {2, 4, 6, 8, 10, 12, 1, 3};
+    bool expected_8 = 0;
+    bool result_8 = ConstructTree(len_8, diameter_8, length_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int len_9 = 1;
+    int diameter_9 = 12;
+    std::vector<int> length_9 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        ConstructTree(len_9, diameter_9, length_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_10 = -1;
+    int diameter_10 = 12;
+    std::vector<int> length_10 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        ConstructTree(len_10, diameter_10, length_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_11 = 2005;
+    int diameter_11 = 12;
+    std::vector<int> length_11 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        ConstructTree(len_11, diameter_11, length_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_12 = 8;
+    int diameter_12 = 2005;
+    std::vector<int> length_12 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        ConstructTree(len_12, diameter_12, length_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_13 = 8;
+    int diameter_13 = 0;
+    std::vector<int> length_13 = {2, 4, 6, 9, 10, 13, 1, 3};
+    try
+    {
+        ConstructTree(len_13, diameter_13, length_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_14 = 8;
+    int diameter_14 = -2;
+    std::vector<int> length_14 = {2, 4, 6, 9, 10, 14, 1, 3};
+    try
+    {
+        ConstructTree(len_14, diameter_14, length_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_15 = 8;
+    int diameter_15 = 5;
+    std::vector<int> length_15 = {2, 4, 6, 9, 15, 1, 3};
+    try
+    {
+        ConstructTree(len_15, diameter_15, length_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_16 = 8;
+    int diameter_16 = 5;
+    std::vector<int> length_16 = {2, 4, 6, 9, 16, 1, 3,200};
+    try
+    {
+        ConstructTree(len_16, diameter_16, length_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_17 = 8;
+    int diameter_17 = 5;
+    std::vector<int> length_17 = {2, 4, 0, 0, 0, 1, 3,0};
+    try
+    {
+        ConstructTree(len_17, diameter_17, length_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_18 = 8;
+    int diameter_18 = 5;
+    std::vector<int> length_18 = {2, -4, 0, 0, 0, 1, 3,0};
+    try
+    {
+        ConstructTree(len_18, diameter_18, length_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_19 = 8;
+    int diameter_19 = 5;
+    std::vector<int> length_19 = {};
+    try
+    {
+        ConstructTree(len_19, diameter_19, length_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
