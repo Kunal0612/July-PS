@@ -1,0 +1,219 @@
+// https://codeforces.com/problemset/problem/1437/F
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int Add(int first, int sec)
+{
+    first += sec;
+    int mod = 998244353;
+    while (first >= mod)
+    {
+        first -= mod;
+    }
+    while (first < 0)
+    {
+        first += mod;
+    }
+    return first;
+}
+
+int Sub(int first, int sec)
+{
+    int mod = 998244353;
+    return Add(first, mod - sec);
+}
+
+int Mul(int first, int sec)
+{
+    int mod = 998244353;
+    return (first * 1ll * sec) % mod;
+}
+
+int EmotionalFishermen(std::vector<int> nums)
+{
+    int len = nums.size();
+    if(len<2 or len>5000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<nums.size();i++){
+        if(nums[i]<1 or nums[i]>1000000000){
+            throw std::invalid_argument("Invalid nums value");
+        }
+    }
+    std::vector<int> elements(len);
+    std::vector<int> count_less(len, 0);
+    std::vector<int> last_less(len, -1);
+    std::vector<std::vector<int>> dp(len, std::vector<int>(len + 1, 0));
+    std::vector<std::vector<int>> pdp(len + 1, std::vector<int>(len + 1, 0));
+
+    for (int i = 0; i < len; i++){
+        elements[i] = nums[i];
+    }
+
+    std::sort(elements.begin(), elements.end());
+
+    for (int i = 0; i < len; i++)
+    {
+        for (int j = 0; j < len; j++)
+            if (elements[j] * 2 <= elements[i])
+            {
+                last_less[i] = j;
+                count_less[i]++;
+            }
+    }
+
+    for (int i = 0; i < len; i++)
+    {
+        dp[i][1] = 1;
+        pdp[i + 1][1] = Add(pdp[i][1], dp[i][1]);
+    }
+
+    for (int k = 2; k <= len; k++)
+    {
+        for (int i = 0; i < len; i++)
+        {
+            if (count_less[i] + 1 >= k){
+                dp[i][k] = Add(Mul(dp[i][k - 1], Add(count_less[i], Sub(2, k))), pdp[last_less[i] + 1][k - 1]);
+            }
+            else{
+                dp[i][k] = 0;
+            }
+            pdp[i + 1][k] = Add(pdp[i][k], dp[i][k]);
+        }
+    }
+
+    int ans = dp[len - 1][len];
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::vector<int> nums_1 = {1, 1, 4, 9};
+    int expected_1 = 20;
+    int result_1 = EmotionalFishermen(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    // int expected_2 = 31;
+    // int result_2 = EmotionalFishermen(nums_2);
+    // assert(result_2 == expected_2);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_3 = {1000000,5,5};
+    // int expected_3 = 1000005;
+    // int result_3 = EmotionalFishermen(nums_3);
+    // assert(result_3 == expected_3);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    // int expected_4 = 7;
+    // int result_4 = EmotionalFishermen(nums_4);
+    // assert(result_4 == expected_4);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    // int expected_5 = 62;
+    // int result_5 = EmotionalFishermen(nums_5);
+    // assert(result_5 == expected_5);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    // int expected_6 =5;
+    // int result_6 = EmotionalFishermen(nums_6);
+    // assert(result_6 == expected_6);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    // int expected_7 = 7;
+    // int result_7 = EmotionalFishermen(nums_7);
+    // assert(result_7 == expected_7);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    // int expected_8 = 3;
+    // int result_8 = EmotionalFishermen(nums_8);
+    // assert(result_8 == expected_8);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_9 = {0};
+    // try
+    // {
+    //     EmotionalFishermen(nums_9);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    //  // TEST
+    // std::vector<int> nums_10(6000000,0);
+    // try
+    // {
+    //     EmotionalFishermen(nums_10);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    //  // TEST
+    // std::vector<int> nums_11(6,-1);
+    // try
+    // {
+    //     EmotionalFishermen(nums_11);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    // // TEST
+    // std::vector<int> nums_12(6,100000000);
+    // try
+    // {
+    //     EmotionalFishermen(nums_12);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    // // TEST
+    // std::vector<int> nums_13={};
+    // try
+    // {
+    //     EmotionalFishermen(nums_13);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
