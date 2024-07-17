@@ -1,0 +1,174 @@
+// https://codeforces.com/problemset/problem/1111/D
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+long long ModExp(long long base, long long exp, long long mod)
+{
+    long long result = 1;
+    while (exp)
+    {
+        if (exp & 1LL){
+            result = (result * base) % mod;
+        }
+        base = (base * base) % mod;
+        exp /= 2LL;
+    }
+    return result;
+}
+
+int FindIndex(char chr)
+{
+    if (chr >= 'A' && chr <= 'Z'){
+        return (int)(chr - 'A' + 26);
+    }
+    else{
+        return (chr - 'a');
+    }
+}
+
+inline void AddMod(long long &first, long long sec, long long mod)
+{
+    first += sec;
+    if (first >= mod){
+        first -= mod;
+    }
+}
+
+inline void SubtractMod(long long &first, long long sec, long long mod)
+{
+    first -= sec;
+    if (first < 0){
+        first += mod;
+    }
+}
+
+std::vector<int> DestroyTheColony(std::string str, std::vector<std::vector<int>> &quer)
+{
+    int len = str.size();
+    if (len < 2 or len > 100000 or len%2==1)
+    {
+        throw std::invalid_argument("Invalid str length");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (str[i]<'0' or str[i]>'9')
+        {
+            throw std::invalid_argument("Invalid str");
+        }
+    }
+    int num_queries=quer.size();
+    if (num_queries<1 or num_queries>100000)
+    {
+        throw std::invalid_argument("Invalid quer length");
+    }
+    for(int i=0;i<quer.size();i++){
+        if(quer[i][0]<1 or quer[i][1]<1 or quer[i][0]>len or quer[i][0]>len or quer[i][0]!=quer[i][1]){
+            throw std::invalid_argument("Invalid str length");
+        }
+    }
+    long long mod = 1e9 + 7;
+    std::vector<long long> bucket(101, 0);
+    std::vector<long long> factorial(len + 1, 1);
+    std::vector<long long> inverse_factorial(len + 1, 1);
+    std::vector<long long> dp_table(len + 1, 0);
+    std::vector<long long> temp_dp(len + 1, 0);
+    std::vector<std::vector<long long>> answer(55, std::vector<long long>(55, 0));
+
+    for (char c : str)
+    {
+        bucket[FindIndex(c)]++;
+    }
+
+    for (int i = 1; i <= len; i++)
+    {
+        factorial[i] = (factorial[i - 1] * i) % mod;
+    }
+    inverse_factorial[len] = ModExp(factorial[len], mod - 2, mod);
+    for (int i = len - 1; i >= 0; i--)
+    {
+        inverse_factorial[i] = (inverse_factorial[i + 1] * (i + 1)) % mod;
+    }
+
+    long long num = (factorial[len / 2] * factorial[len / 2]) % mod;
+    for (int i = 0; i < 52; i++)
+    {
+        num = (num * inverse_factorial[bucket[i]]) % mod;
+    }
+
+    dp_table[0] = 1;
+    for (int i = 0; i < 52; i++)
+    {
+        if (!bucket[i])
+        {
+            continue;
+        }
+        for (int j = len; j >= bucket[i]; j--)
+        {
+            AddMod(dp_table[j], dp_table[j - bucket[i]], mod);
+        }
+    }
+
+    for (int i = 0; i < 52; i++)
+    {
+        answer[i][i] = dp_table[len / 2];
+    }
+
+    for (int i = 0; i < 52; i++)
+    {
+        if (!bucket[i])
+        {
+            continue;
+        }
+        temp_dp = dp_table;
+        for (int k = bucket[i]; k <= len; k++)
+        {
+            SubtractMod(temp_dp[k], temp_dp[k - bucket[i]], mod);
+        }
+        for (int j = i + 1; j < 52; j++)
+        {
+            if (!bucket[j])
+            {
+                continue;
+            }
+            for (int k = bucket[j]; k <= len; k++)
+            {
+                SubtractMod(temp_dp[k], temp_dp[k - bucket[j]], mod);
+            }
+            answer[i][j] = (2LL * temp_dp[len / 2]) % mod;
+            answer[j][i] = answer[i][j];
+            for (int k = len; k >= bucket[j]; k--)
+            {
+                AddMod(temp_dp[k], temp_dp[k - bucket[j]], mod);
+            }
+        }
+    }
+
+    
+    std::vector<int> ans;
+    for(int i=0;i<num_queries;i++)
+    {
+        int xec=quer[i][0], yec=quer[i][1]  ;
+        int l_index = FindIndex(str[xec - 1]);
+        int r_index = FindIndex(str[yec - 1]);
+        ans.push_back((num * answer[l_index][r_index]) % mod);
+    }
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+
+    return 0;
+}
