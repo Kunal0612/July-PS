@@ -1,0 +1,147 @@
+// https://codeforces.com/problemset/problem/1051/E
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int AddModulo(int value_a, int value_b) {
+    int mod = 998244353;
+    value_a += value_b;
+    if (value_a >= mod){
+        value_a -= mod;
+    }
+    return value_a;
+}
+
+std::vector<int> ComputeZFunction(const std::string& str) {
+    int length = str.size();
+    std::vector<int> z_array(length);
+    for (int index = 1, left = 0, right = 0; index < length; ++index) {
+        if (index <= right){
+            z_array[index] = std::min(right - index + 1, z_array[index - left]);
+        }
+        while (index + z_array[index] < length && str[z_array[index]] == str[index + z_array[index]]){
+            ++z_array[index];
+        }
+        if (index + z_array[index] - 1 > right){
+            left = index, right = index + z_array[index] - 1;
+        }
+    }
+    return z_array;
+}
+
+char Compare(const std::vector<int>& z_function, const std::string& main_str, const std::string& substr, int position) {
+    int substr_len = substr.size();
+    assert(position + substr_len + 1 < z_function.size());
+    if (main_str.size() - position < substr_len){
+        return '<';
+    }
+
+    int z_value = z_function[substr_len + 1 + position];
+    assert(z_value <= substr_len);
+    if (z_value == substr_len){
+        return '=';
+    }
+
+    assert(position + z_value < main_str.size());
+    assert(main_str[position + z_value] != substr[z_value]);
+    if (main_str[position + z_value] < substr[z_value]){
+        return '<';
+    }
+    return '>';
+}
+
+
+int VasyaandBigIntegers(std::string input_string,std::string left_string,std::string right_string){
+    if (input_string.size() < 1 or input_string.size() > 1000000)
+    {
+        throw std::invalid_argument("Invalid input_string length");
+    }
+    for (int i = 0; i < input_string.size(); i++)
+    {
+        if (input_string[i]<'0' or input_string[i]>'9')
+        {
+            throw std::invalid_argument("Invalid input_string");
+        }
+    }
+    if (left_string.size() < 1 or left_string.size() > 1000000)
+    {
+        throw std::invalid_argument("Invalid left_string length");
+    }
+    for (int i = 0; i < left_string.size(); i++)
+    {
+        if (left_string[i]<'0' or left_string[i]>'9')
+        {
+            throw std::invalid_argument("Invalid left_string");
+        }
+    }
+    if (right_string.size() < 1 or right_string.size() > 1000000)
+    {
+        throw std::invalid_argument("Invalid right_string length");
+    }
+    for (int i = 0; i < right_string.size(); i++)
+    {
+        if (right_string[i]<'0' or right_string[i]>'9')
+        {
+            throw std::invalid_argument("Invalid right_string");
+        }
+    }
+    int string_length = input_string.size();
+    std::vector<int> z_function_left = ComputeZFunction(left_string + "#" + input_string);
+    std::vector<int> z_function_right = ComputeZFunction(right_string + "#" + input_string);
+    std::vector<int> dpp(string_length + 1, 0);
+    std::vector<int> sum_dp(string_length + 1, 0);
+    sum_dp[string_length] = dpp[string_length] = 1;
+    int mod = 998244353;
+    for (int index = string_length - 1; index >= 0; --index) {
+        if (input_string[index] == '0') {
+            if (left_string == "0") {
+                dpp[index] = dpp[index + 1];
+            } else {
+                dpp[index] = 0;
+            }
+            sum_dp[index] = AddModulo(dpp[index], sum_dp[index + 1]);
+            continue;
+        }
+
+        int left_bound = left_string.size() + index;
+        char compare_left = Compare(z_function_left, input_string, left_string, index);
+        if (compare_left == '<'){
+            ++left_bound;
+        }
+
+        int right_bound = right_string.size() + index;
+        char compare_right = Compare(z_function_right, input_string, right_string, index);
+        if (compare_right == '>'){
+            --right_bound;
+        }
+
+        int current_value = 0;
+        if (left_bound <= right_bound && left_bound <= string_length) {
+            right_bound = std::min(right_bound, string_length);
+            current_value = sum_dp[left_bound];
+            if (right_bound != string_length) {
+                current_value = AddModulo(current_value, mod - sum_dp[right_bound + 1]);
+            }
+        }
+        dpp[index] = current_value;
+        sum_dp[index] = AddModulo(dpp[index], sum_dp[index + 1]);
+    }
+    int ans=dpp[0];
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    
+}
