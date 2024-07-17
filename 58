@@ -1,4 +1,61 @@
-// https://codeforces.com/problemset/problem/1677/D
+/*
+
+https://codeforces.com/problemset/problem/1677/D
+
+Write a C++ Solution TokitsukazeAndPermutations to find the number 
+of possible permutations modulo 998244353 (a prime number used for modular arithmetic)
+
+Tokitsukaze has a permutation p of length len. She performs a specific 
+operation k_value times on this permutation:
+
+Operation Details: In each operation, she iterates through indices 1 to len-1.
+
+Swap Condition: If p_i (element at index i) is greater than p_{i+1}, 
+she swaps the positions of p_i and p_{i+1}.
+
+Resulting Sequence a:
+
+After performing the operation k_value times, a new permutation a is formed.
+
+Value Sequence v:
+
+Based on permutation a, Tokitsukaze calculates a value sequence nums of length len. 
+Each element nums_i represents the number of elements greater than a_i that appear 
+to the left of position i in the permutation a.
+
+The Challenge:
+
+Unfortunately, naughty cats have bitten out some parts of the 
+value sequence nums written on paper. Tokitsukaze wants to 
+know how many different original permutations p could have 
+existed that would result in the same partially visible value 
+sequence nums (ignoring the missing parts) after applying the operation k_value times.
+
+The Twist:
+
+Since the answer can be very large, 
+we need to find the number of possible 
+permutations modulo 998244353 (a prime number used for modular arithmetic).
+
+Input:
+
+A integer k_value.
+A vector of integer nums.
+
+Output:
+
+A string ans to find the number of possible permutations modulo 998244353 (a prime number used for modular arithmetic).
+
+Constraints:
+
+k_value : ranges from 1 to len.
+nums.size() : ranges from 1 to 10^6.
+nums : nums[i] : ranges from -1 to i (0 based indexing).
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -54,9 +111,6 @@ int TokitsukazeAndPermutations(int k_value, std::vector<int> &nums)
 #include <cstdio>
 #include <cassert>
 #include <stdexcept>
-
-
-// std::cout<<result_5<<std::endl;
 
 int main()
 {
@@ -161,6 +215,32 @@ int main()
     try
     {
         TokitsukazeAndPermutations(k_value_12,nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {-1,1,-1,0,0};
+    int k_value_13=10;
+    try
+    {
+        TokitsukazeAndPermutations(k_value_13,nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {-1,1,-1,0,0};
+    int k_value_14=-1;
+    try
+    {
+        TokitsukazeAndPermutations(k_value_14,nums_14);
         assert(false);
     }
     catch (const std::invalid_argument &e)
