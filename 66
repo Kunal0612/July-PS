@@ -1,0 +1,103 @@
+// https://codeforces.com/problemset/problem/1178/F2
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int ComputeResult(int left, int right, const std::vector<int>& array, 
+const std::vector<int>& left_pos, const std::vector<int>& right_pos, std::vector<std::vector<int>>& dpp, 
+int num_elements) {
+    int mod = 998244353;
+    if (left > right) return 1;
+    if (dpp[left][right] != -1) return dpp[left][right];
+
+    int min_value = num_elements + 1;
+    for (int i = left; i <= right; ++i) {
+        if (left_pos[array[i]] < left || right_pos[array[i]] > right) {
+            return dpp[left][right] = 0;
+        }
+        min_value = std::min(min_value, array[i]);
+    }
+
+    dpp[left][right] = 1;
+    int xec = 0, yec = 0, pec = 0;
+
+    for (int i = left; i <= right; ++i) {
+        if (array[i] == min_value) {
+            if (!pec) {
+                pec = i;
+                for (int j = left; j <= pec; ++j) {
+                    xec = (xec + 1LL * ComputeResult(left, j - 1, array, left_pos, right_pos, dpp, num_elements) * ComputeResult(j, pec - 1, array, left_pos, right_pos, dpp, num_elements)) % mod;
+                }
+            } else {
+                dpp[left][right] = 1LL * dpp[left][right] * ComputeResult(pec + 1, i - 1, array, left_pos, right_pos, dpp, num_elements) % mod;
+                pec = i;
+            }
+        }
+    }
+
+    for (int j = pec; j <= right; ++j) {
+        yec = (yec + 1LL * ComputeResult(pec + 1, j, array, left_pos, right_pos, dpp, num_elements) * ComputeResult(j + 1, right, array, left_pos, right_pos, dpp, num_elements)) % mod;
+    }
+
+    return dpp[left][right] = 1LL * dpp[left][right] * xec % mod * yec % mod;
+}
+
+
+int LongColorfulStrip(int num_elements,std::vector<int> color_visible){
+    if(num_elements<1 or num_elements>500){
+        throw std::invalid_argument("Invalid num_element length");
+    }
+    if(color_visible.size()<num_elements or color_visible.size()>1000000){
+        throw std::invalid_argument("Invalid color_visible length");
+    }
+    for(int i=0;i<color_visible.size();i++){
+        if(color_visible[i]>num_elements or color_visible[i]<1){
+            throw std::invalid_argument("Invalid color_visible value");
+        }
+    }
+    int max_n = 510;
+    std::vector<int> array(2 * num_elements + 1);
+    std::vector<int> left_pos(max_n, 0), right_pos(max_n, 0);
+    std::vector<std::vector<int>> dpp(2 * num_elements + 1, std::vector<int>(2 * num_elements + 1, -1));
+
+    int array_size = 0;
+    for(int i=0;i<color_visible.size();i++){
+        array[array_size + 1]=color_visible[i];
+        if (array[array_size] == array[array_size + 1]){
+            continue;
+        }
+        ++array_size;
+        if (array_size > 2 * num_elements) {
+            return 0;
+        }
+        if (!left_pos[array[array_size]]){
+            left_pos[array[array_size]] = array_size;
+        }
+        right_pos[array[array_size]] = array_size;
+    }
+
+    int ans=ComputeResult(1, array_size, array, left_pos, right_pos, dpp, num_elements);
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    
+
+    return 0;
+}
