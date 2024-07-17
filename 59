@@ -1,5 +1,63 @@
-// https://codeforces.com/problemset/problem/1580/B
+/*
 
+https://codeforces.com/problemset/problem/1580/B
+
+Write a C++ Solution  MathematicsCurriculum to determine the number of permutations modulo 1e9+7.
+
+Cirno is given a permutation c_1, c_2, ..., c_len of integers from 1 to len.
+We're interested in subsegments of this permutation that contain a specific integer x.
+
+Defining "Good" Numbers:
+
+An integer x in the permutation is considered "good" if there are exactly lem
+different maximum values across all subsegments containing x. In simpler terms,
+the number x should appear within subsegments where it's the maximum value lem different times.
+
+Cirno's Challenge:
+
+Cirno needs to find the number of permutations of length len where exactly
+k_value integers are classified as "good" based on the criteria mentioned above.
+
+Modular Arithmetic:
+
+Since the answer can be very large, we only need to determine the number of
+permutations modulo 1e9+7 (commonly used for modular arithmetic).
+
+Understanding Permutations:
+
+A permutation is an arrangement of distinct integers from 1 to n in a specific
+order (no repetition).
+For example, [2, 3, 1, 5, 4] is a valid permutation, while [1, 2, 2]
+(repeated element) and [1, 3, 4] (missing element) are not.
+
+Subsegments:
+
+A subsegment of a sequence b is a subsequence obtained by removing zero or
+more elements from the beginning and/or end of b. For example, [2, 1] is a
+subsegment of [2, 3, 1, 5, 4].
+
+
+Input:
+
+A integer len.
+A integer lem.
+A integer k_value.
+
+Output:
+
+An integer ans to determine the number of permutations modulo 1e9+7.
+
+Constraints:
+
+k_value : ranges from 1 to len.
+len : ranges from 1 to 100.
+lem : ranges from 1 to len.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -9,29 +67,37 @@
 #include <cassert>
 #include <stdexcept>
 
-
-int Add(int first, int sec, int mod) {
+int Add(int first, int sec, int mod)
+{
     return first + sec < mod ? first + sec : first + sec - mod;
 }
 
-void Helper(int size, int cnt, int dep, int lem, int mod, std::vector<std::vector<std::vector<int>>>& dpp, const std::vector<int>& fac, const std::vector<std::vector<int>>& cpp) {
-    if (dpp[dep][size][cnt] != -1) return;
-    int& res = dpp[dep][size][cnt] = 0;
-    if (!size) {
+void Helper(int size, int cnt, int dep, int lem, int mod, std::vector<std::vector<std::vector<int>>> &dpp, const std::vector<int> &fac, const std::vector<std::vector<int>> &cpp)
+{
+    if (dpp[dep][size][cnt] != -1)
+        return;
+    int &res = dpp[dep][size][cnt] = 0;
+    if (!size)
+    {
         res = 1;
         return;
     }
-    if ((lem - dep < 7 && (1 << (lem - dep)) < cnt) || (cnt && size < lem - dep)) return;
-    if (dep == lem) {
+    if ((lem - dep < 7 && (1 << (lem - dep)) < cnt) || (cnt && size < lem - dep))
+        return;
+    if (dep == lem)
+    {
         res = (cnt == 1 ? fac[size] : 0);
         return;
     }
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
+    {
         int fidx = 0;
-        std::vector<int>& f_left = dpp[dep + 1][i];
-        std::vector<int>& f_right = dpp[dep + 1][size - i - 1];
-        for (int j = std::max(0, cnt + i + 1 - size); j <= std::min(cnt, i); j++) {
-            if (f_left[j] && f_right[cnt - j]) {
+        std::vector<int> &f_left = dpp[dep + 1][i];
+        std::vector<int> &f_right = dpp[dep + 1][size - i - 1];
+        for (int j = std::max(0, cnt + i + 1 - size); j <= std::min(cnt, i); j++)
+        {
+            if (f_left[j] && f_right[cnt - j])
+            {
                 Helper(i, j, dep + 1, lem, mod, dpp, fac, cpp);
                 Helper(size - i - 1, cnt - j, dep + 1, lem, mod, dpp, fac, cpp);
                 fidx = (fidx + 1ll * f_left[j] * f_right[cnt - j]) % mod;
@@ -41,25 +107,30 @@ void Helper(int size, int cnt, int dep, int lem, int mod, std::vector<std::vecto
     }
 }
 
-int MathematicsCurriculum(int len,int lem,int k_value,int mod){
-    if(len<1 or len>100 or lem<1 or lem>len or k_value<1 or k_value>len or mod<1 or mod>1000000009){
+int MathematicsCurriculum(int len, int lem, int k_value)
+{
+    if (len < 1 or len > 100 or lem < 1 or lem > len or k_value < 1 or k_value > len)
+    {
         throw std::invalid_argument("Invalid crr length");
     }
     lem--;
-    int MAX_N = 100 + 5;
-    int MIN_SIZE = 4;
-    std::vector<int> fac(std::max(len + 1, MIN_SIZE), 1);
-    std::vector<std::vector<int>> cpp(std::max(len + 1, MIN_SIZE), std::vector<int>(std::max(len + 1, MIN_SIZE), 0));
-    std::vector<std::vector<std::vector<int>>> dpp(std::max(lem + 1, MIN_SIZE), std::vector<std::vector<int>>(std::max(len + 1, MIN_SIZE), std::vector<int>(std::max(len + 1, MIN_SIZE), -1)));
-    for (int i = 0; i <= len; i++) {
+    int mod = 1e9 + 7;
+    int min_sz = 4;
+    std::vector<int> fac(std::max(len + 1, min_sz), 1);
+    std::vector<std::vector<int>> cpp(std::max(len + 1, min_sz), std::vector<int>(std::max(len + 1, min_sz), 0));
+    std::vector<std::vector<std::vector<int>>> dpp(std::max(lem + 1, min_sz), std::vector<std::vector<int>>(std::max(len + 1, min_sz), std::vector<int>(std::max(len + 1, min_sz), -1)));
+    for (int i = 0; i <= len; i++)
+    {
         cpp[i][0] = cpp[i][i] = 1;
-        if (i > 0) fac[i] = 1ll * fac[i - 1] * i % mod;
-        for (int j = 1; j < i; j++) {
+        if (i > 0)
+            fac[i] = 1ll * fac[i - 1] * i % mod;
+        for (int j = 1; j < i; j++)
+        {
             cpp[i][j] = Add(cpp[i - 1][j - 1], cpp[i - 1][j], mod);
         }
     }
     Helper(len, k_value, 0, lem, mod, dpp, fac, cpp);
-    int ans=dpp[0][len][k_value];
+    int ans = dpp[0][len][k_value];
     return ans;
 }
 
@@ -71,13 +142,148 @@ int MathematicsCurriculum(int len,int lem,int k_value,int mod){
 #include <cassert>
 #include <stdexcept>
 
-int main() {
+int main()
+{
     // TEST
-    int len_1=4,lem_1=3,k_value_1=2,mod_1=10007;
+    int len_1 = 4, lem_1 = 3, k_value_1 = 2;
     int threshold_1 = 4;
     int expected_1 = 4;
-    int result_1 = MathematicsCurriculum(len_1,lem_1,k_value_1,mod_1);
+    int result_1 = MathematicsCurriculum(len_1, lem_1, k_value_1);
     assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int len_2 = 5, lem_2 = 3, k_value_2 = 2;
+    int threshold_2 = 3;
+    int expected_2 = 64;
+    int result_2 = MathematicsCurriculum(len_2, lem_2, k_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int len_3 = 6, lem_3 = 4, k_value_3 = 2;
+    int threshold_3 = 6;
+    int expected_3 = 168;
+    int result_3 = MathematicsCurriculum(len_3, lem_3, k_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int len_4 = 7, lem_4 = 5, k_value_4 = 3;
+    int threshold_4 = 5;
+    int expected_4 = 0;
+    int result_4 = MathematicsCurriculum(len_4, lem_4, k_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int len_5 = 8, lem_5 = 6, k_value_5 = 2;
+    int threshold_5 = 8;
+    int expected_5 = 1088;
+    int result_5 = MathematicsCurriculum(len_5, lem_5, k_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int len_6 = 9, lem_6 = 7, k_value_6 = 4;
+    int threshold_6 = 7;
+    int expected_6 = 0;
+    int result_6 = MathematicsCurriculum(len_6, lem_6, k_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int len_7 = 10, lem_7 = 8, k_value_7 = 5;
+    int threshold_7 = 9;
+    int expected_7 = 0;
+    int result_7 = MathematicsCurriculum(len_7, lem_7, k_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int len_8 = 11, lem_8 = 9, k_value_8 = 3;
+    int threshold_8 = 11;
+    int expected_8 = 0;
+    int result_8 = MathematicsCurriculum(len_8, lem_8, k_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int len_9 = 0, lem_9 = 9, k_value_9 = 3;
+    int threshold_9 = 11;
+    try
+    {
+        MathematicsCurriculum(len_9, lem_9, k_value_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int len_10 = 1000, lem_10 = 9, k_value_10 = 3;
+    int threshold_10 = 11;
+    try
+    {
+        MathematicsCurriculum(len_10, lem_10, k_value_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int len_11 = -1, lem_11 = 9, k_value_11 = 3;
+    int threshold_11 = 11;
+    try
+    {
+        MathematicsCurriculum(len_11, lem_11, k_value_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_12 = 1, lem_12 = 100, k_value_12 = 3;
+    int threshold_12 = 11;
+    try
+    {
+        MathematicsCurriculum(len_12, lem_12, k_value_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int len_13 = 1000, lem_13 = -1, k_value_13 = 3;
+    int threshold_13 = 11;
+    try
+    {
+        MathematicsCurriculum(len_13, lem_13, k_value_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    //  TEST
+    int len_14 = 5, lem_14 = 0, k_value_14 = 3;
+    int threshold_14 = 11;
+    try
+    {
+        MathematicsCurriculum(len_14, lem_14, k_value_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
     // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
