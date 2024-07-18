@@ -1,0 +1,124 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cstring>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+/*
+Input :
+
+An integer insert_cost.
+An integer delete_cost.
+An integer replace_cost.
+An integer swap_cost.
+A string str_a.
+A string str_b.
+
+Constraints :
+
+insert_cost :  ranges from 1 to 100.
+delete_cost :  ranges from 1 to 100.
+replace_cost :  ranges from 1 to 100.
+swap_cost :  ranges from 1 to 100.
+str_a.size() : ranges from 1 to 4000.
+str_b.size() : ranges from 1 to 4000.
+str_a , str_b : contains only lowercase characters.
+
+*/
+
+
+
+void Min(int &a, int b) {
+    if (b < a) a = b;
+    return;
+}
+
+int SequenceofBalls(int insert_cost, int delete_cost, int replace_cost, int swap_cost, std::string str_a,
+std::string str_b){
+
+    if(insert_cost<1 or insert_cost>100){
+        throw std::invalid_argument("Invalid insert_cost");
+    }
+    if(delete_cost<1 or delete_cost>100){
+        throw std::invalid_argument("Invalid delete_cost");
+    }
+    if(replace_cost<1 or replace_cost>100){
+        throw std::invalid_argument("Invalid replace_cost");
+    }
+    if(swap_cost<1 or swap_cost>100){
+        throw std::invalid_argument("Invalid swap_cost");
+    }
+    if(str_a.size()<1 or str_a.size()>4000){
+        throw std::invalid_argument("Invalid str_a size");
+    }
+    if(str_b.size()<1 or str_b.size()>4000){
+        throw std::invalid_argument("Invalid str_b size");
+    }
+    for(int i=0;i<str_a.size();i++){
+        if(str_a[i]<'a' or str_a[i]>'z'){
+            throw std::invalid_argument("Invalid str_a");
+        }
+    }
+    for(int i=0;i<str_b.size();i++){
+        if(str_b[i]<'a' or str_b[i]>'z'){
+            throw std::invalid_argument("Invalid str_b");
+        }
+    }
+    int len_a = str_a.size(), len_b = str_b.size();
+    std::vector<std::vector<int>> dp_table(len_a + 1, std::vector<int>(len_b + 1, LONG_MAX));
+    std::vector<int> last_position_a(26, 0), last_position_b(26, 0);
+
+    str_a = " " + str_a;
+    str_b = " " + str_b;
+    dp_table[0][0] = 0;
+
+    for (int i = 1; i <= len_a; i++) dp_table[i][0] = delete_cost * i;
+    for (int i = 1; i <= len_b; i++) dp_table[0][i] = insert_cost * i;
+
+    for (int j = 1; j <= len_b; j++) {
+        std::fill(last_position_a.begin(), last_position_a.end(), 0);
+        for (int i = 1; i <= len_a; i++) {
+            if (str_a[i] == str_b[j]) Min(dp_table[i][j], dp_table[i - 1][j - 1]);
+            else Min(dp_table[i][j], dp_table[i - 1][j - 1] + replace_cost);
+
+            Min(dp_table[i][j], dp_table[i][j - 1] + insert_cost);
+            Min(dp_table[i][j], dp_table[i - 1][j] + delete_cost);
+
+            int pos_a = last_position_a[str_b[j] - 'a'], pos_b = last_position_b[str_a[i] - 'a'];
+            if (pos_a && pos_b) 
+                Min(dp_table[i][j], dp_table[pos_a - 1][pos_b - 1] + swap_cost + (j - pos_b - 1) * insert_cost + (i - pos_a - 1) * delete_cost);
+
+            last_position_a[str_a[i] - 'a'] = i;
+        }
+        last_position_b[str_b[j] - 'a'] = j;
+    }
+
+    int ans=dp_table[len_a][len_b];
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cstring>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int main() {
+    long long insert_cost, delete_cost, replace_cost, swap_cost;
+    std::cin >> insert_cost >> delete_cost >> replace_cost >> swap_cost;
+
+    std::string str_a, str_b;
+    std::cin >> str_a >> str_b;
+    int ans=SequenceofBalls(insert_cost,delete_cost,replace_cost,swap_cost,str_a,str_b);
+    std::cout<<ans<<std::endl;
+    return 0;
+}
