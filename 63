@@ -1,4 +1,65 @@
-// https://codeforces.com/problemset/problem/1111/D
+/*
+
+https://codeforces.com/problemset/problem/1111/D
+
+Write a C++ Solution DestroyTheColony to determine for each query Jarvis needs to 
+report the number of distinct colony arrangements he can create under the given 
+conditions, modulo a specific value (which will be provided in the problem).
+
+Imagine a colony of villains residing in a series of holes arranged in a straight 
+line. Each hole houses exactly one villain, and the colony's layout can be represented 
+by a string of even length. In this string, each character at position i represents 
+the type of villain residing in the i_th hole.
+
+Iron Man, the superhero, can only destroy the colony if all villains of a 
+specific type are grouped together, either in the first half of the colony or the second half.
+
+Jarvis' Special Power:
+
+Iron Man's trusty assistant, Jarvis, possesses a unique ability. He can swap any 
+two villains within the colony at will. He can perform this swap operation as many times as needed.
+
+The Challenge:
+
+Iron Man bombards Jarvis with q_len questions. In each question, he provides two 
+numbers, x and y. Your task is to help Jarvis answer Iron Man's questions. 
+For each question, Jarvis needs to determine the number of distinct colony 
+arrangements he can create using his swapping power that satisfy these conditions:
+
+All villains of the same type as the villain originally residing in the x_th hole 
+must be grouped together in either the first or second half of the colony.
+Similarly, all villains of the same type as the villain originally residing 
+in the y_th hole must also be grouped together in the same half of the colony.
+Two colony arrangements are considered distinct if there exists a single hole 
+where the villain types differ between the arrangements.
+
+For each of Iron Man's q_len questions, Jarvis needs to report the number of
+distinct colony arrangements he can create under the given conditions, modulo 
+a specific value (which will be provided in the problem).
+
+
+Input:
+
+A string str.
+A vector of vector of integers quer.
+
+Output:
+
+An vector of integer ans to determine for each query Jarvis needs to report the number of distinct colony arrangements he can create under the given conditions, modulo a specific value (which will be provided in the problem).
+
+
+Constraints:
+
+str.size() : ranges from 2 to 100005 , and should be even.
+str : contains only lowercase and uppercase characters.
+quer.size() : ranges from 1 to 100000.
+quer : ranges from 1 to str.size(). 
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 
 #include <iostream>
@@ -56,18 +117,18 @@ std::vector<int> DestroyTheColony(std::string str, std::vector<std::vector<int>>
     }
     for (int i = 0; i < len; i++)
     {
-        if (str[i]<'0' or str[i]>'9')
+        if (!isalpha(str[i]))
         {
             throw std::invalid_argument("Invalid str");
         }
     }
-    int num_queries=quer.size();
-    if (num_queries<1 or num_queries>100000)
+    int q_len=quer.size();
+    if (q_len<1 or q_len>100000)
     {
         throw std::invalid_argument("Invalid quer length");
     }
     for(int i=0;i<quer.size();i++){
-        if(quer[i][0]<1 or quer[i][1]<1 or quer[i][0]>len or quer[i][0]>len or quer[i][0]!=quer[i][1]){
+        if(quer[i][0]<1 or quer[i][1]<1 or quer[i][0]>len or quer[i][0]>len or quer[i][0]==quer[i][1]){
             throw std::invalid_argument("Invalid str length");
         }
     }
@@ -150,13 +211,14 @@ std::vector<int> DestroyTheColony(std::string str, std::vector<std::vector<int>>
 
     
     std::vector<int> ans;
-    for(int i=0;i<num_queries;i++)
+    for(int i=0;i<q_len;i++)
     {
         int xec=quer[i][0], yec=quer[i][1]  ;
         int l_index = FindIndex(str[xec - 1]);
         int r_index = FindIndex(str[yec - 1]);
         ans.push_back((num * answer[l_index][r_index]) % mod);
     }
+    return ans;
 }
 
 
@@ -166,9 +228,176 @@ std::vector<int> DestroyTheColony(std::string str, std::vector<std::vector<int>>
 #include <cassert>
 #include <stdexcept>
 
+// 
 
 int main()
 {
+    // TEST
+    std::string str_1 = "abba";
+    std::vector<std::vector<int>> quer_1 = {{1, 4}, {1, 2}};
+    std::vector<int> expected_1 = {2, 0};
+    std::vector<int> result_1 = DestroyTheColony(str_1, quer_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::string str_2 = "abcdef";
+    std::vector<std::vector<int>> quer_2 = {{1, 6}, {2, 5}};
+    std::vector<int> expected_2 = {288, 288};
+    std::vector<int> result_2 = DestroyTheColony(str_2, quer_2);
+    assert(result_2 == expected_2);
+    // TEST_END
 
+    // TEST
+    std::string str_3 = "aabbcc";
+    std::vector<std::vector<int>> quer_3 = {{1, 6}, {1, 2}, {3, 4}};
+    std::vector<int> expected_3 = {0, 0, 0};
+    std::vector<int> result_3 = DestroyTheColony(str_3, quer_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "ababab";
+    std::vector<std::vector<int>> quer_4 = {{1, 6}, {2, 5}, {1, 4}};
+    std::vector<int> expected_4 = {0, 0, 0};
+    std::vector<int> result_4 = DestroyTheColony(str_4, quer_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "AAaa";
+    std::vector<std::vector<int>> quer_5 = {{1, 2}, {1, 3}};
+    std::vector<int> expected_5 = {2,0};
+    std::vector<int> result_5 = DestroyTheColony(str_5, quer_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "ccddeeff";
+    std::vector<std::vector<int>> quer_6 = {{1, 8}, {3, 6}, {5, 8}};
+    std::vector<int> expected_6 = {72, 72, 72};
+    std::vector<int> result_6 = DestroyTheColony(str_6, quer_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "rrttyy";
+    std::vector<std::vector<int>> quer_7 = {{1, 6}, {2, 5}, {4, 6}};
+    std::vector<int> expected_7 = {0, 0, 0};
+    std::vector<int> result_7 = DestroyTheColony(str_7, quer_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "ppqqrrss";
+    std::vector<std::vector<int>> quer_8 = {{1, 8}, {1, 4}, {5, 8}};
+    std::vector<int> expected_8 = {72, 72, 72};
+    std::vector<int> result_8 = DestroyTheColony(str_8, quer_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    std::vector<std::vector<int>> quer_9 = {{1, 8}, {1, 4}, {5, 8}};
+    try
+    {
+        DestroyTheColony(str_9, quer_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "51";
+    std::vector<std::vector<int>> quer_10 = {{1, 8}, {1, 4}, {5, 8}};
+    try
+    {
+        DestroyTheColony(str_10, quer_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = "anj";
+    std::vector<std::vector<int>> quer_11 = {};
+    try
+    {
+        DestroyTheColony(str_11, quer_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_12 = "anj";
+    std::vector<std::vector<int>> quer_12 = {{1,5}};
+    try
+    {
+        DestroyTheColony(str_12, quer_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_13 = "anj";
+    std::vector<std::vector<int>> quer_13 = {{1,-1}};
+    try
+    {
+        DestroyTheColony(str_13, quer_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_14 =std::string(2000000,'a');
+    std::vector<std::vector<int>> quer_14 = {{1,5}};
+    try
+    {
+        DestroyTheColony(str_14, quer_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_15 =std::string(20,'a');
+    std::vector<std::vector<int>> quer_15(1000005,{1,5});
+    try
+    {
+        DestroyTheColony(str_15, quer_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_16 =std::string(15,'a');
+    std::vector<std::vector<int>> quer_16(105,{1,5});
+    try
+    {
+        DestroyTheColony(str_16, quer_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
     return 0;
 }
