@@ -1,0 +1,120 @@
+// https://codeforces.com/problemset/problem/273/E
+
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+
+/*
+
+Input : 
+
+An integer len.
+An integer cnt.
+
+Constraints :
+
+len : ranges from 1 to 1000.
+cnt : ranges from 1 to 10^9.
+
+
+*/
+
+int CalculateMidElement(int first, int sec) {
+    for (int i = 0; i <= 2; ++i){
+         if (first != i && sec != i) {
+            return i;
+         }
+    }
+    return -1; 
+}
+
+int Calculate(int first, int sec, int cnt) {
+    int mod = 1000000007;
+    int right = cnt - first, left = cnt - sec;
+    return (long long)(left + right) * (right - left + 1) / 2 % mod;
+}
+
+int DimaAndGame(int &len, int &cnt) {
+    if(len<1 or len>1000){
+        throw std::invalid_argument("Invalid len");
+    }
+    if(cnt<1 or cnt>1000000000){
+        throw std::invalid_argument("Invalid cnt");
+    }
+    std::vector<int> sequence_b(120), sequence_a(120);
+    std::vector<std::vector<int>> dp_table(1200, std::vector<int>(4));
+    std::vector<int> temp_g(4, 0);
+
+    int total_count = 1;
+    int left_max, right_max;
+    int left_ptr = 1, right_ptr = 1;
+
+    sequence_a[total_count] = 2;
+    sequence_b[total_count] = 0;
+    int mod = 1000000007;
+    while (sequence_a[total_count] < cnt) {
+        left_max = (sequence_a[left_ptr] + 1) * 3 - 1;
+        if (sequence_a[right_ptr] & 1){
+            right_max = (sequence_a[right_ptr] - 1) / 2 * 3 + 1;
+        }
+        else{
+            right_max = sequence_a[right_ptr] / 2 * 3;
+        }
+
+        sequence_b[++total_count] = CalculateMidElement(sequence_b[left_ptr], sequence_b[right_ptr]);
+        if (sequence_b[total_count] == sequence_b[total_count - 1]){
+            total_count--;
+        }
+        sequence_a[total_count] = std::min(right_max, left_max);
+        if (left_max == sequence_a[total_count]){
+            left_ptr++;
+        }
+        if (right_max == sequence_a[total_count]){
+            right_ptr++;
+        }
+    }
+
+    for (int i = 1; i <= total_count; ++i) {
+        if (i != total_count){
+            temp_g[sequence_b[i]] = (temp_g[sequence_b[i]] + Calculate(sequence_a[i - 1] + 1, sequence_a[i], cnt)) % mod;
+        }
+        else{
+            temp_g[sequence_b[i]] = (temp_g[sequence_b[i]] + Calculate(sequence_a[i - 1] + 1, cnt, cnt)) % mod;
+        }
+    }
+
+    std::fill(dp_table.begin(), dp_table.end(), std::vector<int>(4, 0));
+    dp_table[0][0] = 1;
+    for (int i = 1; i <= len; ++i) {
+        for (int j = 0; j <= 3; ++j) {
+            for (int k = 0; k <= 2; ++k) {
+                dp_table[i][j ^ k] = ((long long)dp_table[i - 1][j] * temp_g[k] + dp_table[i][j ^ k]) % mod;
+            }
+        }
+    }
+    long long ans=((long long)dp_table[len][1] + dp_table[len][2] + dp_table[len][3]) % mod;
+    return ans;
+}
+
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    int len,cnt;
+    std::cin>>len>>cnt;
+    long long ans=DimaAndGame(len,cnt);
+    std::cout << ans << std::endl;
+    return 0;
+}
