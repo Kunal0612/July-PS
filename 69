@@ -1,0 +1,80 @@
+// https://codeforces.com/problemset/problem/513/E1
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+
+/*
+Input :
+
+An integer k_value.
+A vector of integer nums.
+
+Constraints :
+
+k_value : ranges from 2 to min(50,nums.size())
+nums.size() : ranges from 2 to 400.
+nums : abs(nums[i]) ranges from 0 to 10000.
+
+
+*/
+
+
+int SubarrayCuts(int k_value, std::vector<int> &nums){
+    int len=nums.size();
+    if(len < 2 or len>400){
+        throw std::invalid_argument("Invalid nums length");
+    }
+    if(k_value < 2 or k_value>std::min(50,len)){
+        throw std::invalid_argument("Invalid k_value");
+    }
+    for(int i=0;i<len;i++){
+        if(abs(nums[i])>10000){
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    std::vector<int> array(len + 1), prefix_sum(len + 1, 0);
+    for (int i = 1; i <= len; i++) {
+        array[i]=nums[i-1];
+        prefix_sum[i] = prefix_sum[i - 1] + array[i];
+    }
+
+    std::vector<std::vector<std::vector<int>>> dp(len + 1, std::vector<std::vector<int>>(k_value + 1, std::vector<int>(len + 1, 0)));
+    int answer = 0;
+
+    for (int i = 1; i <= len; i++) {
+        for (int j = 2; j <= std::min(i, k_value); j++) {
+            for (int k = 1; k <= i - j + 1; k++) {
+                for (int t = 1; t <= i - k - j + 2; t++) {
+                    dp[i][j][k] = std::max(dp[i][j][k], dp[i - k][j - 1][t] + std::abs(prefix_sum[i] - prefix_sum[i - k] - prefix_sum[i - k] + prefix_sum[i - k - t]));
+                }
+                if (j == k_value) {
+                    answer = std::max(answer, dp[i][j][k]);
+                }
+            }
+        }
+    }
+    return answer;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    int k_value=2;
+    std::vector<int> nums={7,4,3,7};
+    int res=SubarrayCuts(k_value,nums);
+    std::cout<<res<<std::endl;
+    return 0;
+}
