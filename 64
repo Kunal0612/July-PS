@@ -1,5 +1,47 @@
-// https://codeforces.com/contest/813/problem/D
+/*
 
+https://codeforces.com/contest/813/problem/D
+
+
+Write a C++ Solution Two Melodies to determine the maximum sum of lengths 
+of such two non-empty non-intersecting subsequences that both of them form a melody.
+
+Alice is a beginner composer and now she is ready to create another masterpiece. 
+And not even the single one but two at the same time!
+
+Alice has a sheet with len notes written on it. She wants to take two such 
+non-empty non-intersecting subsequences that both of them form a melody and 
+sum of their lengths is maximal.
+
+Subsequence is a sequence that can be derived from another sequence by 
+deleting some elements without changing the order of the remaining elements.
+
+Subsequence forms a melody when each two adjacent notes either differs 
+by 1 or are congruent modulo 7.
+
+You should write a program which will calculate maximum sum of lengths 
+of such two non-empty non-intersecting subsequences that both of them form a melody.
+
+
+Input:
+
+A vector of integer nums.
+
+Output:
+
+An vector of integer ans to determine the maximum sum of lengths of such two non-empty non-intersecting subsequences that both of them form a melody.
+
+
+Constraints:
+
+nums.size() : ranges from 2 to 5000.
+nums : ranges from 1 to 100000.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -62,115 +104,115 @@ int main() {
     assert(result_1 == expected_1);
     // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
-    // int expected_2 = 31;
-    // int result_2 = TwoMelodies(nums_2);
-    // assert(result_2 == expected_2);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    int expected_2 = 5;
+    int result_2 = TwoMelodies(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_3 = {1000000,5,5};
-    // int expected_3 = 1000005;
-    // int result_3 = TwoMelodies(nums_3);
-    // assert(result_3 == expected_3);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_3 = {10000,5,5};
+    int expected_3 = 3;
+    int result_3 = TwoMelodies(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_4 = {1, 2, 3, 4, 5};
-    // int expected_4 = 7;
-    // int result_4 = TwoMelodies(nums_4);
-    // assert(result_4 == expected_4);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    int expected_4 = 5;
+    int result_4 = TwoMelodies(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
-    // int expected_5 = 62;
-    // int result_5 = TwoMelodies(nums_5);
-    // assert(result_5 == expected_5);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    int expected_5 = 2;
+    int result_5 = TwoMelodies(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
-    // int expected_6 =5;
-    // int result_6 = TwoMelodies(nums_6);
-    // assert(result_6 == expected_6);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    int expected_6 =6;
+    int result_6 = TwoMelodies(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_7 = {7, 7, 7, 7, 7};
-    // int expected_7 = 7;
-    // int result_7 = TwoMelodies(nums_7);
-    // assert(result_7 == expected_7);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    int expected_7 = 5;
+    int result_7 = TwoMelodies(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
-    // int expected_8 = 3;
-    // int result_8 = TwoMelodies(nums_8);
-    // assert(result_8 == expected_8);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    int expected_8 = 7;
+    int result_8 = TwoMelodies(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_9 = {0};
-    // try
-    // {
-    //     TwoMelodies(nums_9);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    //  // TEST
-    // std::vector<int> nums_10(6000000,0);
-    // try
-    // {
-    //     TwoMelodies(nums_10);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    //  // TEST
-    // std::vector<int> nums_11(6,-1);
-    // try
-    // {
-    //     TwoMelodies(nums_11);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    // // TEST
-    // std::vector<int> nums_12(6,100000000);
-    // try
-    // {
-    //     TwoMelodies(nums_12);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    // // TEST
-    // std::vector<int> nums_13={};
-    // try
-    // {
-    //     TwoMelodies(nums_13);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        TwoMelodies(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        TwoMelodies(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        TwoMelodies(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        TwoMelodies(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        TwoMelodies(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
