@@ -1,4 +1,70 @@
-// https://codeforces.com/problemset/problem/1051/E
+/*
+
+https://codeforces.com/problemset/problem/1051/E
+
+
+Write a C++ Solution VasyaandBigIntegers to determine the amount of partitions 
+of number input_string such that they match all the given requirements modulo 998244353.
+
+Vasya, a math enthusiast, is fascinated by integer partitions. He has a large integer 
+input_string and two other integers, left_string and right_string.
+
+What are Partitions?
+
+A partition of a number x is a way of splitting it into smaller, non-negative integers 
+(s_1, s_2, ..., s_k) that, when combined (concatenated with a '+' symbol), reconstruct 
+the original number x. For example, the number 12345 has several partitions, including:
+
+["1", "2", "3", "4", "5"]
+["123", "4", "5"]
+["1", "2345"]
+["12345"]
+
+The Beauty Standard:
+
+Vasya is particularly interested in a specific type of partition called a "beautiful" 
+partition. A partition is considered beautiful if every string element (s_i) within 
+the partition doesn't start with a leading zero. In simpler terms, "123" is beautiful, while "012" is not.
+
+Vasya's Challenge:
+
+Vasya wants to count the number of beautiful partitions of the integer 
+input_string where each string element (s_i) in the partition also satisfies 
+a specific range constraint: l <= s_i <= r. Here, the comparison is done between 
+the integer values represented by the strings (l and r are converted to integers 
+before comparison), not by comparing the strings lexicographically 
+(i.e., "10" is less than "2" in integer comparison, but "10" comes lexicographically after "2").
+
+Counting with a Twist:
+
+Since the answer can be very large, we need to find the number of beautiful 
+partitions modulo 998244353, a prime number commonly used for modular arithmetic. 
+This helps us efficiently handle extremely large counts without exceeding memory limitations.
+
+
+Input:
+
+A string input_string.
+A string left_string.
+A string right_string.
+
+Output:
+
+An vector of integer ans to determine the amount of partitions of number 
+input_string such that they match all the given requirements modulo 998244353.
+
+
+Constraints:
+
+input_string.size() : ranges from 1 to 1000000
+left_string.size() , right_string.size() : ranges from 0 to 1000000
+All consist of digits from 0 to 9.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -6,66 +72,79 @@
 #include <cassert>
 #include <stdexcept>
 
-
-int AddModulo(int value_a, int value_b) {
+int AddModulo(int value_a, int value_b)
+{
     int mod = 998244353;
     value_a += value_b;
-    if (value_a >= mod){
+    if (value_a >= mod)
+    {
         value_a -= mod;
     }
     return value_a;
 }
 
-std::vector<int> ComputeZFunction(const std::string& str) {
+std::vector<int> ComputeZFunction(const std::string &str)
+{
     int length = str.size();
     std::vector<int> z_array(length);
-    for (int index = 1, left = 0, right = 0; index < length; ++index) {
-        if (index <= right){
+    for (int index = 1, left = 0, right = 0; index < length; ++index)
+    {
+        if (index <= right)
+        {
             z_array[index] = std::min(right - index + 1, z_array[index - left]);
         }
-        while (index + z_array[index] < length && str[z_array[index]] == str[index + z_array[index]]){
+        while (index + z_array[index] < length && str[z_array[index]] == str[index + z_array[index]])
+        {
             ++z_array[index];
         }
-        if (index + z_array[index] - 1 > right){
+        if (index + z_array[index] - 1 > right)
+        {
             left = index, right = index + z_array[index] - 1;
         }
     }
     return z_array;
 }
 
-char Compare(const std::vector<int>& z_function, const std::string& main_str, const std::string& substr, int position) {
+char Compare(const std::vector<int> &z_function, const std::string &main_str, const std::string &substr, int position)
+{
     int substr_len = substr.size();
     assert(position + substr_len + 1 < z_function.size());
-    if (main_str.size() - position < substr_len){
+    if (main_str.size() - position < substr_len)
+    {
         return '<';
     }
 
     int z_value = z_function[substr_len + 1 + position];
     assert(z_value <= substr_len);
-    if (z_value == substr_len){
+    if (z_value == substr_len)
+    {
         return '=';
     }
 
     assert(position + z_value < main_str.size());
     assert(main_str[position + z_value] != substr[z_value]);
-    if (main_str[position + z_value] < substr[z_value]){
+    if (main_str[position + z_value] < substr[z_value])
+    {
         return '<';
     }
     return '>';
 }
 
-
-int VasyaandBigIntegers(std::string input_string,std::string left_string,std::string right_string){
-    if (input_string.size() < 1 or input_string.size() > 1000000)
+int VasyaandBigIntegers(std::string input_string, std::string left_string, std::string right_string)
+{
+    if (input_string.size() < 1 or input_string.size() > 1000000 )
     {
         throw std::invalid_argument("Invalid input_string length");
     }
     for (int i = 0; i < input_string.size(); i++)
     {
-        if (input_string[i]<'0' or input_string[i]>'9')
+        if (input_string[i] < '0' or input_string[i] > '9')
         {
             throw std::invalid_argument("Invalid input_string");
         }
+    }
+    if(input_string.size()!=1 and input_string[0]=='0'){
+        throw std::invalid_argument("Invalid input_string , it has trailing zeroes");
     }
     if (left_string.size() < 1 or left_string.size() > 1000000)
     {
@@ -73,10 +152,13 @@ int VasyaandBigIntegers(std::string input_string,std::string left_string,std::st
     }
     for (int i = 0; i < left_string.size(); i++)
     {
-        if (left_string[i]<'0' or left_string[i]>'9')
+        if (left_string[i] < '0' or left_string[i] > '9')
         {
             throw std::invalid_argument("Invalid left_string");
         }
+    }
+    if(left_string.size()!=1 and left_string[0]=='0'){
+        throw std::invalid_argument("Invalid left_string , it has trailing zeroes");
     }
     if (right_string.size() < 1 or right_string.size() > 1000000)
     {
@@ -84,10 +166,13 @@ int VasyaandBigIntegers(std::string input_string,std::string left_string,std::st
     }
     for (int i = 0; i < right_string.size(); i++)
     {
-        if (right_string[i]<'0' or right_string[i]>'9')
+        if (right_string[i] < '0' or right_string[i] > '9')
         {
             throw std::invalid_argument("Invalid right_string");
         }
+    }
+    if(right_string.size()!=1 and right_string[0]=='0'){
+        throw std::invalid_argument("Invalid right_string , it has trailing zeroes");
     }
     int string_length = input_string.size();
     std::vector<int> z_function_left = ComputeZFunction(left_string + "#" + input_string);
@@ -96,11 +181,16 @@ int VasyaandBigIntegers(std::string input_string,std::string left_string,std::st
     std::vector<int> sum_dp(string_length + 1, 0);
     sum_dp[string_length] = dpp[string_length] = 1;
     int mod = 998244353;
-    for (int index = string_length - 1; index >= 0; --index) {
-        if (input_string[index] == '0') {
-            if (left_string == "0") {
+    for (int index = string_length - 1; index >= 0; --index)
+    {
+        if (input_string[index] == '0')
+        {
+            if (left_string == "0")
+            {
                 dpp[index] = dpp[index + 1];
-            } else {
+            }
+            else
+            {
                 dpp[index] = 0;
             }
             sum_dp[index] = AddModulo(dpp[index], sum_dp[index + 1]);
@@ -109,31 +199,34 @@ int VasyaandBigIntegers(std::string input_string,std::string left_string,std::st
 
         int left_bound = left_string.size() + index;
         char compare_left = Compare(z_function_left, input_string, left_string, index);
-        if (compare_left == '<'){
+        if (compare_left == '<')
+        {
             ++left_bound;
         }
 
         int right_bound = right_string.size() + index;
         char compare_right = Compare(z_function_right, input_string, right_string, index);
-        if (compare_right == '>'){
+        if (compare_right == '>')
+        {
             --right_bound;
         }
 
         int current_value = 0;
-        if (left_bound <= right_bound && left_bound <= string_length) {
+        if (left_bound <= right_bound && left_bound <= string_length)
+        {
             right_bound = std::min(right_bound, string_length);
             current_value = sum_dp[left_bound];
-            if (right_bound != string_length) {
+            if (right_bound != string_length)
+            {
                 current_value = AddModulo(current_value, mod - sum_dp[right_bound + 1]);
             }
         }
         dpp[index] = current_value;
         sum_dp[index] = AddModulo(dpp[index], sum_dp[index + 1]);
     }
-    int ans=dpp[0];
+    int ans = dpp[0];
     return ans;
 }
-
 
 #include <iostream>
 #include <vector>
@@ -141,7 +234,219 @@ int VasyaandBigIntegers(std::string input_string,std::string left_string,std::st
 #include <cassert>
 #include <stdexcept>
 
+int main()
+{
+    // TEST
+    std::string input_string_1 = "135";
+    std::string left_string_1 = "1";
+    std::string right_string_1 = "15";
+    int expected_1 = 2;
+    int result_1 = VasyaandBigIntegers(input_string_1, left_string_1, right_string_1);
+    assert(expected_1 == result_1);
+    // TEST_END
 
-int main() {
-    
+    // TEST
+    std::string input_string_2 = "123456789";
+    std::string left_string_2 = "123";
+    std::string right_string_2 = "456";
+    int expected_2 = 0;
+    int result_2 = VasyaandBigIntegers(input_string_2, left_string_2, right_string_2);
+    assert(expected_2 == result_2);
+    // TEST_END
+
+    // TEST
+    std::string input_string_3 = "987654321";
+    std::string left_string_3 = "98";
+    std::string right_string_3 = "765";
+    int expected_3 = 0;
+    int result_3 = VasyaandBigIntegers(input_string_3, left_string_3, right_string_3);
+    assert(expected_3 == result_3);
+    // TEST_END
+
+    // TEST
+    std::string input_string_4 = "111111111";
+    std::string left_string_4 = "1";
+    std::string right_string_4 = "11";
+    int expected_4 = 55;
+    int result_4 = VasyaandBigIntegers(input_string_4, left_string_4, right_string_4);
+    assert(expected_4 == result_4);
+    // TEST_END
+
+    // TEST
+    std::string input_string_5 = "222222222";
+    std::string left_string_5 = "22";
+    std::string right_string_5 = "222";
+    int expected_5 = 5;
+    int result_5 = VasyaandBigIntegers(input_string_5, left_string_5, right_string_5);
+    assert(expected_5 == result_5);
+    // TEST_END
+
+    // TEST
+    std::string input_string_6 = "333333333";
+    std::string left_string_6 = "333";
+    std::string right_string_6 = "333";
+    int expected_6 = 1;
+    int result_6 = VasyaandBigIntegers(input_string_6, left_string_6, right_string_6);
+    assert(expected_6 == result_6);
+    // TEST_END
+
+    // TEST
+    std::string input_string_7 = "444444444";
+    std::string left_string_7 = "4";
+    std::string right_string_7 = "44";
+    int expected_7 = 55;
+    int result_7 = VasyaandBigIntegers(input_string_7, left_string_7, right_string_7);
+    assert(expected_7 == result_7);
+    // TEST_END
+
+    // TEST
+    std::string input_string_8 = "555555555";
+    std::string left_string_8 = "55";
+    std::string right_string_8 = "555";
+    int expected_8 = 5;
+    int result_8 = VasyaandBigIntegers(input_string_8, left_string_8, right_string_8);
+    assert(expected_8 == result_8);
+    // TEST_END
+    // TEST
+    std::string input_string_9 = "";
+    std::string left_string_9 = "55";
+    std::string right_string_9 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_9, left_string_9, right_string_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_10 = "00";
+    std::string left_string_10 = "55";
+    std::string right_string_10 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_10, left_string_10, right_string_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_11 = std::string(11000000,'1');
+    std::string left_string_11 = "55";
+    std::string right_string_11 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_11, left_string_11, right_string_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_12 = std::string(1,'1');
+    std::string left_string_12 = "";
+    std::string right_string_12 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_12, left_string_12, right_string_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_13 = std::string(1,'1');
+    std::string left_string_13 = "000";
+    std::string right_string_13 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_13, left_string_13, right_string_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_14 = std::string(1,'1');
+    std::string left_string_14 = std::string(15410100,'1');
+    std::string right_string_14 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_14, left_string_14, right_string_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_15 = std::string(1,'1');
+    std::string left_string_15 = "fff";
+    std::string right_string_15 = "555";
+    try
+    {
+        VasyaandBigIntegers(input_string_15, left_string_15, right_string_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_16 = std::string(1,'1');
+    std::string left_string_16 = "111";
+    std::string right_string_16 = "00";
+    try
+    {
+        VasyaandBigIntegers(input_string_16, left_string_16, right_string_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_17 = std::string(1,'1');
+    std::string left_string_17 = "111";
+    std::string right_string_17 = std::string(10000000,'1');
+    try
+    {
+        VasyaandBigIntegers(input_string_17, left_string_17, right_string_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string input_string_18 = std::string(1,'1');
+    std::string left_string_18 = "111";
+    std::string right_string_18 = "";
+    try
+    {
+        VasyaandBigIntegers(input_string_18, left_string_18, right_string_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
 }
