@@ -1,4 +1,50 @@
-// https://codeforces.com/problemset/problem/1437/F
+/*
+
+https://codeforces.com/problemset/problem/1437/F
+
+Write a C++ Solution EmotionalFishermen to determine the number of emotional orders modulo 998244353.
+
+There are len fishermen who just returned from a fishing trip. 
+Each fisherman caught a fish with a specific weight, denoted by nums[i] (1 ≤ nums[i] ≤ 10^9). 
+They want to brag (or commiserate) by showing off their catches to each other, 
+but there's a catch (pun intended).
+
+The fishermen will choose an order to present their fish. As each fisherman 
+reveals their catch (weight x_i), their emotional state depends on the 
+heaviest fish previously shown (weight y_i, where y_0 = 0 for the first fisherman). 
+Here's the emotional breakdown:
+
+Happy: If x_i is at least twice as heavy as the biggest fish shown so far (x_i ≥ 2y_i).
+Sad: If x_i is less than half the weight of the biggest fish shown so far (2x_i ≤ y_i).
+Content: If neither of the above conditions are met.
+An order is considered emotional if, after everyone shows their fish, each 
+fisherman ends up feeling either happy or sad (not content).
+
+Your Challenge:
+
+Given the weights of the fish caught by each fisherman (nums[1], nums[2], ..., nums[len]), 
+calculate the number of emotional orders in which the fishermen can 
+present their catches. Remember, the answer needs to be modulo 998244353.
+
+
+Input:
+
+A vector of integers nums.
+
+Output:
+
+An integer ans to determine the number of emotional orders modulo 998244353.
+
+Constraints:
+
+nums.size() : ranges from 5 to 5000.
+nums : ranges from 1 to 1000000000.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -47,7 +93,7 @@ int EmotionalFishermen(std::vector<int> nums)
     std::vector<int> elements(len);
     std::vector<int> count_less(len, 0);
     std::vector<int> last_less(len, -1);
-    std::vector<std::vector<int>> dp(len, std::vector<int>(len + 1, 0));
+    std::vector<std::vector<int>> dp_table(len, std::vector<int>(len + 1, 0));
     std::vector<std::vector<int>> pdp(len + 1, std::vector<int>(len + 1, 0));
 
     for (int i = 0; i < len; i++){
@@ -68,8 +114,8 @@ int EmotionalFishermen(std::vector<int> nums)
 
     for (int i = 0; i < len; i++)
     {
-        dp[i][1] = 1;
-        pdp[i + 1][1] = Add(pdp[i][1], dp[i][1]);
+        dp_table[i][1] = 1;
+        pdp[i + 1][1] = Add(pdp[i][1], dp_table[i][1]);
     }
 
     for (int k = 2; k <= len; k++)
@@ -77,16 +123,16 @@ int EmotionalFishermen(std::vector<int> nums)
         for (int i = 0; i < len; i++)
         {
             if (count_less[i] + 1 >= k){
-                dp[i][k] = Add(Mul(dp[i][k - 1], Add(count_less[i], Sub(2, k))), pdp[last_less[i] + 1][k - 1]);
+                dp_table[i][k] = Add(Mul(dp_table[i][k - 1], Add(count_less[i], Sub(2, k))), pdp[last_less[i] + 1][k - 1]);
             }
             else{
-                dp[i][k] = 0;
+                dp_table[i][k] = 0;
             }
-            pdp[i + 1][k] = Add(pdp[i][k], dp[i][k]);
+            pdp[i + 1][k] = Add(pdp[i][k], dp_table[i][k]);
         }
     }
 
-    int ans = dp[len - 1][len];
+    int ans = dp_table[len - 1][len];
     return ans;
 }
 
@@ -105,115 +151,115 @@ int main()
     assert(result_1 == expected_1);
     // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
-    // int expected_2 = 31;
-    // int result_2 = EmotionalFishermen(nums_2);
-    // assert(result_2 == expected_2);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    int expected_2 = 0;
+    int result_2 = EmotionalFishermen(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_3 = {1000000,5,5};
-    // int expected_3 = 1000005;
-    // int result_3 = EmotionalFishermen(nums_3);
-    // assert(result_3 == expected_3);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_3 = {1000000,5,5};
+    int expected_3 = 4;
+    int result_3 = EmotionalFishermen(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_4 = {1, 2, 3, 4, 5};
-    // int expected_4 = 7;
-    // int result_4 = EmotionalFishermen(nums_4);
-    // assert(result_4 == expected_4);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    int expected_4 = 0;
+    int result_4 = EmotionalFishermen(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
-    // int expected_5 = 62;
-    // int result_5 = EmotionalFishermen(nums_5);
-    // assert(result_5 == expected_5);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    int expected_5 = 0;
+    int result_5 = EmotionalFishermen(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
-    // int expected_6 =5;
-    // int result_6 = EmotionalFishermen(nums_6);
-    // assert(result_6 == expected_6);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_6 = {5, 5, 5, 5, 585485, 5};
+    int expected_6 =240;
+    int result_6 = EmotionalFishermen(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_7 = {7, 7, 7, 7, 7};
-    // int expected_7 = 7;
-    // int result_7 = EmotionalFishermen(nums_7);
-    // assert(result_7 == expected_7);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_7 = {7, 5447, 7, 7, 7};
+    int expected_7 = 48;
+    int result_7 = EmotionalFishermen(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
-    // int expected_8 = 3;
-    // int result_8 = EmotionalFishermen(nums_8);
-    // assert(result_8 == expected_8);
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 5153, 3, 3, 3, 3};
+    int expected_8 = 1440;
+    int result_8 = EmotionalFishermen(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
 
-    // // TEST
-    // std::vector<int> nums_9 = {0};
-    // try
-    // {
-    //     EmotionalFishermen(nums_9);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    //  // TEST
-    // std::vector<int> nums_10(6000000,0);
-    // try
-    // {
-    //     EmotionalFishermen(nums_10);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    //  // TEST
-    // std::vector<int> nums_11(6,-1);
-    // try
-    // {
-    //     EmotionalFishermen(nums_11);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    // // TEST
-    // std::vector<int> nums_12(6,100000000);
-    // try
-    // {
-    //     EmotionalFishermen(nums_12);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
-    // // TEST
-    // std::vector<int> nums_13={};
-    // try
-    // {
-    //     EmotionalFishermen(nums_13);
-    //     assert(false);
-    // }
-    // catch (const std::invalid_argument &e)
-    // {
-    //     assert(true);
-    // }
-    // // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        EmotionalFishermen(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        EmotionalFishermen(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        EmotionalFishermen(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,1000000009);
+    try
+    {
+        EmotionalFishermen(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        EmotionalFishermen(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
     std::cout << "All test cases passed!\n";
     return 0;
 }
