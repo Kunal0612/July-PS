@@ -1,4 +1,43 @@
-//https://codeforces.com/problemset/problem/285/E
+/*
+
+https://codeforces.com/problemset/problem/285/E
+
+Write a C++ Solution PositionsInPermutations to determine the number of permutations of 
+length num_elements with exactly min_elements good positions modulo 1000000007.
+
+You are given a set of positive integers from 1 to num_elements (inclusive). 
+A permutation p of size num_elements is an ordered arrangement of these distinct 
+integers. Additionally, a position i (1 ≤ i ≤ num_elements) in the permutation is 
+considered "good" if the absolute difference between the element at that position 
+(p[i]) and the position itself (i) is equal to 1. In other words, a good position holds 
+an element that's either one greater than its index or one less than its index.
+
+Challenge:
+
+Given a size num_elements, your task is to find the number of permutations of size 
+min_elements where there are exactly k good positions. Remember, the answer needs 
+to be calculated modulo  10^9 + 7 (1000000007).
+
+Input:
+
+An integer num_elements.
+An integer min_elements.
+
+Output:
+
+An integer ans to determine the number of permutations of length n with exactly 
+k good positions modulo 1000000007.
+
+Constraints:
+
+num_elements : ranges from 1 to 1000.
+min_elements : ranges from 0 to num_elements.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 
 #include <iostream>
@@ -57,7 +96,121 @@ int PositionsInPermutations(int num_elements,int min_elements){
 
 
 int main() {
-    int ans=PositionsInPermutations(7,4);
-    std::cout<<ans<<std::endl;
+    // TEST
+    int num_elements_1 = 7, min_elements_1 = 4;
+    int expected_1 = 328;
+    int result_1 = PositionsInPermutations(num_elements_1, min_elements_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_elements_2 = 5, min_elements_2 = 3;
+    int expected_2 = 12;
+    int result_2 = PositionsInPermutations(num_elements_2, min_elements_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_elements_3 = 10, min_elements_3 = 7;
+    int expected_3 = 2876;
+    int result_3 = PositionsInPermutations(num_elements_3, min_elements_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_elements_4 = 8, min_elements_4 = 5;
+    int expected_4 = 688;
+    int result_4 = PositionsInPermutations(num_elements_4, min_elements_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_elements_5 = 12, min_elements_5 = 8;
+    int expected_5 = 82455;
+    int result_5 = PositionsInPermutations(num_elements_5, min_elements_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_elements_6 = 6, min_elements_6 = 3;
+    int expected_6 = 104;
+    int result_6 = PositionsInPermutations(num_elements_6, min_elements_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_elements_7 = 9, min_elements_7 = 6;
+    int expected_7 =1560;
+    int result_7 = PositionsInPermutations(num_elements_7, min_elements_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_elements_8 = 4, min_elements_8 = 2;
+    int expected_8 = 10;
+    int result_8 = PositionsInPermutations(num_elements_8, min_elements_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_elements_9 = 0, min_elements_9 = 2;
+    try
+    {
+        PositionsInPermutations(num_elements_9, min_elements_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_elements_10 = -1, min_elements_10 = 2;
+    try
+    {
+        PositionsInPermutations(num_elements_10, min_elements_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_elements_11 = 1001, min_elements_11 = 2;
+    try
+    {
+        PositionsInPermutations(num_elements_11, min_elements_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_elements_12 = 101, min_elements_12 = -1;
+    try
+    {
+        PositionsInPermutations(num_elements_12, min_elements_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_elements_13 = 101, min_elements_13 = 105;
+    try
+    {
+        PositionsInPermutations(num_elements_13, min_elements_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
     return 0;
 }
