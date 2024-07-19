@@ -1,0 +1,85 @@
+// https://codeforces.com/problemset/problem/1863/G
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+/*
+
+Input :
+
+A vector of integers nums.
+
+Constraints :
+
+nums.size() : ranges from 1 to 1000000.
+nums :  ranges from 1 to nums.size()
+
+
+*/
+
+int solve(std::vector<int> nums){
+    long long len=nums.size(), idx_1, idx_2, answer = 1, sum_1, sum_2;
+    std::vector<int> array(len+1), visited(len+1), tagged(len+1), in_degree(len+1);
+    int mod = 1e9 + 7;
+     if (len <= 0 or len > 1000000)
+    {
+        throw std::invalid_argument("Invalid length");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (nums[i] <= 0 or nums[i] >= len)
+        {
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    
+    for (idx_1 = 1; idx_1 <= len; ++idx_1) {
+        array[idx_1] =nums[idx_1-1];
+        in_degree[array[idx_1]]++;
+    }
+
+    for (idx_1 = 1; idx_1 <= len; ++idx_1) {
+        if (!visited[idx_1]) {
+            idx_2 = idx_1;
+            while (!visited[idx_2]) {
+                visited[idx_2] = idx_1;
+                idx_2 = array[idx_2];
+            }
+            sum_1 = 1;
+            sum_2 = 0;
+            while (visited[idx_2] == idx_1 && !tagged[idx_2]) {
+                tagged[idx_2] = 1;
+                sum_1 = (sum_1 * (in_degree[idx_2] + 1)) % mod;
+                sum_2 = (sum_2 + in_degree[idx_2]) % mod;
+                idx_2 = array[idx_2];
+            }
+            answer = answer * (sum_1 - sum_2 + mod) % mod;
+        }
+    }
+
+    for (idx_1 = 1; idx_1 <= len; ++idx_1) {
+        if (!tagged[idx_1]) {
+            answer = answer * (in_degree[idx_1] + 1) % mod;
+        }
+    }
+
+    return answer;
+}
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+signed main() {
+    std::vector<int> nums = {2,3,1,1,1,2};
+    int ans=solve(nums);
+    std::cout<<ans;
+}
