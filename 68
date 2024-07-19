@@ -1,3 +1,58 @@
+/*
+
+https://codeforces.com/problemset/problem/67/C
+
+Write a C++ Solution SequenceofBalls to find the minimal time to convert the sequence str_a to the
+sequence str_b.
+
+You are given a sequence of balls str_a by your teacher, each labeled with a lowercase Latin letter 'a'-'z'. You don't like the given sequence. You want to change it into a new sequence, str_b that suits you better. So, you allow yourself four operations:
+
+You can insert any ball with any label into the sequence at any position.
+
+You can delete (remove) any ball from any position.
+
+You can replace any ball with any other ball.
+
+You can exchange (swap) two adjacent balls.
+
+Your teacher now places time constraints on each operation, meaning
+that an operation can only be performed in certain time. So, the first
+operation takes time insert_time, the second one takes delete_time, the
+third one takes replace_time and the fourth one takes swap_time. Also,
+it is given that 2·swap_time ≥ insert_time + delete_time.
+
+Find the minimal time to convert the sequence str_a to the sequence str_b.
+
+
+Input :
+
+An integer insert_time.
+An integer delete_time.
+An integer replace_time.
+An integer swap_time.
+A string str_a.
+A string str_b.
+
+
+Output:
+
+An integer ans to determine minimum time to convert str_a to str_b.
+
+
+Constraints :
+
+insert_time :  ranges from 1 to 100.
+delete_time :  ranges from 1 to 100.
+replace_time :  ranges from 1 to 100.
+swap_time :  ranges from 1 to 100.
+str_a.size() : ranges from 1 to 4000.
+str_b.size() : ranges from 1 to 4000.
+str_a , str_b : contains only lowercase characters.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -7,63 +62,53 @@
 #include <cassert>
 #include <stdexcept>
 
-/*
-Input :
-
-An integer insert_cost.
-An integer delete_cost.
-An integer replace_cost.
-An integer swap_cost.
-A string str_a.
-A string str_b.
-
-Constraints :
-
-insert_cost :  ranges from 1 to 100.
-delete_cost :  ranges from 1 to 100.
-replace_cost :  ranges from 1 to 100.
-swap_cost :  ranges from 1 to 100.
-str_a.size() : ranges from 1 to 4000.
-str_b.size() : ranges from 1 to 4000.
-str_a , str_b : contains only lowercase characters.
-
-*/
-
-
-
-void Min(int &a, int b) {
-    if (b < a) a = b;
+void Min(int &first, int sec)
+{
+    if (sec < first)
+        first = sec;
     return;
 }
 
-int SequenceofBalls(int insert_cost, int delete_cost, int replace_cost, int swap_cost, std::string str_a,
-std::string str_b){
+int SequenceofBalls(int insert_time, int delete_time, int replace_time,
+                    int swap_time, std::string str_a,
+                    std::string str_b)
+{
 
-    if(insert_cost<1 or insert_cost>100){
-        throw std::invalid_argument("Invalid insert_cost");
+    if (insert_time < 1 or insert_time > 100)
+    {
+        throw std::invalid_argument("Invalid insert_time");
     }
-    if(delete_cost<1 or delete_cost>100){
-        throw std::invalid_argument("Invalid delete_cost");
+    if (delete_time < 1 or delete_time > 100)
+    {
+        throw std::invalid_argument("Invalid delete_time");
     }
-    if(replace_cost<1 or replace_cost>100){
-        throw std::invalid_argument("Invalid replace_cost");
+    if (replace_time < 1 or replace_time > 100)
+    {
+        throw std::invalid_argument("Invalid replace_time");
     }
-    if(swap_cost<1 or swap_cost>100){
-        throw std::invalid_argument("Invalid swap_cost");
+    if (swap_time < 1 or swap_time > 100)
+    {
+        throw std::invalid_argument("Invalid swap_time");
     }
-    if(str_a.size()<1 or str_a.size()>4000){
+    if (str_a.size() < 1 or str_a.size() > 4000)
+    {
         throw std::invalid_argument("Invalid str_a size");
     }
-    if(str_b.size()<1 or str_b.size()>4000){
+    if (str_b.size() < 1 or str_b.size() > 4000)
+    {
         throw std::invalid_argument("Invalid str_b size");
     }
-    for(int i=0;i<str_a.size();i++){
-        if(str_a[i]<'a' or str_a[i]>'z'){
+    for (int i = 0; i < str_a.size(); i++)
+    {
+        if (str_a[i] < 'a' or str_a[i] > 'z')
+        {
             throw std::invalid_argument("Invalid str_a");
         }
     }
-    for(int i=0;i<str_b.size();i++){
-        if(str_b[i]<'a' or str_b[i]>'z'){
+    for (int i = 0; i < str_b.size(); i++)
+    {
+        if (str_b[i] < 'a' or str_b[i] > 'z')
+        {
             throw std::invalid_argument("Invalid str_b");
         }
     }
@@ -75,31 +120,44 @@ std::string str_b){
     str_b = " " + str_b;
     dp_table[0][0] = 0;
 
-    for (int i = 1; i <= len_a; i++) dp_table[i][0] = delete_cost * i;
-    for (int i = 1; i <= len_b; i++) dp_table[0][i] = insert_cost * i;
+    for (int i = 1; i <= len_a; i++)
+    {
+        dp_table[i][0] = delete_time * i;
+    }
+    for (int i = 1; i <= len_b; i++)
+    {
+        dp_table[0][i] = insert_time * i;
+    }
 
-    for (int j = 1; j <= len_b; j++) {
+    for (int j = 1; j <= len_b; j++)
+    {
         std::fill(last_position_a.begin(), last_position_a.end(), 0);
-        for (int i = 1; i <= len_a; i++) {
-            if (str_a[i] == str_b[j]) Min(dp_table[i][j], dp_table[i - 1][j - 1]);
-            else Min(dp_table[i][j], dp_table[i - 1][j - 1] + replace_cost);
+        for (int i = 1; i <= len_a; i++)
+        {
+            if (str_a[i] == str_b[j])
+            {
+                Min(dp_table[i][j], dp_table[i - 1][j - 1]);
+            }
+            else
+            {
+                Min(dp_table[i][j], dp_table[i - 1][j - 1] + replace_time);
+            }
 
-            Min(dp_table[i][j], dp_table[i][j - 1] + insert_cost);
-            Min(dp_table[i][j], dp_table[i - 1][j] + delete_cost);
+            Min(dp_table[i][j], dp_table[i][j - 1] + insert_time);
+            Min(dp_table[i][j], dp_table[i - 1][j] + delete_time);
 
             int pos_a = last_position_a[str_b[j] - 'a'], pos_b = last_position_b[str_a[i] - 'a'];
-            if (pos_a && pos_b) 
-                Min(dp_table[i][j], dp_table[pos_a - 1][pos_b - 1] + swap_cost + (j - pos_b - 1) * insert_cost + (i - pos_a - 1) * delete_cost);
-
+            if (pos_a && pos_b)
+            {
+                Min(dp_table[i][j], dp_table[pos_a - 1][pos_b - 1] + swap_time + (j - pos_b - 1) * insert_time + (i - pos_a - 1) * delete_time);
+            }
             last_position_a[str_a[i] - 'a'] = i;
         }
         last_position_b[str_b[j] - 'a'] = j;
     }
-
-    int ans=dp_table[len_a][len_b];
+    int ans = dp_table[len_a][len_b];
     return ans;
 }
-
 
 #include <iostream>
 #include <vector>
@@ -110,15 +168,279 @@ std::string str_b){
 #include <cassert>
 #include <stdexcept>
 
+int main()
+{
+    // TEST
+    int insert_time_1 = 1, delete_time_1 = 1, replace_time_1 = 1, swap_time_1 = 1;
+    std::string str_a_1 = "youshouldnot", str_b_1 = "thoushaltnot";
+    int expected_1 = 5;
+    int result_1 = SequenceofBalls(insert_time_1, delete_time_1, replace_time_1, swap_time_1, str_a_1, str_b_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
+    // TEST
+    int insert_time_2 = 2, delete_time_2 = 2, replace_time_2 = 2, swap_time_2 = 2;
+    std::string str_a_2 = "kitten", str_b_2 = "sitting";
+    int expected_2 = 6;
+    int result_2 = SequenceofBalls(insert_time_2, delete_time_2, replace_time_2, swap_time_2, 
+    str_a_2, str_b_2);
+    assert(result_2 == expected_2);
+    // TEST_END
 
-int main() {
-    long long insert_cost, delete_cost, replace_cost, swap_cost;
-    std::cin >> insert_cost >> delete_cost >> replace_cost >> swap_cost;
+    // TEST
+    int insert_time_3 = 5, delete_time_3 = 5, replace_time_3 = 5, swap_time_3 = 5;
+    std::string str_a_3 = "intention", str_b_3 = "execution";
+    int expected_3 = 25;
+    int result_3 = SequenceofBalls(insert_time_3, delete_time_3, replace_time_3, swap_time_3, str_a_3, str_b_3);
+    assert(result_3 == expected_3);
+    // TEST_END
 
-    std::string str_a, str_b;
-    std::cin >> str_a >> str_b;
-    int ans=SequenceofBalls(insert_cost,delete_cost,replace_cost,swap_cost,str_a,str_b);
-    std::cout<<ans<<std::endl;
+    // TEST
+    int insert_time_4 = 10, delete_time_4 = 10, replace_time_4 = 10, swap_time_4 = 10;
+    std::string str_a_4 = "abcdef", str_b_4 = "ghijkl";
+    int expected_4 = 60;
+    int result_4 = SequenceofBalls(insert_time_4, delete_time_4, replace_time_4, swap_time_4, str_a_4, str_b_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int insert_time_5 = 3, delete_time_5 = 3, replace_time_5 = 3, swap_time_5 = 3;
+    std::string str_a_5 = "flaw", str_b_5 = "lawn";
+    int expected_5 = 6;
+    int result_5 = SequenceofBalls(insert_time_5, delete_time_5, replace_time_5, swap_time_5, str_a_5, str_b_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int insert_time_6 = 15, delete_time_6 = 15, replace_time_6 = 15, swap_time_6 = 15;
+    std::string str_a_6 = "apple", str_b_6 = "aapple";
+    int expected_6 = 15;
+    int result_6 = SequenceofBalls(insert_time_6, delete_time_6, replace_time_6, swap_time_6, str_a_6, str_b_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int insert_time_7 = 1, delete_time_7 = 1, replace_time_7 = 100, swap_time_7 = 1;
+    std::string str_a_7 = "pale", str_b_7 = "ple";
+    int expected_7 = 1;
+    int result_7 = SequenceofBalls(insert_time_7, delete_time_7, replace_time_7, swap_time_7, str_a_7, str_b_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    int insert_time_8 = 50, delete_time_8 = 50, replace_time_8 = 50, swap_time_8 = 50;
+    std::string str_a_8 = "teacher", str_b_8 = "beacher";
+    int expected_8 = 50;
+    int result_8 = SequenceofBalls(insert_time_8, delete_time_8, replace_time_8, swap_time_8, str_a_8, str_b_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int insert_time_9 =0, delete_time_9 = 50, replace_time_9 = 50, swap_time_9 = 50;
+    std::string str_a_9 = "teacher", str_b_9 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_9, delete_time_9, replace_time_9, swap_time_9, str_a_9, str_b_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_10 =-2, delete_time_10 = 50, replace_time_10 = 50, swap_time_10 = 50;
+    std::string str_a_10 = "teacher", str_b_10 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_10, delete_time_10, replace_time_10, swap_time_10, str_a_10, str_b_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_11 =1000, delete_time_11 = 50, replace_time_11 = 50, swap_time_11 = 50;
+    std::string str_a_11 = "teacher", str_b_11 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_11, delete_time_11, replace_time_11, swap_time_11, str_a_11, str_b_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_12 =50, delete_time_12 = 0, replace_time_12 = 50, swap_time_12 = 50;
+    std::string str_a_12 = "teacher", str_b_12 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_12, delete_time_12, replace_time_12, swap_time_12, str_a_12, str_b_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_13 =50, delete_time_13 = -2, replace_time_13 = 50, swap_time_13 = 50;
+    std::string str_a_13 = "teacher", str_b_13 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_13, delete_time_13, replace_time_13, swap_time_13, str_a_13, str_b_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_14 =50, delete_time_14 = 5000, replace_time_14 = 50, swap_time_14 = 50;
+    std::string str_a_14 = "teacher", str_b_14 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_14, delete_time_14, replace_time_14, swap_time_14, str_a_14, str_b_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_15 =50, delete_time_15 = 10, replace_time_15 = 0, swap_time_15 = 50;
+    std::string str_a_15 = "teacher", str_b_15 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_15, delete_time_15, replace_time_15, swap_time_15, str_a_15, str_b_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_16 =50, delete_time_16 = 2, replace_time_16 = -50, swap_time_16 = 50;
+    std::string str_a_16 = "teacher", str_b_16 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_16, delete_time_16, replace_time_16, swap_time_16, str_a_16, str_b_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_17 =50, delete_time_17 = 50, replace_time_17 = 5000, swap_time_17 = 50;
+    std::string str_a_17 = "teacher", str_b_17 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_17, delete_time_17, replace_time_17, swap_time_17, str_a_17, str_b_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_18 =50, delete_time_18 = 1, replace_time_18 = 50, swap_time_18 = 0;
+    std::string str_a_18 = "teacher", str_b_18 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_18, delete_time_18, replace_time_18, swap_time_18, str_a_18, str_b_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_19 =50, delete_time_19 = 1, replace_time_19 = 50, swap_time_19 = -50;
+    std::string str_a_19 = "teacher", str_b_19 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_19, delete_time_19, replace_time_19, swap_time_19, str_a_19, str_b_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_20 =50, delete_time_20 = 50, replace_time_20 = 50, swap_time_20 = 5000;
+    std::string str_a_20 = "teacher", str_b_20 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_20, delete_time_20, replace_time_20, swap_time_20, str_a_20, str_b_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_21 =50, delete_time_21 = 50, replace_time_21 = 50, swap_time_21 = 50;
+    std::string str_a_21 = "", str_b_21 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_21, delete_time_21, replace_time_21, swap_time_21, str_a_21, str_b_21);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_22 =50, delete_time_22 = 50, replace_time_22 = 50, swap_time_22 = 50;
+    std::string str_a_22 = "Ajvf", str_b_22 = "beacher";
+    try
+    {
+        SequenceofBalls(insert_time_22, delete_time_22, replace_time_22, swap_time_22, str_a_22, str_b_22);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_23 =50, delete_time_23 = 50, replace_time_23 = 50, swap_time_23 = 50;
+    std::string str_a_23 = "jvf", str_b_23 = "Abeacher";
+    try
+    {
+        SequenceofBalls(insert_time_23, delete_time_23, replace_time_23, swap_time_23, str_a_23, str_b_23);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int insert_time_24 =50, delete_time_24 = 50, replace_time_24 = 50, swap_time_24 = 50;
+    std::string str_a_24 = "jvf", str_b_24 = "";
+    try
+    {
+        SequenceofBalls(insert_time_24, delete_time_24, replace_time_24, swap_time_24, str_a_24, str_b_24);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<< "All test cases passed!\n";
     return 0;
 }
