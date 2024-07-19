@@ -1,4 +1,74 @@
-// https://codeforces.com/problemset/problem/273/E
+/*
+
+https://codeforces.com/problemset/problem/273/E
+
+Write a C++ Solution DimaAndGame to determine the number of ways Dima can arrange the 
+len integer pairs (l_i, r_i) on the paper, considering the rules and the goal 
+of making Anya lose in the first turn (if both players play optimally).
+
+
+Dima and Anya are playful minds who enjoy strategic games. Dima has devised a 
+new game with specific rules.
+
+Dima writes down len pairs of integers on a piece of paper. Each pair is denoted 
+as (l_i, r_i) where:
+
+1 <= l_i < r_i <= cnt (cnt is an upper bound for all integer values).
+
+The game involves turns between Dima and Anya. Anya always starts.
+
+
+On Dima's turn, he can choose one of the n pairs written down, provided the difference 
+between its elements (r_i - l_i) is greater than 2. He then modifies the chosen pair 
+according to one of two options:
+
+Replace the pair with (l_i, floor(r_i/2)). Here, floor(r_i/2) represents the integer 
+obtained by rounding down r_i by dividing it by 2.
+Replace the pair with (floor(r_i/2), r_i).
+
+Anya, on her turn, cannot make any modifications. She can only observe Dima's actions.
+
+
+The player who cannot make a valid move (due to no pairs satisfying the r_i - l_i > 2 condition) 
+loses the game.
+
+Dima, being the mastermind behind the game, wants Anya to lose. He achieves this by 
+strategically writing down the len integer pairs such that, even with optimal play 
+from both sides, Anya will eventually be forced into a position where she cannot make a move.
+
+
+Your task is to determine the number of ways Dima can arrange the len integer pairs 
+(l_i, r_i) on the paper, considering the rules and the goal of making Anya lose in 
+the first turn (if both players play optimally).
+
+The answer can be very large, so you need to find the number of winning arrangements 
+modulo 1000000007 (a prime number used for modular arithmetic). This helps efficiently 
+handle extremely large counts without exceeding memory limitations.
+
+Input : 
+
+An integer len.
+An integer cnt.
+
+
+Output:
+
+An integer ans to to determine the number of ways Dima can arrange the len integer pairs 
+(l_i, r_i) on the paper, considering the rules and the goal of making Anya 
+lose in the first turn (if both players play optimally).
+
+
+Constraints :
+
+len : ranges from 1 to 1000.
+cnt : ranges from 1 to 10^9.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+
+*/
 
 #include <algorithm>
 #include <cstdio>
@@ -10,20 +80,7 @@
 #include <stdexcept>
 
 
-/*
 
-Input : 
-
-An integer len.
-An integer cnt.
-
-Constraints :
-
-len : ranges from 1 to 1000.
-cnt : ranges from 1 to 10^9.
-
-
-*/
 
 int CalculateMidElement(int first, int sec) {
     for (int i = 0; i <= 2; ++i){
@@ -112,9 +169,121 @@ int DimaAndGame(int &len, int &cnt) {
 #include <stdexcept>
 
 int main() {
-    int len,cnt;
-    std::cin>>len>>cnt;
-    long long ans=DimaAndGame(len,cnt);
-    std::cout << ans << std::endl;
+    // TEST
+    int len_1 = 4, cnt_1 = 4;
+    int expected_1 = 520;
+    int result_1 = DimaAndGame(len_1, cnt_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int len_2 = 7, cnt_2 = 4;
+    int expected_2 = 131776;
+    int result_2 = DimaAndGame(len_2, cnt_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int len_3 = 10, cnt_3 = 7;
+    int expected_3 = 677430627;
+    int result_3 = DimaAndGame(len_3, cnt_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int len_4 = 8, cnt_4 = 5;
+    int expected_4 = 70369408;
+    int result_4 = DimaAndGame(len_4, cnt_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int len_5 = 12, cnt_5 = 8;
+    int expected_5 = 574561256;
+    int result_5 = DimaAndGame(len_5, cnt_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int len_6 = 6, cnt_6 = 3;
+    int expected_6 = 0;
+    int result_6 = DimaAndGame(len_6, cnt_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int len_7 = 9, cnt_7 = 6;
+    int expected_7 =232939090;
+    int result_7 = DimaAndGame(len_7, cnt_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int len_8 = 4, cnt_8 = 2;
+    int expected_8 = 0;
+    int result_8 = DimaAndGame(len_8, cnt_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int len_9 = 0, cnt_9 = 2;
+    try
+    {
+        DimaAndGame(len_9, cnt_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_10 = -1, cnt_10 = 2;
+    try
+    {
+        DimaAndGame(len_10, cnt_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_11 = 1001, cnt_11 = 2;
+    try
+    {
+        DimaAndGame(len_11, cnt_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_12 = 101, cnt_12 = -1;
+    try
+    {
+        DimaAndGame(len_12, cnt_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_13 = 101, cnt_13 = 10000000009;
+    try
+    {
+        DimaAndGame(len_13, cnt_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
     return 0;
 }
