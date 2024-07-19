@@ -1,4 +1,38 @@
-// https://codeforces.com/problemset/problem/513/E1
+/*
+
+
+https://codeforces.com/problemset/problem/513/E1
+
+Write a C++ Solution SubarrayCuts to determine the maximum possible value.
+
+
+You are given an array of length len and a number k_value. 
+Let's pick k_value non-overlapping non-empty subarrays of the initial array. 
+Let s_i be the sum of the i-th subarray in order from left 
+to right. Compute the maximum value of the following expression:
+
+|s_1 - s_2| + |s_2 - s_3| + ... + |s_k-1 - s_k|. Here subarray is a contiguous part of an array.
+
+
+Input :
+
+An integer k_value.
+A vector of integer nums.
+
+Output:
+
+An integer ans to determine the maximum possible value.
+
+Constraints :
+
+k_value : ranges from 2 to min(50,nums.size())
+nums.size() : ranges from 2 to 400.
+nums : abs(nums[i]) ranges from 0 to 10000.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+*/
+
 
 #include <iostream>
 #include <vector>
@@ -8,21 +42,6 @@
 #include <cassert>
 #include <stdexcept>
 
-
-/*
-Input :
-
-An integer k_value.
-A vector of integer nums.
-
-Constraints :
-
-k_value : ranges from 2 to min(50,nums.size())
-nums.size() : ranges from 2 to 400.
-nums : abs(nums[i]) ranges from 0 to 10000.
-
-
-*/
 
 
 int SubarrayCuts(int k_value, std::vector<int> &nums){
@@ -44,17 +63,17 @@ int SubarrayCuts(int k_value, std::vector<int> &nums){
         prefix_sum[i] = prefix_sum[i - 1] + array[i];
     }
 
-    std::vector<std::vector<std::vector<int>>> dp(len + 1, std::vector<std::vector<int>>(k_value + 1, std::vector<int>(len + 1, 0)));
+    std::vector<std::vector<std::vector<int>>> dp_table(len + 1, std::vector<std::vector<int>>(k_value + 1, std::vector<int>(len + 1, 0)));
     int answer = 0;
 
     for (int i = 1; i <= len; i++) {
         for (int j = 2; j <= std::min(i, k_value); j++) {
             for (int k = 1; k <= i - j + 1; k++) {
                 for (int t = 1; t <= i - k - j + 2; t++) {
-                    dp[i][j][k] = std::max(dp[i][j][k], dp[i - k][j - 1][t] + std::abs(prefix_sum[i] - prefix_sum[i - k] - prefix_sum[i - k] + prefix_sum[i - k - t]));
+                    dp_table[i][j][k] = std::max(dp_table[i][j][k], dp_table[i - k][j - 1][t] + std::abs(prefix_sum[i] - prefix_sum[i - k] - prefix_sum[i - k] + prefix_sum[i - k - t]));
                 }
                 if (j == k_value) {
-                    answer = std::max(answer, dp[i][j][k]);
+                    answer = std::max(answer, dp_table[i][j][k]);
                 }
             }
         }
@@ -71,10 +90,142 @@ int SubarrayCuts(int k_value, std::vector<int> &nums){
 #include <stdexcept>
 
 
-int main() {
-    int k_value=2;
-    std::vector<int> nums={7,4,3,7};
-    int res=SubarrayCuts(k_value,nums);
-    std::cout<<res<<std::endl;
+int main()
+{
+    // TEST
+    std::vector<int> nums_1 = {0,1,2,3,4};
+    int k_value_1=5;
+    int expected_1 = 4;
+    int result_1 = SubarrayCuts(k_value_1,nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_2 = {-1,1,2,0,0};
+    int k_value_2=2;
+    int expected_2 =4;
+    int result_2 = SubarrayCuts(k_value_2,nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_3 = {0,1,1,0,0};
+    int k_value_3=2;
+    int expected_3 =2;
+    int result_3 = SubarrayCuts(k_value_3,nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_4 = {0,1,1,0};
+    int k_value_4=2;
+    int expected_4 =2;
+    int result_4 = SubarrayCuts(k_value_4,nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_5 = {0,1,1,2};
+    int k_value_5=2;
+    int expected_5 =4;
+    int result_5 = SubarrayCuts(k_value_5,nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_6 = {-1,1,2,0,0};
+    int k_value_6=2;
+    int expected_6 =4;
+    int result_6 = SubarrayCuts(k_value_6,nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+        // TEST
+    std::vector<int> nums_7 = {-1,1,2,2,0};
+    int k_value_7=2;
+    int expected_7 =6;
+    int result_7 = SubarrayCuts(k_value_7,nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_8 = {-1,1,-1,0,0};
+    int k_value_8=2;
+    int expected_8 =2;
+    int result_8 = SubarrayCuts(k_value_8,nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {-1,1,111115,0,0};
+    int k_value_9=2;
+    try
+    {
+        SubarrayCuts(k_value_9,nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {};
+    int k_value_10=2;
+    try
+    {
+        SubarrayCuts(k_value_10,nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11(1000005,0);
+    int k_value_11=2;
+    try
+    {
+        SubarrayCuts(k_value_11,nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    int k_value_12=2;
+    try
+    {
+        SubarrayCuts(k_value_12,nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {-1,1,-1,0,0};
+    int k_value_13=10;
+    try
+    {
+        SubarrayCuts(k_value_13,nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {-1,1,-1,0,0};
+    int k_value_14=-1;
+    try
+    {
+        SubarrayCuts(k_value_14,nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
     return 0;
 }
