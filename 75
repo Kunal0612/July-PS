@@ -1,0 +1,85 @@
+// https://codeforces.com/contest/1842/problem/F
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+void BFS(int start_node, int num_nodes, const std::vector<std::vector<int>>& graph, std::vector<int>& answers) {
+    std::vector<int> queue(num_nodes), distances(num_nodes, -1);
+    queue[0] = start_node;
+    distances[start_node] = 0;
+
+    int front = 0, rear = 1;
+    while (front < rear) {
+        int node = queue[front++];
+        for (int neighbor : graph[node]) {
+            if (distances[neighbor] < 0) {
+                distances[neighbor] = distances[node] + 1;
+                queue[rear++] = neighbor;
+            }
+        }
+    }
+
+    int sum_distances = 0;
+    for (int i = 0; i < num_nodes; ++i) {
+        sum_distances += distances[queue[i]];
+        answers[i + 1] = std::max(answers[i + 1], (num_nodes - 1) * (i + 1) - 2 * sum_distances);
+    }
+}
+/*
+Input :
+An integer num_nodes.
+A vector of vector of edges.
+
+Constraints : 
+
+num_nodes : ranges from 1 to 5000.
+edges : ranges from 1 to num_nodes and edges[i][0]!=edges[i][1].
+
+*/
+
+
+std::vector<int>TenzingAndTree(int num_nodes, std::vector<std::vector<int>> edges){
+    if(num_nodes<1 or num_nodes>5000){
+        throw std::invalid_argument("Invalid length");
+    }
+    std::vector<std::vector<int>> graph(num_nodes);
+    for (int i = 0; i < num_nodes - 1; ++i) {
+        int node_u=edges[i][0], node_v=edges[i][1];
+        if(node_u<1 or node_u>num_nodes or node_v<1 or node_v>num_nodes or node_u==node_v){
+            throw std::invalid_argument("Invalid Edges");
+        }
+        --node_u;
+        --node_v;
+        graph[node_u].push_back(node_v);
+        graph[node_v].push_back(node_u);
+    }
+    std::vector<int> answer(num_nodes + 1, 0);
+    for (int i = 0; i < num_nodes; ++i) {
+        BFS(i, num_nodes, graph, answer);
+    }
+    return answer;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    int num_nodes=4;
+    std::vector<std::vector<int>> edges={{1,2},{3,2},{2,4}};
+    std::vector<int> ans=TenzingAndTree(num_nodes,edges);
+    for(auto x:ans) std::cout << x << " ";
+    return 0;
+}
