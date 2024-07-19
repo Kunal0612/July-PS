@@ -1,0 +1,101 @@
+// https://codeforces.com/contest/1842/problem/H
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+long long Power(long long base, int exponent) {
+    long long result = 1;
+    int mod = 998244353;
+    while (exponent) {
+        if (exponent & 1) {
+            result = result * base % mod;
+        }
+        base = base * base % mod;
+        exponent >>= 1;
+    }
+    return result;
+}
+
+inline void Increment(int& value, int addition) {
+    int mod = 998244353;
+    if ((value += addition) >= mod) {
+        value -= mod;
+    }
+}
+
+int solve(int len,int lem,std::vector<std::vector<int>> queries){
+    if(len < 1 or len>20){
+        throw std::invalid_argument("Invalid len");
+    }
+    if(lem < 0 or lem>len*len + len){
+        throw std::invalid_argument("Invalid len");
+    }
+    std::vector<std::vector<int>> condt(len, std::vector<int>(2, 0)); 
+    std::vector<int> dp(1 << len, 0);  
+
+    for(int i=0;i<lem;i++) {
+        int type=queries[i][0], num_i=queries[i][1], num_j=queries[i][2];
+        if(type!=0 and type!=1){
+            throw std::invalid_argument("Invalid Query");
+        }
+        if(num_i<1 or num_i>num_j or num_j>len){
+            throw std::invalid_argument("Invalid Query");
+        }
+        num_i--, num_j--;
+        condt[num_i][type] |= 1 << num_j;
+        condt[num_j][type] |= 1 << num_i;
+    }
+    /*
+    Input : 
+    An integer len.
+    An integer lem.
+    A vector of vector of integers queries.
+
+    Constraints : 
+    len : ranges from 1 to 20.
+    lem : ranges from 0 to len*len + len.
+    queries : queries[i][0] contains either 0 or 1 , queries[i][1] ranges from 1 to queries[i][2]
+              queries[i][2] ranges from queries[i][1] to len.
+    
+    */
+    int mod = 998244353;
+    dp[0] = 1;
+
+    for (int subset = 0; subset < (1 << len); ++subset) {
+        for (int node = 0; node < len; ++node) {
+            if (~subset >> node & 1) {
+                if ((condt[node][0] | subset) == subset) {
+                    Increment(dp[subset | (1 << node)], dp[subset]);
+                }
+                if ((condt[node][1] | subset) == subset) {
+                    Increment(dp[subset | (1 << node)], dp[subset]);
+                }
+            }
+        }
+    }
+
+    long long factorial_term = 1;
+    for (int i = 1; i <= len; ++i) {
+        factorial_term = factorial_term * i * 2 % mod;
+    }
+
+    int ans=dp[(1 << len) - 1] * Power(factorial_term, mod - 2) % mod;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    
+    int ans=solve(3,2,{{0,1,2},{1,3,3}});
+    std::cout << ans << std::endl;
+    return 0;
+}
