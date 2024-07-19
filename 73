@@ -1,0 +1,94 @@
+// https://codeforces.com/problemset/problem/1842/G
+
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+
+long long power(long long base, int exponent) {
+    long long result = 1;
+    int mod = 1e9 + 7;
+    while (exponent) {
+        if (exponent & 1) {
+            result = result * base % mod;
+        }
+        base = base * base % mod;
+        exponent >>= 1;
+    }
+    return result;
+}
+
+int TenzingAndRandomOperations(int max_m,int value,std::vector<int> nums){
+    int len=nums.size();
+    if(len<1 or len>5000){
+        throw std::invalid_argument("Invalid len");
+    }
+    if(max_m<1 or max_m>1000000000){
+        throw std::invalid_argument("Invalid max_m");
+    }
+    if(value<1 or value>1000000000){
+        throw std::invalid_argument("Invalid value");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (nums[i] <= 0 or nums[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    /*
+
+    Input :
+    An integer max_m.
+    An integer value.
+    A vector of integer nums.
+
+    Constraints :
+    nums.size() : ranges from 1 to 5000.
+    nums : ranges from 1 to 10^9.
+    max_m , value : ranges from 1 to 10^9. 
+
+    */
+    std::vector<int> arr(len + 1);
+    std::vector<std::vector<int>> dp_table(len + 1, std::vector<int>(len + 1, 0));
+
+    for (int i = 1; i <= len; i++) {
+        arr[i]=nums[i-1];
+    }
+
+    dp_table[0][0] = 1;
+    int mod = 1e9 + 7;
+    for (int i = 1; i <= len; i++) {
+        auto coef = i * power(len, mod - 2) % mod * value % mod;
+        for (int j = 0; j < i; j++) {
+            dp_table[i][j + 1] = dp_table[i - 1][j] * coef % mod * (max_m - j) % mod;
+            dp_table[i][j] = (dp_table[i][j] + dp_table[i - 1][j] * (arr[i] + 1LL * j * value % mod)) % mod;
+        }
+    }
+
+    int result = 0;
+    for (int i = 0; i <= len; i++) {
+        result = (result + dp_table[len][i]) % mod;
+    }
+
+    return result;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    int ans=TenzingAndRandomOperations(2,5,{2,2});
+    std::cout << ans << std::endl;
+    return 0;
+}
