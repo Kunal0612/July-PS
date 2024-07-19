@@ -32,7 +32,7 @@ int solve(std::vector<int> nums){
     }
     for (int i = 0; i < len; i++)
     {
-        if (nums[i] <= 0 or nums[i] >= len)
+        if (nums[i] <= 0 or nums[i] > len)
         {
             throw std::invalid_argument("Invalid nums");
         }
