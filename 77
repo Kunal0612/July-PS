@@ -1,0 +1,126 @@
+// https://codeforces.com/problemset/problem/1805/F1
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+
+long long Binpow(long long base, int exponent) {
+    long long result = 1;
+    int mod = 1000000007;
+    while (exponent) {
+        if (exponent % 2) {
+            result *= base;
+            result %= mod;
+        }
+        base *= base;
+        base %= mod;
+        exponent /= 2;
+    }
+    return result;
+}
+
+
+void Chill(std::vector<int>& brr, int real_len, long long& ans) {
+    int min_value = brr[0];
+    int mod = 1000000007;
+    ans += static_cast<int>((static_cast<long long>(min_value) * Binpow(2, real_len - 1)) % mod);
+    if (ans >= mod) {
+        ans -= mod;
+    }
+    for (auto& x : brr) {
+        x -= min_value;
+    }
+}
+
+void ProcessVector(std::vector<int>& brr, int& real_len, long long& ans, int sub = 0) {
+    --real_len;
+    std::vector<int> candidates;
+    for (int i = 0; i < brr.size(); i++) {
+        for (int j = i + 1; j < brr.size(); j++) {
+            if (i * j >= brr.size()){
+                break;
+            }
+            candidates.push_back(brr[i] + brr[j]);
+        }
+    }
+    std::sort(candidates.begin(), candidates.end());
+    std::vector<int> new_b(brr.size() - sub);
+    for (int i = 0; i < brr.size() - sub; i++) {
+        new_b[i] = candidates[i];
+    }
+    Chill(new_b, real_len, ans);
+    brr = new_b;
+}
+
+/*
+Input : 
+A vector of integers nums.
+
+Constraints :
+
+nums : ranges from 0 to 10^9.
+nums.size() : ranges from 2 to 3000.
+
+*/
+
+
+
+int SurvivalOfTheWeakest(std::vector<int> &nums){
+    int len=nums.size();
+    if(len<2 or len>3000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<len;i++){
+        if(nums[i]<0 or nums[i]>1000000000){
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    std::sort(nums.begin(), nums.end());
+    int mx_len = 64;
+    std::vector<int> brr(std::min(len, mx_len));
+    for (int i = 0; i < std::min(len, mx_len); i++) {
+        brr[i] = nums[i];
+    }
+
+    int real_len = len;
+    long long ans = 0;
+    Chill(brr, real_len, ans);
+
+    while (brr.size() < real_len) {
+        if (brr[1] + brr[2] > brr.back()) {
+            ProcessVector(brr, real_len, ans, 1);
+            ProcessVector(brr, real_len, ans, 1);
+        } else {
+            ProcessVector(brr, real_len, ans);
+        }
+    }
+
+    while (real_len > 1) {
+        ProcessVector(brr, real_len, ans, 1);
+    }
+    int mod = 1000000007;
+    ans += brr[0];
+    ans %= mod;
+    return ans;
+}
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    std::cout.tie(nullptr);
+
+    int len;
+    std::cin >> len;
+    std::vector<int> nums(len);
+    for (int i = 0; i < len; i++) {
+        std::cin >> nums[i];
+    }
+    int ans=SurvivalOfTheWeakest(nums);
+    std::cout << ans << std::endl;
+    return 0;
+}
