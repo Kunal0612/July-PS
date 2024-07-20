@@ -1,4 +1,35 @@
-// https://codeforces.com/problemset/problem/1863/G
+/*
+
+https://codeforces.com/problemset/problem/1863/G
+
+Write a C++ Solution Swaps to determine the distinct arrays is 
+it possible to attain? return the answer modulo (10^9+7)
+
+You are given an array of integers nums_1,nums_2,…,nums_n (1≤nums_i≤len). 
+You can perform the following operation several (possibly, zero) times:
+pick an arbitrary i and perform swap(nums[i],nums[nums[i]]).
+
+How many distinct arrays is it possible to attain? Output the answer modulo (10^9+7).
+
+
+Input :
+
+A vector of integers nums.
+
+Output:
+
+An integer answer to determine the distinct arrays is it possible to attain? 
+return the answer modulo (10^9+7).
+
+Constraints :
+
+nums.size() : ranges from 1 to 1000000.
+nums :  ranges from 1 to nums.size()
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -7,22 +38,7 @@
 #include <stdexcept>
 
 
-
-/*
-
-Input :
-
-A vector of integers nums.
-
-Constraints :
-
-nums.size() : ranges from 1 to 1000000.
-nums :  ranges from 1 to nums.size()
-
-
-*/
-
-int solve(std::vector<int> nums){
+int Swaps(std::vector<int> nums){
     long long len=nums.size(), idx_1, idx_2, answer = 1, sum_1, sum_2;
     std::vector<int> array(len+1), visited(len+1), tagged(len+1), in_degree(len+1);
     int mod = 1e9 + 7;
@@ -78,8 +94,124 @@ int solve(std::vector<int> nums){
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
-signed main() {
-    std::vector<int> nums = {2,3,1,1,1,2};
-    int ans=solve(nums);
-    std::cout<<ans;
+
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {1,2,4,3};
+    int expected_1 = 2;
+    int result_1 = Swaps(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 1,2,3,4};
+    int expected_2 = 120;
+    int result_2 = Swaps(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1,2,3,4,5,5};
+    int expected_3 = 1;
+    int result_3 = Swaps(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 4, 4, 5};
+    int expected_4 = 1;
+    int result_4 = Swaps(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 2, 2, 4, 5, 6};
+    int expected_5 = 1;
+    int result_5 = Swaps(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 2, 1, 2, 5, 5};
+    int expected_6 =1;
+    int result_6 = Swaps(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7,1,1,1};
+    int expected_7 = 16;
+    int result_7 = Swaps(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    int expected_8 = 1;
+    int result_8 = Swaps(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        Swaps(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        Swaps(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        Swaps(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        Swaps(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        Swaps(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
 }
