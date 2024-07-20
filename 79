@@ -1,0 +1,79 @@
+// https://codeforces.com/problemset/problem/1310/B
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+/*
+Input :
+An integer num
+An integer k_value
+A vector of integers arr.
+
+Constraints :
+
+num : ranges from 2 to 17.
+k_value : ranges from 1 to 2^num.
+arr : ranges from 1 to 2^num.
+
+*/
+
+int DoubleElimination(int num,int k_value,std::vector<int> &arr){
+    if(num<2 or num>17 or k_value<0 or k_value>(1<<num)){
+        throw std::invalid_argument("Invalid Constraints");
+    }
+    for(int i=0; i<arr.size();i++){
+        if(arr[i]<1 or arr[i]>(1<<num)){
+            throw std::invalid_argument("Invalid Constraints");
+        }
+    }
+    int bit;
+    int inf = INT_MAX;
+    bit = 1 << (num - 1);
+    
+    std::vector<std::vector<int>> dp_table(bit * 2, std::vector<int>(4, -inf));
+    
+    for (int i = 1; i <= k_value; ++i) {
+        int cnt=arr[i-1];
+        cnt = bit + (cnt - 1) / 2;
+        dp_table[cnt][3] = dp_table[cnt][1];
+        dp_table[cnt][1] = dp_table[cnt][2] = 1;
+    }
+    
+    for (int i = bit - 1; i > 0; --i) {
+        for (int x = 0; x < 4; ++x) {
+            for (int y = 0; y < 4; ++y) {
+                dp_table[i][x | y] = std::max(dp_table[i][x | y], dp_table[2 * i][x] + dp_table[2 * i + 1][y] + (x | y));
+            }
+        }
+    }
+    
+    int result = std::max({dp_table[1][1], dp_table[1][2], dp_table[1][3], -1}) + 1;
+    return result;
+}
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    int num, k_value;
+    std::cin >> num >> k_value;
+    std::vector<int> arr(k_value);
+    for(auto &x:arr){
+        std::cin>>x;
+    }
+    int ans=DoubleElimination(num,k_value,arr);
+    std::cout<<ans<<std::endl;
+    return 0;
+}
