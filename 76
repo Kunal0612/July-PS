@@ -1,0 +1,124 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+int Size(const std::string& str) {
+    return static_cast<int>(str.size());
+}
+
+std::vector<int> Divisors(int xec) {
+    std::vector<int> res;
+    for (int i = 1; i * i <= xec; ++i) {
+        if (xec % i == 0) {
+            res.push_back(i);
+            if (i * i != xec){
+                res.push_back(xec / i);
+            }
+        }
+    }
+    return res;
+}
+
+int gcd(int first, int sec) {
+    while (sec != 0) {
+        int temp = sec;
+        sec = first % sec;
+        first = temp;
+    }
+    return first;
+}
+/*
+Input : 
+
+An integer first.
+An integer sec.
+An integer num.
+
+
+Constraints :
+
+first , sec : ranges from 1 to 100000.
+num : ranges from 1 to 10^9.
+
+
+*/
+
+
+int StrangeTriples(int first,int sec,int num){
+    if(first<1 or first>100000 or sec<1 or sec>100000 or num<1 or num>1000000000){
+        throw std::invalid_argument("Invalid length");
+    }
+    int mx_len = 5;
+    std::vector<int> pow(10);
+    pow[0] = 1;
+    for (int i = 1; i < 10; ++i) {
+        pow[i] = pow[i - 1] * 10;
+    }
+
+    int pw_len = pow[mx_len];
+    std::set<std::array<int, 3>> used;
+
+    std::vector<int> len(pw_len);
+    for (int i = 0; i < pw_len; ++i) {
+        len[i] = Size(std::to_string(i));
+    }
+
+    for (int lenn = 1; lenn <= 9; ++lenn) {
+        int xec = pow[lenn] - 1;
+        for (int k2 : Divisors(xec)) {
+            int rec = xec / k2;
+            for (int d = 1; d < pw_len; ++d) {
+                for (int lenb = len[d]; lenb <= mx_len; ++lenb) {
+                    int bec = pow[lenb] - d * static_cast<long long>(rec) % pow[lenb];
+                    int dec = d / gcd(d, bec);
+                    int left_b = (pow[lenb - 1] + bec - 1) / bec;
+                    int right_b = (pow[lenb] - 1) / bec;
+                    for (int g = (left_b + dec - 1) / dec * dec; g <= right_b; g += dec) {
+                        int yec = bec * g;
+                        assert(yec % d == 0);
+                        if (yec >= sec || gcd(yec / d, rec) != 1){
+                            continue;
+                        }
+                        int agc = (d * static_cast<long long>(rec) + bec) / pow[lenb];
+                        long long cnt = yec / d * static_cast<long long>(k2) * agc;
+                        if (cnt < num && agc * g < first && gcd(agc, bec) == 1 && Size(std::to_string(cnt)) == lenn){
+                            used.insert({agc * g, yec, static_cast<int>(cnt)});
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    int res = 0;
+    for (auto it : used) {
+        long long xec = it[0], yec = it[1], cnt = it[2];
+        int lenn = Size(std::to_string(cnt));
+        int lenb = Size(std::to_string(yec));
+        res += xec * yec * pow[lenn] + cnt * yec == xec * cnt * pow[lenb] + xec * yec;
+    }
+
+    return res;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    int first, sec, num;
+    std::cin >> first >> sec >> num;
+    int res=StrangeTriples(first,sec,num);
+    std::cout<<res<<std::endl;
+}
