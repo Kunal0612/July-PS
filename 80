@@ -1,0 +1,76 @@
+// https://codeforces.com/problemset/problem/1142/D
+
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cassert>
+#include <stdexcept>
+
+
+
+/*
+Input :
+A string str.
+
+Constraints :
+str.size() : ranges from 1 to 100000.
+str : contains only digits , first digit of str is not zero.
+
+*/
+
+int Calculate(int first, int sec) {
+    return (first * (first - 1) / 2 + 10 + sec) % 11;
+}
+
+long long Foreigner(const std::string& str) {
+    int len = str.size();
+    if(len<1 or len>100000){
+        throw std::invalid_argument("Invalid length");
+    }
+    if(str[0]=='0'){
+        throw std::invalid_argument("Invalid digit");
+    }
+    for(int i=0;i<len;i++){
+        if(!isdigit(str[i])){
+            throw std::invalid_argument("Invalid digits");
+        }
+    }
+    std::vector<std::vector<long long>> dp_table(len + 1, std::vector<long long>(12, 0));
+    long long ans = 0;
+    for (int ii = 1; ii <= len; ++ii) {
+        int idx = str[ii - 1] - '0';
+        for (int j = idx + 1; j < 11; ++j) {
+            dp_table[ii][Calculate(j, idx)] += dp_table[ii - 1][j];
+        }
+        if (idx != 0) {
+            dp_table[ii][idx]++;
+        }
+        
+        for (int j = 0; j < 11; ++j) {
+            ans += dp_table[ii][j];
+        }
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    std::cout.tie(nullptr);
+
+    std::string str;
+    std::cin >> str;
+
+    long long result = Foreigner(str);
+    
+    std::cout << '\n' << result << '\n';
+    
+    return 0;
+}
