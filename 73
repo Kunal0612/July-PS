@@ -1,4 +1,46 @@
-// https://codeforces.com/problemset/problem/1842/G
+/*
+
+https://codeforces.com/problemset/problem/1863/G
+
+Write a C++ Solution TenzingAndRandomOperations to determine the 
+distinct arrays is it possible to attain? return the answer modulo (10^9+7)
+
+Tenzing has an array nums of length len and an integer value.
+
+Tenzing will perform the following operation max_m times:
+
+Choose an integer i such that 1≤i≤len uniformly at random.
+For all j such that i≤j≤len, set nums_j:=nums_j+value.
+Tenzing wants to know the expected value of ∏(i=0 to n) nums_i after 
+performing the max_m operations, modulo 10^9+7.
+
+Formally, let M=10^9+7. It can be shown that the answer can be expressed 
+as an irreducible fraction pq, where p and q are integers and q≢0(modM). 
+Output the integer equal to (p/q)modM. In other words, output the integer 
+x that 0≤x<M and x⋅q≡p(modM).
+
+Input :
+
+An integer max_m.
+An integer value.
+A vector of integer nums.
+
+Output:
+
+An integer answer to determine the expected value of ∏(i=0 to n) nums_i 
+after performing the max_m operations, modulo 10^9+7.
+
+
+Constraints :
+
+nums.size() : ranges from 1 to 5000.
+nums : ranges from 1 to 10^9.
+max_m , value : ranges from 1 to 10^9. 
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 
 #include <iostream>
@@ -9,7 +51,7 @@
 
 
 
-long long power(long long base, int exponent) {
+long long Power(long long base, int exponent) {
     long long result = 1;
     int mod = 1e9 + 7;
     while (exponent) {
@@ -40,19 +82,7 @@ int TenzingAndRandomOperations(int max_m,int value,std::vector<int> nums){
             throw std::invalid_argument("Invalid nums");
         }
     }
-    /*
 
-    Input :
-    An integer max_m.
-    An integer value.
-    A vector of integer nums.
-
-    Constraints :
-    nums.size() : ranges from 1 to 5000.
-    nums : ranges from 1 to 10^9.
-    max_m , value : ranges from 1 to 10^9. 
-
-    */
     std::vector<int> arr(len + 1);
     std::vector<std::vector<int>> dp_table(len + 1, std::vector<int>(len + 1, 0));
 
@@ -63,7 +93,7 @@ int TenzingAndRandomOperations(int max_m,int value,std::vector<int> nums){
     dp_table[0][0] = 1;
     int mod = 1e9 + 7;
     for (int i = 1; i <= len; i++) {
-        auto coef = i * power(len, mod - 2) % mod * value % mod;
+        auto coef = i * Power(len, mod - 2) % mod * value % mod;
         for (int j = 0; j < i; j++) {
             dp_table[i][j + 1] = dp_table[i - 1][j] * coef % mod * (max_m - j) % mod;
             dp_table[i][j] = (dp_table[i][j] + dp_table[i - 1][j] * (arr[i] + 1LL * j * value % mod)) % mod;
@@ -84,11 +114,233 @@ int TenzingAndRandomOperations(int max_m,int value,std::vector<int> nums){
 #include <cassert>
 #include <stdexcept>
 
-int main() {
-    std::ios::sync_with_stdio(false);
-    std::cin.tie(nullptr);
+int main()
+{
+    // TEST
+    int max_m_1 = 1;
+    int value_1 = 10;
+    std::vector<int> nums_1 = {5,6};
+    int expected_1 = 160;
+    int result_1 = TenzingAndRandomOperations(max_m_1, value_1, nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
-    int ans=TenzingAndRandomOperations(2,5,{2,2});
-    std::cout << ans << std::endl;
+    // TEST
+    int max_m_2 = 5;
+    int value_2 = 15;
+    std::vector<int> nums_2 = {2, 3, 4, 5, 6};
+    int expected_2 = 233124480;
+    int result_2 = TenzingAndRandomOperations(max_m_2, value_2, nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int max_m_3 = 3;
+    int value_3 = 8;
+    std::vector<int> nums_3 = {1, 4, 6};
+    int expected_3 = 6040;
+    int result_3 = TenzingAndRandomOperations(max_m_3, value_3, nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int max_m_4 = 6;
+    int value_4 = 20;
+    std::vector<int> nums_4 = {2, 5, 10, 15, 18, 20};
+    int expected_4 = 335271889;
+    int result_4 = TenzingAndRandomOperations(max_m_4, value_4, nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int max_m_5 = 7;
+    int value_5 = 25;
+    std::vector<int> nums_5 = {1, 3, 5, 7, 9, 11, 13};
+    int expected_5 = 248294995;
+    int result_5 = TenzingAndRandomOperations(max_m_5, value_5, nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int max_m_6 = 2;
+    int value_6 = 5;
+    std::vector<int> nums_6 = {2, 4};
+    int expected_6 = 98;
+    int result_6 = TenzingAndRandomOperations(max_m_6, value_6, nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int max_m_7 = 10;
+    int value_7 = 50;
+    std::vector<int> nums_7 = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+    int expected_7 = 166416167;
+    int result_7 = TenzingAndRandomOperations(max_m_7, value_7, nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int max_m_8 = 8;
+    int value_8 = 12;
+    std::vector<int> nums_8 = {2, 4, 6, 8, 10, 12, 1, 3};
+    int expected_8 = 63822483;
+    int result_8 = TenzingAndRandomOperations(max_m_8, value_8, nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int max_m_9 = 1000000009;
+    int value_9 = 12;
+    std::vector<int> nums_9 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_9, value_9, nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_10 = -1;
+    int value_10 = 12;
+    std::vector<int> nums_10 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_10, value_10, nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_11 = 2005;
+    int value_11 = 1200000008;
+    std::vector<int> nums_11 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_11, value_11, nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_12 = 8;
+    int value_12 = -1;
+    std::vector<int> nums_12 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_12, value_12, nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_13 = 8;
+    int value_13 = -1;
+    std::vector<int> nums_13 = {2, 4, 6, 9, 10, 13, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_13, value_13, nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_14 = 8;
+    int value_14 = -2;
+    std::vector<int> nums_14 = {2, 4, 6, 9, 10, 14, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_14, value_14, nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_15 = 8;
+    int value_15 = 5;
+    std::vector<int> nums_15 = {2, 4, 6, 9, -5, 1, 3};
+    try
+    {
+        TenzingAndRandomOperations(max_m_15, value_15, nums_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_16 = 8;
+    int value_16 = 5;
+    std::vector<int> nums_16 = {2, 1000000005, 6, 9, 16, 1, 3,200};
+    try
+    {
+        TenzingAndRandomOperations(max_m_16, value_16, nums_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_17 = 8;
+    int value_17 = 5;
+    std::vector<int> nums_17 = {2, 4, 0, 0, -44, 1, 3,0};
+    try
+    {
+        TenzingAndRandomOperations(max_m_17, value_17, nums_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_18 = 8;
+    int value_18 = 5;
+    std::vector<int> nums_18(400000,5);
+    try
+    {
+        TenzingAndRandomOperations(max_m_18, value_18, nums_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_19 = 8;
+    int value_19 = 5;
+    std::vector<int> nums_19 = {};
+    try
+    {
+        TenzingAndRandomOperations(max_m_19, value_19, nums_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
     return 0;
 }
