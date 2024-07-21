@@ -13,14 +13,22 @@ The defending monster's (Monster y) energy level becomes max(0, y - x).
 The attacking monster's (Monster x) energy remains unchanged.
 Nene's Challenge:
 Nene plans to cast the "Attack Your Neighbour" spell 10100 times. Your task is to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+
 Input:
+
 A vector of integers nums.
+
 Output:
+
 A vector of integer ans to determine which monsters (by their indices) will still have a non-zero energy level after all the attacks.
+
 Constraints:
+
 nums.size() : ranges from 2 to 100000.
 nums : ranges from 0 to 10^9.
+
 Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
 */
 #include <iostream>
 #include <vector>
