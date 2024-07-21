@@ -1,4 +1,66 @@
-// https://codeforces.com/problemset/problem/1805/F1
+/*
+
+https://codeforces.com/problemset/problem/1805/F1
+
+Write a C++ Solution SurvivalOfTheWeakest to find the result of 
+applying F to the array len-1 times recursively.
+
+Imagine you have an array a containing len non-negative integers. 
+We're interested in a specific function F applied repeatedly to this array.
+
+Function F Explained:
+
+F(nums_1, nums_2, ..., nums_len): This function takes an array of 
+non-negative integers as input.
+Output of F: It returns a new array containing the len-1 smallest 
+sums formed by adding any two distinct elements from the original 
+input array nums. The resulting sums are sorted in non-decreasing order.
+
+Example:
+
+For instance, F([1, 2, 5, 7]) = [3, 6, 7]. This means the smallest 
+sums from adding any two distinct elements in [1, 2, 5, 7] are:
+
+1 + 2 = 3
+1 + 5 = 6
+2 + 5 = 7
+
+The Challenge:
+
+You're given another array nums containing non-negative integers. 
+However, instead of calculating F once, the problem asks you to find 
+the result of applying F to the array len-1 times recursively.
+
+In simpler terms, you need to determine the single element of the 
+array obtained by:
+
+F(F(F(...F(nums_1, nums_2, ..., nums_len)...)  // F applied len-1 times
+
+Large Answer Handling:
+
+Since the final sum can be very large, the answer needs to be provided 
+modulo 10^9 + 7 (a prime number used for modular arithmetic) to avoid 
+exceeding memory limitations.
+
+
+Input : 
+
+A vector of integers nums.
+
+Constraints :
+
+nums : ranges from 0 to 10^9.
+nums.size() : ranges from 2 to 3000.
+
+Output:
+
+An integer res to find the result of applying F to the array len-1 
+times recursively.
+
+Use appropriate Error Handling using the stdexcept library for the 
+invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -56,19 +118,6 @@ void ProcessVector(std::vector<int>& brr, int& real_len, long long& ans, int sub
     brr = new_b;
 }
 
-/*
-Input : 
-A vector of integers nums.
-
-Constraints :
-
-nums : ranges from 0 to 10^9.
-nums.size() : ranges from 2 to 3000.
-
-*/
-
-
-
 int SurvivalOfTheWeakest(std::vector<int> &nums){
     int len=nums.size();
     if(len<2 or len>3000){
@@ -110,17 +159,122 @@ int SurvivalOfTheWeakest(std::vector<int> &nums){
 
 
 int main() {
-    std::ios::sync_with_stdio(false);
-    std::cin.tie(nullptr);
-    std::cout.tie(nullptr);
+     // TEST
+    std::vector<int> nums_1 = {1,2,4,5};
+    int expected_1 = 17;
+    int result_1 = SurvivalOfTheWeakest(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
-    int len;
-    std::cin >> len;
-    std::vector<int> nums(len);
-    for (int i = 0; i < len; i++) {
-        std::cin >> nums[i];
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    int expected_2 = 1648;
+    int result_2 = SurvivalOfTheWeakest(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {10000,5,5};
+    int expected_3 = 10015;
+    int result_3 = SurvivalOfTheWeakest(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    int expected_4 = 30;
+    int result_4 = SurvivalOfTheWeakest(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    int expected_5 = 610;
+    int result_5 = SurvivalOfTheWeakest(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    int expected_6 =160;
+    int result_6 = SurvivalOfTheWeakest(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    int expected_7 = 112;
+    int result_7 = SurvivalOfTheWeakest(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    int expected_8 = 192;
+    int result_8 = SurvivalOfTheWeakest(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        SurvivalOfTheWeakest(nums_9);
+        assert(false);
     }
-    int ans=SurvivalOfTheWeakest(nums);
-    std::cout << ans << std::endl;
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        SurvivalOfTheWeakest(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        SurvivalOfTheWeakest(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,10000000009);
+    try
+    {
+        SurvivalOfTheWeakest(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        SurvivalOfTheWeakest(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
     return 0;
 }
