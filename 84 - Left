@@ -1,0 +1,96 @@
+// https://codeforces.com/problemset/problem/717/B
+
+#include <iostream>
+#include <map>
+#include <queue>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+
+
+/*
+Input :
+
+A long long integer num_letters.
+A long long integer cost_a.
+A long long integer cost_b.
+
+Constraints : 
+
+num_letters : ranges from 2 to 10^8.
+cost_a : ranges from 0 to 10^18.
+cost_b : ranges from 0 to 10^18.
+
+
+
+*/
+
+int SummerAdventure(long long num_letters,long long cost_a,long long cost_b){
+    if(num_letters<2 or num_letters>100000000){
+         throw std::invalid_argument("Invalid number of letters");
+    }
+    if(cost_a<0 or cost_a>1000000000000000000){
+         throw std::invalid_argument("Invalid cost_a");
+    }
+    if(cost_b<0 or cost_b>1000000000000000000){
+         throw std::invalid_argument("Invalid cost_b");
+    }
+    long long result = 0, tot_num = 0;
+    std::map<long long, long long> count_map;
+    std::priority_queue<long long, std::vector<long long>, std::greater<long long>> pq_queue;
+    if (cost_a > cost_b) {
+        std::swap(cost_a, cost_b);
+    }
+    if (cost_a == 0) {
+        return (num_letters - 1) * cost_b;
+    }
+    pq_queue.push(0);
+    count_map[0]++;
+    tot_num = 1;
+
+    for (long long i = 2; i <= num_letters; i++) {
+        long long top_value = pq_queue.top();
+        if (count_map[top_value] + tot_num >= num_letters) {
+            result += cost_a * (num_letters - tot_num);
+            result += cost_b * (num_letters - tot_num);
+            result += top_value * (num_letters - tot_num);
+            break;
+        }
+        pq_queue.pop();
+        if (!count_map[top_value + cost_a]) {
+            pq_queue.push(top_value + cost_a);
+        }
+        count_map[top_value + cost_a] += count_map[top_value];
+        result += count_map[top_value] * cost_a;
+        if (!count_map[top_value + cost_b]) {
+            pq_queue.push(top_value + cost_b);
+        }
+        count_map[top_value + cost_b] += count_map[top_value];
+        result += count_map[top_value] * cost_b;
+        result += count_map[top_value] * top_value;
+        tot_num += count_map[top_value];
+    }
+    return result;   
+}
+
+
+#include <iostream>
+#include <map>
+#include <queue>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
+    std::cout.tie(0);
+
+    long long num_letters, cost_a, cost_b;
+    std::cin >> num_letters >> cost_a >> cost_b;
+    long long answer=SummerAdventure(num_letters, cost_a, cost_b);
+    std::cout << answer << std::endl;
+    return 0;
+}
