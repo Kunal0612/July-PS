@@ -1,0 +1,152 @@
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int Add(int first, int sec) {
+    first += sec;
+    int mod = 998244353;
+    if (first >= mod)
+        first -= mod;
+    return first;
+}
+
+int Multiply(int first, int sec) {
+    int mod = 998244353;
+    return first * 1ll * sec % mod;
+}
+
+struct Node {
+    int value[4], length;
+};
+
+Node Merge(const Node& left_node, const Node& right_node, int left_char, int right_char) {
+    Node result_node;
+    int left_index = left_node.length == 1 ? 0 : 1;
+    int right_index = right_node.length == 1 ? 0 : 2;
+    result_node.length = left_node.length + right_node.length;
+    result_node.value[0] = Multiply(left_node.value[left_index], right_node.value[right_index]);
+    result_node.value[1] = Multiply(left_node.value[left_index], right_node.value[3]);
+    result_node.value[2] = Multiply(left_node.value[3], right_node.value[right_index]);
+    result_node.value[3] = Multiply(left_node.value[3], right_node.value[3]);
+    if (left_char == 1) {
+        left_index = left_node.length == 1 ? 2 : 0;
+        right_index = right_node.length == 1 ? 1 : 0;
+        result_node.value[left_index + right_index] = Add(result_node.value[left_index + right_index], Multiply(Multiply(left_node.value[0], right_node.value[0]), 19 - (left_char * 10 + right_char)));
+        result_node.value[1 + left_index] = Add(result_node.value[1 + left_index], Multiply(Multiply(left_node.value[0], right_node.value[1]), 19 - (left_char * 10 + right_char)));
+        result_node.value[2 + right_index] = Add(result_node.value[2 + right_index], Multiply(Multiply(left_node.value[2], right_node.value[0]), 19 - (left_char * 10 + right_char)));
+        result_node.value[3] = Add(result_node.value[3], Multiply(Multiply(left_node.value[2], right_node.value[1]), 19 - (left_char * 10 + right_char)));
+    }
+    return result_node;
+}
+
+void BuildTree(std::vector<Node>& seg_tree, const std::string& str, int index, int left, int right) {
+    seg_tree[index].length = right - left;
+    if (left == right - 1) {
+        seg_tree[index].value[0] = 1;
+        seg_tree[index].value[3] = str[left] + 1;
+        return;
+    }
+    int middle = (left + right) / 2;
+    BuildTree(seg_tree, str, index * 2, left, middle);
+    BuildTree(seg_tree, str, index * 2 + 1, middle, right);
+    seg_tree[index] = Merge(seg_tree[index * 2], seg_tree[index * 2 + 1], str[middle - 1], str[middle]);
+}
+
+void UpdateTree(std::vector<Node>& seg_tree, std::string& str, int index, int left, int right, int position, int new_value) {
+    if (left == right - 1) {
+        str[left] = new_value;
+        seg_tree[index].value[3] = str[left] + 1;
+        return;
+    }
+    int middle = (left + right) / 2;
+    if (position < middle){
+        UpdateTree(seg_tree, str, index * 2, left, middle, position, new_value);
+    }
+    else{
+        UpdateTree(seg_tree, str, index * 2 + 1, middle, right, position, new_value);
+    }
+    seg_tree[index] = Merge(seg_tree[index * 2], seg_tree[index * 2 + 1], str[middle - 1], str[middle]);
+}
+
+
+/*
+Input :
+
+A string str.
+A vector of vector of integer desc.
+
+Constraints: 
+
+str: consist of only digits
+str.size() , desc.size() : ranges from 1 to 500000.
+desc : desc[i][0] ranges from 1 to n , desc[i][1] ranges from 0 to 9.
+
+
+*/
+
+
+std::vector<int> StrangeAddition(std::string str,std::vector<std::vector<int>> desc){
+
+    int str_len=str.size(), desc_len=desc.size();
+    if(str_len<1 or str_len>500000){
+        throw std::invalid_argument("Invalid str length");
+    } 
+    if(desc_len<1 or desc_len>500000){
+        throw std::invalid_argument("Invalid desc length");
+    } 
+    for (int i = 0; i < str_len; i++){
+        if(!isdigit(str[i])){
+            throw std::invalid_argument("Invalid str length");
+        }
+    }
+    for (int i = 0; i < desc_len; i++){
+        if(desc[i][0]<1 or desc[i][0]>str_len or desc[i][1]<0 or desc[i][1]>9){
+            throw std::invalid_argument("Invalid desc length");
+        }
+    }
+    for (int i = 0; i < str_len; i++){
+        str[i] -= '0';
+    }
+
+    std::vector<Node> seg_tree(4 * str_len * 4);
+    BuildTree(seg_tree, str, 1, 0, str_len);
+    std::vector<int> ans;
+    for (int i = 0; i < desc_len; i++) {
+        int position=desc[i][0], new_value=desc[i][1];
+        --position;
+        UpdateTree(seg_tree, str, 1, 0, str_len, position, new_value);
+        ans.push_back(seg_tree[1].value[3]);
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
+    std::cout.tie(0);
+    int n,m;
+    std::cin>>n>>m;
+    std::string str;
+    std::cin>>str;
+    std::vector<std::vector<int>> desc;
+    for(int i=0;i<m;i++){
+        int a,b;
+        std::cin>>a>>b;
+        desc.push_back({a,b});
+    }
+    std::vector<int> ans=StrangeAddition(str,desc);
+    for(auto x:ans) std::cout<<x<<std::endl;
+
+    return 0;
+}
