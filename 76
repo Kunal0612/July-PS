@@ -1,4 +1,70 @@
-// https://codeforces.com/problemset/problem/1796/F
+/*
+
+https://codeforces.com/problemset/problem/1796/F
+
+Write a C++ Solution StrangeTriples to determine the total number of 
+possible strange triples (a,b,n) considering the given upper bounds 
+for each element.
+
+The Strange Triple Challenge: Counting Concatenated Matches
+
+The Scenario:
+
+We're dealing with "strange triples" of positive integers. A triple 
+(a,b,n) is considered strange if a specific condition holds based on concatenation.
+
+Understanding Concatenation:
+
+Concatenation refers to joining two strings or numbers end-to-end 
+to create a new string or number. For instance, concatenating 
+1 and 2 results in "12".
+
+The Strange Condition:
+
+In a strange triple, the following equality must hold:
+
+(a*n) * (n*b) = (a*b)
+
+Here:
+
+a, b, and n represent the three positive integers in the triple.
+(a*n) is the concatenation of a and n (e.g., if a = 1 and n = 9, then (a*n) = 19).
+(n*b) is the concatenation of n and b (e.g., if n = 9 and b = 5, then (n*b) = 95).
+The multiplication (*) refers to numerical multiplication (not string concatenation).
+For example, the triple (1, 5, 9) is strange because 19 * 95 = 1 * 5 = 5.
+
+The Challenge:
+
+You are given three integers:
+
+first : Upper bound for a (1 <= a < first).
+sec : Upper bound for b (1 <= b < sec).
+num : Upper bound for n (1 <= n < num).
+
+Your task is to determine the total number of possible strange 
+triples (a, b, n) considering the given upper bounds for each element.
+
+Input : 
+
+An integer first.
+An integer sec.
+An integer num.
+
+Output:
+
+An integer res to determine the total number of possible strange 
+triples (a, b, n) considering the given upper bounds for each element.
+
+Constraints :
+
+first , sec : ranges from 1 to 1000.
+num : ranges from 1 to 10^9.
+
+
+Use appropriate Error Handling using the stdexcept library for the 
+invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -34,28 +100,14 @@ int gcd(int first, int sec) {
     }
     return first;
 }
-/*
-Input : 
 
-An integer first.
-An integer sec.
-An integer num.
-
-
-Constraints :
-
-first , sec : ranges from 1 to 100000.
-num : ranges from 1 to 10^9.
-
-
-*/
 
 
 int StrangeTriples(int first,int sec,int num){
-    if(first<1 or first>100000 or sec<1 or sec>100000 or num<1 or num>1000000000){
+    if(first<1 or first>1000 or sec<1 or sec>1000 or num<1 or num>1000000000){
         throw std::invalid_argument("Invalid length");
     }
-    int mx_len = 5;
+    int mx_len = 3;
     std::vector<int> pow(10);
     pow[0] = 1;
     for (int i = 1; i < 10; ++i) {
@@ -104,7 +156,6 @@ int StrangeTriples(int first,int sec,int num){
         int lenb = Size(std::to_string(yec));
         res += xec * yec * pow[lenn] + cnt * yec == xec * cnt * pow[lenb] + xec * yec;
     }
-
     return res;
 }
 
@@ -119,8 +170,168 @@ int StrangeTriples(int first,int sec,int num){
 #include <stdexcept>
 
 int main() {
-    int first, sec, num;
-    std::cin >> first >> sec >> num;
-    int res=StrangeTriples(first,sec,num);
-    std::cout<<res<<std::endl;
+    // TEST
+    int first_1 = 10, sec_1 = 10, num_1 = 100;
+    int expected_1 = 29;
+    int result_1 = StrangeTriples(first_1, sec_1, num_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int first_2 = 1, sec_2 = 1, num_2 = 1;
+    int expected_2 = 0;
+    int result_2 = StrangeTriples(first_2, sec_2, num_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int first_3 = 1, sec_3 = 2, num_3 = 10;
+    int expected_3 = 0;
+    int result_3 = StrangeTriples(first_3, sec_3, num_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int first_4 = 5, sec_4 = 6, num_4 = 10;
+    int expected_4 = 7;
+    int result_4 = StrangeTriples(first_4, sec_4, num_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int first_5 = 99, sec_5 = 100, num_5 = 999;
+    int expected_5 = 285;
+    int result_5 = StrangeTriples(first_5, sec_5, num_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int first_6 = 123, sec_6 = 60, num_6 = 123456789;
+    int expected_6 = 914;
+    int result_6 = StrangeTriples(first_6, sec_6, num_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int first_7 = 222, sec_7 = 33, num_7 = 444444444;
+    int expected_7 = 695;
+    int result_7 = StrangeTriples(first_7, sec_7, num_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int first_8 = 543, sec_8 = 125, num_8 = 987654321;
+    int expected_8 = 2175;
+    int result_8 = StrangeTriples(first_8, sec_8, num_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int first_9 = 54300, sec_9 = 125, num_9 = 987654321;
+    try
+    {
+        StrangeTriples(first_9, sec_9, num_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_10 = 0, sec_10 = 125, num_10 = 1087654321;
+    try
+    {
+        StrangeTriples(first_10, sec_10, num_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_11 = -10, sec_11 = 125, num_11 = 1187654321;
+    try
+    {
+        StrangeTriples(first_11, sec_11, num_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_12 = 10, sec_12 = 1250, num_12 = 1287654321;
+    try
+    {
+        StrangeTriples(first_12, sec_12, num_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_13 = 10, sec_13 = 0, num_13 = 1387654321;
+    try
+    {
+        StrangeTriples(first_13, sec_13, num_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_14 = 10, sec_14 = -5, num_14 = 1487654321;
+    try
+    {
+        StrangeTriples(first_14, sec_14, num_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_15 = 10, sec_15 = 5, num_15 = -1587654321;
+    try
+    {
+        StrangeTriples(first_15, sec_15, num_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_16 = 10, sec_16 = 5, num_16 = 0;
+    try
+    {
+        StrangeTriples(first_16, sec_16, num_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int first_17 = 10, sec_17 = 5, num_17 = 1000000011;
+    try
+    {
+        StrangeTriples(first_17, sec_17, num_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All tests passed."<<std::endl;
 }
