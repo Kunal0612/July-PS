@@ -1,0 +1,143 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <bitset>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+
+template <int len = 1>
+void SubsetSum(int num_nodes, std::vector<long long>& brr, long long& closest) {
+    if (num_nodes >= len) {
+        SubsetSum<std::min(len * 2, 1000000)>(num_nodes, brr, closest);
+        return;
+    }
+    
+    std::bitset<len> dp_table;
+    
+    dp_table[0] = 1;
+    for (long long xec: brr) {
+        dp_table = dp_table | (dp_table << xec);
+    }
+    
+    long long cev = num_nodes;
+    closest = 0;
+    for (int i = 0; i <= num_nodes; i++) {
+        if (dp_table[i] && std::abs(i - (num_nodes - i)) < cev) {
+            closest = i;
+            cev = std::abs(i - (num_nodes - i));
+        }
+    }
+}
+
+long long Solve(std::vector<long long>& arr) {
+    if (arr.empty()) return 0;
+    
+    std::sort(arr.begin(), arr.end(),std::greater<long long> ());
+    long long cst = 0;
+    for (long long xec: arr){
+        cst += xec;
+    }
+    
+    if (arr[0] * 2 >= cst) {
+        return arr[0];
+    }
+    
+    int num_nodes = arr.size();
+    arr.push_back(0);
+    
+    std::vector<long long> brr;
+    int pii = 0;
+    for (int i = 1; i <= num_nodes; i++) {
+        if (arr[i] != arr[i - 1]) {
+            long long cnt = i - pii;
+            long long xec = arr[i - 1];
+            
+            long long j = 1;
+            while (j < cnt) {
+                brr.push_back(xec * j);
+                cnt -= j;
+                j *= 2;
+            }            
+            brr.push_back(xec * cnt);
+
+            pii = i;
+        }
+    }
+    
+    long long closest = 0;
+    SubsetSum(cst, brr, closest);
+    return closest;
+}
+
+void dfs(int srt, const std::vector<std::vector<int>>& adj, std::vector<int>& sum, long long& ans) {
+    std::vector<long long> arr;
+    sum[srt] = 1;
+    
+    for (int u: adj[srt]) {
+        if (u == -1) continue;
+        dfs(u, adj, sum, ans);
+        sum[srt] += sum[u];
+        
+        arr.push_back(sum[u]);
+    }
+    
+    long long xec = Solve(arr);
+    ans += xec * (sum[srt] - 1 - xec);
+    arr.clear();
+}
+
+/*
+Input :
+
+An integer num_nodes.
+A vector of integers parent.
+
+Constraints :
+
+num_nodes : ranges from 2 to 10^6.
+parent.size() : has a size of num_nodes - 1
+parent[i] : ranges from 1 to i-1. 
+
+*/
+
+
+long long int PermuTree(int num_nodes,std::vector<int> &parent){
+    if(num_nodes<2 or num_nodes>1000000){
+        throw std::invalid_argument("Invalid number of nodes");
+    }
+    std::vector<std::vector<int>> adj(num_nodes);
+    std::vector<int> sum(num_nodes);
+    long long ans = 0;
+    for (int i = 1; i < num_nodes; i++) {
+        if(parent[i-1]>i){
+            throw std::invalid_argument("Invalid parent");
+        }
+        adj[parent[i-1] - 1].push_back(i);
+    }
+    dfs(0, adj, sum, ans);
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <bitset>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    std::ios::sync_with_stdio(0); std::cin.tie(0);
+    int num_nodes;
+    std::cin >> num_nodes;
+    std::vector<int> parent;
+    for (int i = 1; i < num_nodes; i++) {
+        int xec;
+        std::cin >> xec;
+        parent.push_back(xec);
+    }
+    std::cout << PermuTree(num_nodes,parent) << std::endl;
+}
