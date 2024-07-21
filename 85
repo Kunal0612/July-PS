@@ -1,0 +1,116 @@
+// https://codeforces.com/problemset/problem/924/E
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+
+struct Box {
+    int height;
+    int temperature;
+};
+
+inline bool operator<(const Box &first, const Box &sec) {
+    if (first.temperature != sec.temperature) {
+        return first.temperature < sec.temperature;
+    }
+    return first.height > sec.height;
+}
+
+/*
+Input :
+
+An integer len.
+An integer left_range.
+An integer right_range.
+A vector of integers height.
+A vector of integers temperatures.
+
+Constraints :
+
+len : ranges from 1 to 10000.
+left_range : ranges from 0 to right_range.
+right_range : ranges from left_range to 10000.
+height.size(),temperatures.size() : has len size
+height : ranges from 1 to 10000.
+temperatures : ranges from 0 to 1.
+
+*/
+
+
+int Wardrobe(int len,int left_range,int right_range,
+std::vector<int> height,std::vector<int> temperatures){
+    if (len < 1 || len > 10000){
+        throw std::invalid_argument("Invalid number of elements");
+    }
+    if (left_range < 0 || right_range > 10000 || left_range > right_range){
+        throw std::invalid_argument("Invalid range for l and r");
+    }
+    if (height.size() != len || temperatures.size() != len){
+        throw std::invalid_argument("Mismatch in number of elements for heights or temperatures");
+    }
+    int totalHeight = 0;
+    for (int& it : height) {
+        if (it < 1 || it > 10000){
+            throw std::invalid_argument("Invalid height value");
+        }
+        totalHeight += it;
+    }
+    if (totalHeight > 10000){
+        throw std::invalid_argument("Total height exceeds limit");
+    }
+    for (int& temperature : temperatures) {
+        if (temperature < 0 || temperature > 1){
+            throw std::invalid_argument("Invalid temperature value");
+        }
+    }
+    std::vector<Box> boxes(len);
+    totalHeight = 0;
+
+    for (int i = 0; i < len; i++) {
+        boxes[i].height=height[i];
+        totalHeight += boxes[i].height;
+    }
+
+    std::tie(left_range, right_range) = std::pair<int, int>{totalHeight - right_range, totalHeight - left_range};
+
+    for (int i = 0; i < len; i++) {
+        boxes[i].temperature=temperatures[i];
+    }
+
+    std::sort(boxes.begin(), boxes.end());
+
+    std::vector<int> answer(totalHeight + 1, 1e9);
+    answer[0] = 0;
+
+    for (struct Box& box : boxes) {
+        for (int currentHeight = totalHeight - box.height; currentHeight >= 0; currentHeight--) {
+            answer[currentHeight + box.height] = std::max(
+                answer[currentHeight + box.height], 
+                answer[currentHeight] + box.temperature * (currentHeight + box.height >= left_range && currentHeight + box.height <= right_range)
+            );
+        }
+    }
+
+    int ans=*std::max_element(answer.begin(), answer.end());
+    return ans;
+}
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    
+    return 0;
+}
