@@ -1,5 +1,70 @@
-// https://codeforces.com/problemset/problem/1142/D
+/*
 
+https://codeforces.com/problemset/problem/1142/D
+
+Write a C++ Solution Double Foreigner to determine the count the 
+total number of substrings in the string str that qualify as inadequate numbers according to the given criteria.
+
+You're traveling, and you suspect shop owners might inflate 
+prices for tourists. You've identified specific criteria for "inadequate" prices:
+
+Single Digits: All single digits (1 to 9) are inadequate.
+
+Multi-Digit Rule: For a number x (greater than or equal to 10), 
+it's inadequate only if:
+
+The integer obtained by rounding down x by dividing by 10 
+(denoted by ⌊x/10⌋) is inadequate based on the single-digit rule.
+
+The last digit of x is strictly less than the remainder 
+when dividing the order (k) of the inadequate number ⌊x/10⌋ by 11.
+
+Example:
+
+4 is the 4th inadequate number (single digits come first).
+Therefore, numbers 40, 41, 42, and 43 are inadequate because 
+their last digits are less than the remainder (4) when dividing k (4) by 11. 
+Numbers 44 and above (up to 49) are not inadequate.
+
+The Challenge:
+
+Unfortunately, you noted down all the prices in a single 
+string str without any separators between individual prices. 
+Your task is to determine the total number of substrings 
+within str that represent inadequate numbers based on the defined criteria.
+
+Counting Occurrences:
+
+If a substring representing an inadequate number appears 
+multiple times at different positions in str, 
+each occurrence should be counted towards the final result.
+
+Objective:
+
+Develop an algorithm to count the total number of substrings 
+in the string str that qualify as inadequate numbers according 
+to the given criteria.
+
+Input :
+
+A string str.
+
+Constraints :
+
+str.size() : ranges from 1 to 100000.
+str : contains only digits , first digit of str is not zero.
+
+Output:
+
+An integer ans to determine to the determine the count the total 
+number of substrings in the string s that qualify as inadequate 
+numbers according to the given criteria.
+ 
+
+Use appropriate Error Handling using the stdexcept library 
+for the invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -9,15 +74,6 @@
 
 
 
-/*
-Input :
-A string str.
-
-Constraints :
-str.size() : ranges from 1 to 100000.
-str : contains only digits , first digit of str is not zero.
-
-*/
 
 int Calculate(int first, int sec) {
     return (first * (first - 1) / 2 + 10 + sec) % 11;
@@ -61,16 +117,122 @@ long long Foreigner(const std::string& str) {
 #include <stdexcept>
 
 int main() {
-    std::ios::sync_with_stdio(false);
-    std::cin.tie(nullptr);
-    std::cout.tie(nullptr);
+    // TEST
+    std::string str_1 = "116285317";
+    int val_1 = 8;
+    int expected_1 = 15;
+    int result_1 = Foreigner(str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
-    std::string str;
-    std::cin >> str;
+    // TEST
+    std::string str_2 = "123456789";
+    int expected_2 = 9;
+    int result_2 = Foreigner(str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
 
-    long long result = Foreigner(str);
-    
-    std::cout << '\n' << result << '\n';
-    
+    // TEST
+    std::string str_3 = "987654321";
+    int expected_3 = 25;
+    int result_3 = Foreigner(str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "1111111111";
+    int expected_4 = 10;
+    int result_4 = Foreigner(str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "3141592653";
+    int expected_5 = 17;
+    int result_5 = Foreigner(str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "2222222222";
+    int expected_6 = 10;
+    int result_6 = Foreigner(str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "9988776655";
+    int expected_7 = 17;
+    int result_7 = Foreigner(str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "1234512345";
+    int expected_8 = 12;
+    int result_8 = Foreigner(str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // // TEST
+    std::string str_9 = "";
+    try
+    {
+        Foreigner(str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 =std::string(200001,'1');
+    try
+    {
+        Foreigner(str_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 =std::string(200,'a');
+    try
+    {
+        Foreigner(str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_12 =std::string(200,'0');
+    try
+    {
+        Foreigner(str_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_13 =std::string(2,'0');
+    try
+    {
+        Foreigner(str_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
     return 0;
 }
