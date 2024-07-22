@@ -1,0 +1,41 @@
+https://codeforces.com/contest/1373/problem/F
+
+Write a C++ Solution PermuTree to find if the designed stations can meet the needs of all cities return 1 if 
+it can meet the needs, or return 0.
+
+The government of Berland decided to improve network coverage in his country. Berland has a unique structure: 
+the capital in the center and n
+cities in a circle around the capital. The capital already has a good network coverage (so the government ignores it), 
+but the i-th city contains household_i
+households that require a connection.
+
+The government designed a plan to build len network stations between all pairs of neighboring 
+cities which will maintain connections only for these cities. In other words, the i-th network 
+station will provide service only for the i-th and the (i+1)-th city (the len-th station is 
+connected to the len-th and the 1-st city).
+
+All network stations have capacities: the i-th station can provide the connection to at most 
+capacities_i households.
+
+Now the government asks you to check can the designed stations meet the needs of all 
+cities or not — that is, is it possible to assign each household a network station so 
+that each network station i provides the connection to at most capacities_i households
+
+
+Input :
+
+A integer len.
+A vector of integers household.
+A vector of integers capacities
+
+Constraints :
+
+len : ranges from 2 to 10^6.
+household : ranges from 1 to 10^9.
+capacities : ranges from 1 to 10^9.
+
+Output:
+
+An integer ans to find if the designed stations can meet the needs of all cities return 1 if it can meet the needs, or return 0.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
