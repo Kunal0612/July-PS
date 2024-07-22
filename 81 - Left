@@ -1,4 +1,44 @@
-// https://codeforces.com/problemset/problem/1856/E2
+/*
+
+https://codeforces.com/problemset/problem/1856/E2
+
+Write a C++ Solution PermuTree to find the maximum possible value of f(a) over all 
+permutations a of length num_nodes.
+
+You are given a tree with num_nodes vertices rooted at vertex 1.
+
+For some permutation† a of length num_nodes , let f(a) be the number of 
+pairs of vertices (u,v) such that a[u]<a[lca(u,v)]<a[v] . Here, lca(u,v)
+denotes the lowest common ancestor of vertices u and v.
+
+Find the maximum possible value of f(a) over all permutations a of length num_nodes.
+
+†A permutation of length n is an array consisting of n distinct integers from 1 to 
+n in arbitrary order. For example, [2,3,1,5,4] is a permutation, but [1,2,2]
+is not a permutation (2 appears twice in the array), and [1,3,4] is also not a 
+permutation (n=3 but there is 4 in the array).
+
+
+Input :
+
+An integer num_nodes.
+A vector of integers parent.
+
+Constraints :
+
+num_nodes : ranges from 2 to 10^6.
+parent.size() : has a size of num_nodes - 1
+parent[i] : ranges from 1 to i-1. 
+
+Output:
+
+An integer ans to find the maximum possible value of f(a) over all 
+permutations a of length num_nodes.
+
+Use appropriate Error Handling using the stdexcept library for 
+the invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -73,13 +113,13 @@ long long Solve(std::vector<long long>& arr) {
     return closest;
 }
 
-void dfs(int srt, const std::vector<std::vector<int>>& adj, std::vector<int>& sum, long long& ans) {
+void DFS(int srt, const std::vector<std::vector<int>>& adj, std::vector<int>& sum, long long& ans) {
     std::vector<long long> arr;
     sum[srt] = 1;
     
     for (int u: adj[srt]) {
         if (u == -1) continue;
-        dfs(u, adj, sum, ans);
+        DFS(u, adj, sum, ans);
         sum[srt] += sum[u];
         
         arr.push_back(sum[u]);
@@ -90,35 +130,22 @@ void dfs(int srt, const std::vector<std::vector<int>>& adj, std::vector<int>& su
     arr.clear();
 }
 
-/*
-Input :
-
-An integer num_nodes.
-A vector of integers parent.
-
-Constraints :
-
-num_nodes : ranges from 2 to 10^6.
-parent.size() : has a size of num_nodes - 1
-parent[i] : ranges from 1 to i-1. 
-
-*/
 
 
 long long int PermuTree(int num_nodes,std::vector<int> &parent){
-    if(num_nodes<2 or num_nodes>1000000){
+    if(num_nodes<2 or num_nodes>1000000 or parent.size()+1!=num_nodes){
         throw std::invalid_argument("Invalid number of nodes");
     }
     std::vector<std::vector<int>> adj(num_nodes);
     std::vector<int> sum(num_nodes);
     long long ans = 0;
     for (int i = 1; i < num_nodes; i++) {
-        if(parent[i-1]>i){
+        if(parent[i-1]>i or parent[i-1]<1){
             throw std::invalid_argument("Invalid parent");
         }
         adj[parent[i-1] - 1].push_back(i);
     }
-    dfs(0, adj, sum, ans);
+    DFS(0, adj, sum, ans);
     return ans;
 }
 
@@ -131,15 +158,142 @@ long long int PermuTree(int num_nodes,std::vector<int> &parent){
 #include <stdexcept>
 
 
-int main() {
-    std::ios::sync_with_stdio(0); std::cin.tie(0);
-    int num_nodes;
-    std::cin >> num_nodes;
-    std::vector<int> parent;
-    for (int i = 1; i < num_nodes; i++) {
-        int xec;
-        std::cin >> xec;
-        parent.push_back(xec);
+int main()
+{
+    // TEST
+    std::vector<int> parent_1 = {1,1,3,3};
+    int num_nodes_1=5;
+    int expected_1 = 4;
+    int result_1 = PermuTree(num_nodes_1,parent_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_2 = {1,1,2,2};
+    int num_nodes_2=5;
+    int expected_2 =4;
+    int result_2 = PermuTree(num_nodes_2,parent_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_3 = {1,1,2,2,3};
+    int num_nodes_3=6;
+    int expected_3 =7;
+    int result_3 = PermuTree(num_nodes_3,parent_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_4 = {1,1,2,2,3,3};
+    int num_nodes_4=7;
+    int expected_4 =11;
+    int result_4 = PermuTree(num_nodes_4,parent_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_5 = {1,1,2};
+    int num_nodes_5=4;
+    int expected_5 =2;
+    int result_5 = PermuTree(num_nodes_5,parent_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_6 = {1,1,2,2,3,3,4};
+    int num_nodes_6=8;
+    int expected_6 =15;
+    int result_6 = PermuTree(num_nodes_6,parent_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_7 = {1,2,2};
+    int num_nodes_7=4;
+    int expected_7 =1;
+    int result_7 = PermuTree(num_nodes_7,parent_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_8 = {1,2,2,3,3};
+    int num_nodes_8=6;
+    int expected_8 =4;
+    int result_8 = PermuTree(num_nodes_8,parent_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_9 = {-1,1,0,0};
+    int num_nodes_9=2;
+    try
+    {
+        PermuTree(num_nodes_9,parent_9);
+        assert(false);
     }
-    std::cout << PermuTree(num_nodes,parent) << std::endl;
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_10 = {};
+    int num_nodes_10=2;
+    try
+    {
+        PermuTree(num_nodes_10,parent_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_11(1000005,5);
+    int num_nodes_11=2;
+    try
+    {
+        PermuTree(num_nodes_11,parent_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_12 = {};
+    int num_nodes_12=2;
+    try
+    {
+        PermuTree(num_nodes_12,parent_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_13 = {-1,1,-1,0,0};
+    int num_nodes_13=10;
+    try
+    {
+        PermuTree(num_nodes_13,parent_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_14 = {-1,1,-1,0,0};
+    int num_nodes_14=-1;
+    try
+    {
+        PermuTree(num_nodes_14,parent_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
 }
