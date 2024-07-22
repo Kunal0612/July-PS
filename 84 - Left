@@ -1,15 +1,29 @@
-// https://codeforces.com/problemset/problem/717/B
-
-#include <iostream>
-#include <map>
-#include <queue>
-#include <vector>
-#include <cassert>
-#include <stdexcept>
-
-
-
 /*
+
+https://codeforces.com/problemset/problem/717/B
+
+Write a C++ Solution SummerAdventure to determine the minimum possible total a cost of the whole alphabet.
+
+R3D3 spent some time on an internship in MDCS. After 
+earning enough money, he decided to go on a holiday 
+somewhere far, far away. He enjoyed suntanning, drinking 
+alcohol-free cocktails and going to concerts of popular local bands. 
+While listening to "The White Buttons" and their hit song "Dacan the Baker", 
+he met another robot for whom he was sure is the love of his life. Well, his 
+summer, at least. Anyway, R3D3 was too shy to approach his potential soulmate, 
+so he decided to write her a love letter. However, he stumbled upon a problem. 
+Due to a terrorist threat, the Intergalactic Space Police was monitoring all 
+letters sent in the area. Thus, R3D3 decided to invent his own alphabet, 
+for which he was sure his love would be able to decipher.
+
+There are num_letters letters in R3D3’s alphabet, and he wants to represent each letter
+as a sequence of '0' and '1', so that no letter’s sequence is a prefix of another letter's sequence. Since the Intergalactic Space Communications Service has lately introduced a tax for invented alphabets, R3D3 must pay a certain amount of money for each bit in his alphabet’s code (check the sample test for clarifications). He is too lovestruck to think clearly, so he asked you for help.
+
+Given the costs cost_a and cost_b 
+for each '0' and '1' in R3D3’s alphabet, respectively, 
+you should come up with a coding for the alphabet (with properties as above) with minimum total cost.
+
+
 Input :
 
 A long long integer num_letters.
@@ -22,11 +36,26 @@ num_letters : ranges from 2 to 10^8.
 cost_a : ranges from 0 to 10^18.
 cost_b : ranges from 0 to 10^18.
 
+Output:
+
+An long long integer ans to determine the minimum possible total a cost of the whole alphabet.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
 
 
 */
 
-int SummerAdventure(long long num_letters,long long cost_a,long long cost_b){
+
+#include <iostream>
+#include <map>
+#include <queue>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+
+
+long long int SummerAdventure(long long num_letters,long long cost_a,long long cost_b){
     if(num_letters<2 or num_letters>100000000){
          throw std::invalid_argument("Invalid number of letters");
     }
@@ -84,13 +113,168 @@ int SummerAdventure(long long num_letters,long long cost_a,long long cost_b){
 
 
 int main() {
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(0);
-    std::cout.tie(0);
+    // TEST
+    long long int num_letters_1 = 10, cost_a_1 = 10, cost_b_1 = 100;
+    long long int expected_1 = 1350;
+    long long int result_1 = SummerAdventure(num_letters_1, cost_a_1, cost_b_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
-    long long num_letters, cost_a, cost_b;
-    std::cin >> num_letters >> cost_a >> cost_b;
-    long long answer=SummerAdventure(num_letters, cost_a, cost_b);
-    std::cout << answer << std::endl;
-    return 0;
+    // TEST
+    long long int num_letters_2 = 4, cost_a_2 = 1, cost_b_2 = 1;
+    long long int expected_2 = 8;
+    long long int result_2 = SummerAdventure(num_letters_2, cost_a_2, cost_b_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    long long int num_letters_3 = 2, cost_a_3 = 2, cost_b_3 = 10;
+    long long int expected_3 = 12;
+    long long int result_3 = SummerAdventure(num_letters_3, cost_a_3, cost_b_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    long long int num_letters_4 = 5, cost_a_4 = 6, cost_b_4 = 10;
+    long long int expected_4 = 92;
+    long long int result_4 = SummerAdventure(num_letters_4, cost_a_4, cost_b_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    long long int num_letters_5 = 99, cost_a_5 = 100, cost_b_5 = 999;
+    long long int expected_5 = 261621;
+    long long int result_5 = SummerAdventure(num_letters_5, cost_a_5, cost_b_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    long long int num_letters_6 = 123, cost_a_6 = 60, cost_b_6 = 123456789;
+    long long int expected_6 = 15062178438;
+    long long int result_6 = SummerAdventure(num_letters_6, cost_a_6, cost_b_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    long long int num_letters_7 = 222, cost_a_7 = 33, cost_b_7 = 444444444;
+    long long int expected_7 = 98223031647;
+    long long int result_7 = SummerAdventure(num_letters_7, cost_a_7, cost_b_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    long long int num_letters_8 = 543, cost_a_8 = 125, cost_b_8 = 987654321;
+    long long int expected_8 = 535327036107;
+    long long int result_8 = SummerAdventure(num_letters_8, cost_a_8, cost_b_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    long long int num_letters_9 = 5430000000, cost_a_9 = 125, cost_b_9 = 987654321;
+    try
+    {
+        SummerAdventure(num_letters_9, cost_a_9, cost_b_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_10 = 0, cost_a_10 = 125, cost_b_10 = 1087654321;
+    try
+    {
+        SummerAdventure(num_letters_10, cost_a_10, cost_b_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_11 = -10, cost_a_11 = 125, cost_b_11 = 1187654321;
+    try
+    {
+        SummerAdventure(num_letters_11, cost_a_11, cost_b_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_12 = 10, cost_a_12 = 1250000000000000000, cost_b_12 = 1287654321;
+    try
+    {
+        SummerAdventure(num_letters_12, cost_a_12, cost_b_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_13 = 10, cost_a_13 = -1, cost_b_13 = 1387654321;
+    try
+    {
+        SummerAdventure(num_letters_13, cost_a_13, cost_b_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_14 = 10, cost_a_14 = -5, cost_b_14 = 1250000000000000000;
+    try
+    {
+        SummerAdventure(num_letters_14, cost_a_14, cost_b_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_15 = 10, cost_a_15 = 5, cost_b_15 = -1587654321;
+    try
+    {
+        SummerAdventure(num_letters_15, cost_a_15, cost_b_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_16 = -10, cost_a_16 = 5, cost_b_16 = 0;
+    try
+    {
+        SummerAdventure(num_letters_16, cost_a_16, cost_b_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int num_letters_17 = 10, cost_a_17 = 5, cost_b_17 = -1000000011;
+    try
+    {
+        SummerAdventure(num_letters_17, cost_a_17, cost_b_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All tests passed."<<std::endl;
 }
