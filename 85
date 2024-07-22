@@ -1,0 +1,401 @@
+/*
+
+https://codeforces.com/problemset/problem/924/E
+
+Write a C++ Solution Wardrobe to determine the maximum possible convenience of the wardrobe.
+
+Olya wants a custom wardrobe with len boxes of various heights (height_1, height_2, ..., height_n).
+These boxes will be stacked vertically without overlapping.
+
+Box Importance:
+
+Each box has an importance level indicated by importance_i (1 for important, 0 for not important).
+
+Convenience Definition:
+
+Olya defines the wardrobe's "convenience" as the number of important boxes where
+the bottom edge of the box lies strictly between a specific height range [left_range, right_range].
+The top edge of the box can be at height r or even exceed it.
+
+The Challenge:
+
+Olya wants to maximize the convenience of her wardrobe. You are tasked with determining the maximum achievable convenience by rearranging the boxes in any order.
+
+
+Input :
+
+An integer len.
+An integer left_range.
+An integer right_range.
+A vector of integers height.
+A vector of integers importance.
+
+Constraints :
+
+len : ranges from 1 to 10000.
+left_range : ranges from 0 to right_range.
+right_range : ranges from left_range to 10000.
+height.size(),importance.size() : has len size
+height : ranges from 1 to 10000.
+importance : ranges from 0 to 1.
+
+Output:
+
+An integer ans to determine the maximum possible convenience of the wardrobe.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+struct Box
+{
+    int height;
+    int temperature;
+};
+
+inline bool operator<(const Box &first, const Box &sec)
+{
+    if (first.temperature != sec.temperature)
+    {
+        return first.temperature < sec.temperature;
+    }
+    return first.height > sec.height;
+}
+
+int Wardrobe(int len, int left_range, int right_range, std::vector<int> height, std::vector<int> importance)
+{
+    if (len < 1 || len > 10000)
+    {
+        throw std::invalid_argument("Invalid number of elements");
+    }
+    if (left_range < 0 || right_range > 10000 || left_range > right_range)
+    {
+        throw std::invalid_argument("Invalid range for l and r");
+    }
+    if (height.size() != len || importance.size() != len)
+    {
+        throw std::invalid_argument("Mismatch in number of elements for heights or importance");
+    }
+    int totalHeight = 0;
+    for (int &it : height)
+    {
+        if (it < 1 || it > 10000)
+        {
+            throw std::invalid_argument("Invalid height value");
+        }
+        totalHeight += it;
+    }
+    if (totalHeight > 10000)
+    {
+        throw std::invalid_argument("Total height exceeds limit");
+    }
+    for (int &temperature : importance)
+    {
+        if (temperature < 0 || temperature > 1)
+        {
+            throw std::invalid_argument("Invalid temperature value");
+        }
+    }
+    std::vector<Box> boxes(len);
+    totalHeight = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        boxes[i].height = height[i];
+        totalHeight += boxes[i].height;
+    }
+
+    std::tie(left_range, right_range) = std::pair<int, int>{totalHeight - right_range, totalHeight - left_range};
+
+    for (int i = 0; i < len; i++)
+    {
+        boxes[i].temperature = importance[i];
+    }
+
+    std::sort(boxes.begin(), boxes.end());
+
+    std::vector<int> answer(totalHeight + 1, -1e9);
+    answer[0] = 0;
+
+    for (struct Box &box : boxes)
+    {
+        for (int currentHeight = totalHeight - box.height; currentHeight >= 0; currentHeight--)
+        {
+            answer[currentHeight + box.height] = std::max(
+                answer[currentHeight + box.height],
+                answer[currentHeight] + box.temperature * (currentHeight + box.height >= left_range && currentHeight + box.height <= right_range));
+        }
+    }
+
+    int ans = *std::max_element(answer.begin(), answer.end());
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+#include <climits>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    int len_1 = 5, left_range_1 = 3, right_range_1 = 6;
+    std::vector<int> heights_1 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_1 = {1, 1, 0, 1, 0};
+    int expected_1 = 2;
+    int result_1 = Wardrobe(len_1, left_range_1, right_range_1, heights_1, importance_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int len_2 = 3, left_range_2 = 1, right_range_2 = 4;
+    std::vector<int> heights_2 = {1, 2, 3};
+    std::vector<int> importance_2 = {0, 1, 0};
+    int expected_2 = 1;
+    int result_2 = Wardrobe(len_2, left_range_2, right_range_2, heights_2, importance_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int len_3 = 6, left_range_3 = 2, right_range_3 = 5;
+    std::vector<int> heights_3 = {5, 4, 3, 2, 1, 6};
+    std::vector<int> importance_3 = {1, 1, 1, 1, 1, 1};
+    int expected_3 = 2;
+    int result_3 = Wardrobe(len_3, left_range_3, right_range_3, heights_3, importance_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int len_4 = 4, left_range_4 = 1, right_range_4 = 7;
+    std::vector<int> heights_4 = {6, 2, 4, 3};
+    std::vector<int> importance_4 = {0, 0, 1, 0};
+    int expected_4 = 1;
+    int result_4 = Wardrobe(len_4, left_range_4, right_range_4, heights_4, importance_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int len_5 = 8, left_range_5 = 1, right_range_5 = 9;
+    std::vector<int> heights_5 = {5, 4, 3, 2, 1, 6, 7, 8};
+    std::vector<int> importance_5 = {1, 0, 1, 0, 1, 0, 1, 0};
+    int expected_5 = 3;
+    int result_5 = Wardrobe(len_5, left_range_5, right_range_5, heights_5, importance_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int len_6 = 7, left_range_6 = 0, right_range_6 = 5;
+    std::vector<int> heights_6 = {7, 6, 5, 4, 3, 2, 1};
+    std::vector<int> importance_6 = {1, 1, 1, 1, 1, 1, 1};
+    int expected_6 = 3;
+    int result_6 = Wardrobe(len_6, left_range_6, right_range_6, heights_6, importance_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int len_7 = 10, left_range_7 = 1, right_range_7 = 10;
+    std::vector<int> heights_7 = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    std::vector<int> importance_7 = {1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+    int expected_7 = 2;
+    int result_7 = Wardrobe(len_7, left_range_7, right_range_7, heights_7, importance_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int len_8 = 3, left_range_8 = 2, right_range_8 = 4;
+    std::vector<int> heights_8 = {3, 3, 3};
+    std::vector<int> importance_8 = {0, 0, 0};
+    int expected_8 = 0;
+    int result_8 = Wardrobe(len_8, left_range_8, right_range_8, heights_8, importance_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int len_9 = 0, left_range_9 = 3, right_range_9 = 6;
+    std::vector<int> heights_9 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_9 = {1, 1, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_9, left_range_9, right_range_9, heights_9, importance_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_10 = 5, left_range_10 = -1, right_range_10 = 6;
+    std::vector<int> heights_10 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_10 = {1, 1, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_10, left_range_10, right_range_10, heights_10, importance_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_11 = 5, left_range_11 = 3, right_range_11 = 10001;
+    std::vector<int> heights_11 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_11 = {1, 1, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_11, left_range_11, right_range_11, heights_11, importance_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_12 = 5, left_range_12 = 6, right_range_12 = 3;
+    std::vector<int> heights_12 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_12 = {1, 1, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_12, left_range_12, right_range_12, heights_12, importance_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_13 = 5, left_range_13 = 3, right_range_13 = 6;
+    std::vector<int> heights_13 = {3, 2, 5, 1, 2, 4};
+    std::vector<int> importance_13 = {1, 1, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_13, left_range_13, right_range_13, heights_13, importance_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_14 = 5, left_range_14 = 3, right_range_14 = 6;
+    std::vector<int> heights_14 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_14 = {1, 1, 0, 1};
+    try
+    {
+        Wardrobe(len_14, left_range_14, right_range_14, heights_14, importance_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_15 = 5, left_range_15 = 3, right_range_15 = 6;
+    std::vector<int> heights_15 = {3, 2, 10001, 1, 2};
+    std::vector<int> importance_15 = {1, 1, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_15, left_range_15, right_range_15, heights_15, importance_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int len_16 = 5, left_range_16 = 3, right_range_16 = 6;
+    std::vector<int> heights_16 = {3, 2, 5, 1, 2};
+    std::vector<int> importance_16 = {1, 2, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_16, left_range_16, right_range_16, heights_16, importance_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_17 = 5, left_range_17 = 3, right_range_17 = 6;
+    std::vector<int> heights_17 = {-1, 2, 5, 1, 2};
+    std::vector<int> importance_17 = {1, 2, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_17, left_range_17, right_range_17, heights_17, importance_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_18 = 5, left_range_18 = 3, right_range_18 = 6;
+    std::vector<int> heights_18 = {100000, 2, 5, 1, 2};
+    std::vector<int> importance_18 = {1, 0, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_18, left_range_18, right_range_18, heights_18, importance_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_19 = 1000005, left_range_19 = 3, right_range_19 = 6;
+    std::vector<int> heights_19 = {1, 2, 5, 1, 2};
+    std::vector<int> importance_19 = {1, 0, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_19, left_range_19, right_range_19, heights_19, importance_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int len_20 = 15, left_range_20 = 3, right_range_20 = 6;
+    std::vector<int> heights_20 = {1, 2, 5, 1, 2};
+    std::vector<int> importance_20 = {-1, 0, 0, 1, 0};
+    try
+    {
+        Wardrobe(len_20, left_range_20, right_range_20, heights_20, importance_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All tests passed" << std::endl;
+    return 0;
+}
