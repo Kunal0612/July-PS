@@ -1,0 +1,136 @@
+// https://codeforces.com/problemset/problem/1491/G
+
+
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <set>
+#include <cassert>
+#include <stdexcept>
+
+void Cswap(int idx, int jdx, std::vector<int>& arr, std::vector<std::pair<long long, long long>>& ans) {
+    std::swap(arr[idx], arr[jdx]);
+    arr[idx] = -arr[idx], arr[jdx] = -arr[jdx];
+    ans.push_back(std::make_pair(idx, jdx));
+}
+
+void swap_cyc(int idx, int jdx, std::vector<int>& arr, std::vector<bool>& vis, std::vector<std::pair<long long, long long>>& ans) {
+    Cswap(idx, jdx, arr, ans);
+    
+    int curr = idx;
+    while (arr[-arr[curr]] > 0) {
+        Cswap(curr, -arr[curr], arr, ans);
+    }
+    
+    curr = -arr[curr];
+    while (arr[-arr[curr]] > 0) {
+        Cswap(curr, -arr[curr], arr, ans);
+    }
+    
+    Cswap(curr, -arr[curr], arr, ans);
+}
+
+/*
+Input :
+
+A vector of integers coins.
+
+Constraints :
+
+coins.size() : ranges from 3 to 200000.
+coins : ranges from 1 to coins.size() , all coins must be unique.
+
+*/
+
+
+
+void SwitchAndFlip(std::vector<int> &coins){
+
+    int len=coins.size();
+    if (coins.size() < 3 || coins.size() > 200000) {
+        throw std::invalid_argument("Invalid number of coins. len must be between 3 and 200000.");
+    }
+    std::set<int> unique_nums;
+    for (int coin : coins) {
+        if (coin < 1 || coin > len) {
+            throw std::invalid_argument("Coin value out of range. Each coin value must be between 1 and len.");
+        }
+        if (unique_nums.count(coin)) {
+            throw std::invalid_argument("Duplicate coin value found. All coin values must be unique.");
+        }
+        unique_nums.insert(coin);
+    }
+    std::vector<int> arr(len + 1);
+    std::vector<bool> vis(len + 1, false);
+    std::vector<std::pair<long long, long long>> ans;
+
+    for (int x = 1; x <= len; ++x) {
+        arr[x]=coins[x-1];
+    }
+    int p_idx = -1;
+    
+    for (int x = 1; x <= len; ++x) {
+        if (!vis[x]) {
+            if (arr[x] == x){
+                continue;
+            }
+            int curr = x;
+            do {
+                vis[curr] = true;
+                curr = arr[curr];
+            } while (curr != x);
+        
+            if (p_idx == -1){
+                p_idx = x;
+            }
+            else {
+                swap_cyc(p_idx, x, arr, vis, ans);
+                p_idx = -1;
+            }
+        }
+    }
+    
+    if (p_idx != -1) {
+        bool can = false;
+        for (int x = 1; x <= len; ++x) {
+            if (arr[x] == x) {
+                swap_cyc(p_idx, x, arr, vis, ans);
+                can = true;
+                break;
+            }
+        }
+        
+        if (!can) {
+            int tr_1 = arr[p_idx], tr_2 = arr[arr[p_idx]];
+            Cswap(p_idx, tr_1, arr, ans);
+            swap_cyc(tr_1, tr_2, arr, vis, ans);
+        }
+    }
+    
+    std::cout << ans.size() << std::endl;
+    for (const auto& it : ans) std::cout << it.first << " " << it.second << std::endl;
+}
+
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <set>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    int len;
+    std::cin>>len;
+    std::vector<int> coins(len);
+    for(int idx = 0; idx < len; idx++){
+        std::cin>>coins[idx];
+    }
+    SwitchAndFlip(coins);
+}
