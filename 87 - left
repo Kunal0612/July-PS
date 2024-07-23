@@ -1,0 +1,82 @@
+// https://codeforces.com/problemset/problem/1453/F
+
+
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <set>
+#include <cassert>
+#include <stdexcept>
+
+
+
+/*
+// take inf as 3000
+
+Input :
+
+A vector of integers platforms.
+
+Constraints :
+
+platform.size() : ranges from 2 to 3000.
+platforms : platforms[i] ranges from 0 to platform.size() - i.
+
+*/
+
+int EvenHarder(std::vector<int> platforms)
+{
+	int len=platforms.size();
+    if (len < 2 || len > 3000) {
+        throw std::invalid_argument("Invalid number of platforms. n must be between 2 and 3000.");
+    }
+
+    for (int i = 0; i < len; ++i) {
+        if (platforms[i] < 0 || platforms[i] > len - i) {
+            throw std::invalid_argument("Platform value out of range. Each platform value must be between 0 and n - i.");
+        }
+    }
+    std::vector<int> arr(len+1);
+    std::vector<std::vector<int>> dp_table(len+1,std::vector<int> (len+1));
+	for (int i = 1; i <= len; i++){
+        arr[i]=platforms[i-1];
+    }
+
+	for (int i = 2; i <= len; i++)
+	{
+		int cnt = 0;
+		for (int j = i; j <= len; j++){
+            dp_table[i][j] = 3000;
+        }
+		for (int j = i - 1; j >= 1; j--){
+            if (j + arr[j] >= i){
+                dp_table[i][j + arr[j]] = std::min(dp_table[i][j + arr[j]], dp_table[j][i - 1] + cnt++);
+            }
+        }
+		for (int j = i + 1; j <= len; j++){
+            dp_table[i][j] = std::min(dp_table[i][j], dp_table[i][j - 1]);
+        }
+	}
+    int ans=dp_table[len][len];
+	return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <set>
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+	int len;
+    std::cin>>len;
+    std::vector<int> platforms(len);
+    for(int i=0; i<len; i++){
+        std::cin>>platforms[i];
+    }
+    int ans=EvenHarder(platforms);
+    std::cout<<ans<<std::endl;
+}
