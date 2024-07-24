@@ -1,0 +1,263 @@
+/*
+
+https://codeforces.com/contest/1223/problem/G
+
+Write a C++ Solution WoodenRaft to find the maximum area of the raft you can craft.
+
+
+Suppose you are stuck on a desert island. The only way to save yourself is to 
+craft a wooden raft and go to the sea. Fortunately, you have a hand-made saw 
+and a forest nearby. Moreover, you've already cut several trees and prepared it 
+to the point that now you have len logs and the i-th log has length logs_i.
+
+The wooden raft you'd like to build has the following structure: 2 logs of length x and x logs of length y. 
+Such raft would have the area equal to x*y. 
+Both x and y must be integers since it's the only way you can measure the lengths
+while being on a desert island. 
+And both x and y must be at least 2 since the raft that is one log wide is unstable.
+
+You can cut logs in pieces but you can't merge two logs in one. What is the maximum 
+area of the raft you can craft?
+
+
+Input :
+
+A vector of integers logs.
+
+Constraints :
+
+logs : ranges from 2 to 500000.
+logs.size() : ranges from 1 to 500000.
+
+Output:
+
+An integer ans to find the maximum area of the raft you can craft.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+
+
+void Check(int first, int sec, long long& ans) {
+    if (first > 1) ans = std::max(ans, 1ll * first * sec);
+}
+
+
+
+int WoodenRaft(std::vector<int> &logs){
+    int len=logs.size();
+    if (len < 1 || len > 500000) {
+        throw std::invalid_argument("Invalid number of logs");
+    }
+    for(int i=0; i<len; i++){
+        if (logs[i] < 2 || logs[i] > 500000) {
+            throw std::invalid_argument("Invalid log length");
+        }
+    }
+    std::vector<int> arr(std::max(len + 1, 3));
+    std::map<int, int> cnt;
+    std::map<int, int> las;
+
+    for (int i = 1; i <= len; ++i) {
+        arr[i]=logs[i-1];
+        ++cnt[arr[i]];
+    }
+
+    int mxi = *std::max_element(arr.begin() + 1, arr.begin() + len + 1);
+    las[0] = -1;
+
+    for (int i = 1; i <= mxi << 1; ++i) {
+        las[i] = cnt.count(i) ? i : las[i - 1];
+        cnt[i] += cnt[i - 1];
+    }
+
+    long long ans = 0;
+
+    for (int y = 2; y <= mxi; ++y) {
+        long long tmp = 0;
+        int mxa = -1, mxb = -1;
+
+        for (int i = y - 1; i <= mxi; i += y) {
+            tmp += (i / y + 1) * (cnt[i + y] - cnt[i]);
+        }
+
+        for (int i = mxi, j = (mxi / y) * y; ~i; i = j - 1, j -= y) {
+            int xec = las[i], idx = -1;
+
+            if (las[i] > 0) {
+                if (cnt[las[i]] - cnt[las[i] - 1] > 1) {
+                    idx = las[i];
+                }
+                else {
+                    idx = las[las[i] - 1];
+                }
+            }
+
+            int kec = j / y;
+
+            if (xec >= j) {
+                xec %= y;
+
+                if ((~mxa) && ((~mxb) || xec >= mxa)){
+                    Check(std::min(tmp - kec - kec - 1, (long long)j + std::max(xec, mxa)), y, ans);
+                }
+
+                if (xec > mxa){
+                    mxb = mxa, mxa = xec;
+                }
+                else if (xec > mxb){
+                    mxb = xec;
+                }
+
+                if (idx >= j){
+                    mxb = std::max(mxb, idx % y);
+                }
+            }
+
+            if (~mxa) {
+                Check(std::min(tmp - kec, (long long)j + mxa >> 1), y, ans);
+                if (~mxb){
+                    Check(std::min(tmp - kec - kec, (long long)j + mxb), y, ans);
+                }
+            }
+        }
+    }
+    return ans;
+}
+
+
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <vector>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {4,2,4,3};
+    int expected_1 = 8;
+    int result_1 = WoodenRaft(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 4,2,3,4};
+    int expected_2 = 12;
+    int result_2 = WoodenRaft(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {4,2,3,4,5,5};
+    int expected_3 = 12;
+    int result_3 = WoodenRaft(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {4, 2, 4, 4, 5};
+    int expected_4 = 8;
+    int result_4 = WoodenRaft(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {2, 2, 2, 4, 5, 6};
+    int expected_5 = 10;
+    int result_5 = WoodenRaft(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {4, 2, 4, 2, 5, 5};
+    int expected_6 =10;
+    int result_6 = WoodenRaft(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7,4,5,6};
+    int expected_7 = 35;
+    int result_7 = WoodenRaft(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    int expected_8 = 9;
+    int result_8 = WoodenRaft(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        WoodenRaft(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        WoodenRaft(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        WoodenRaft(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        WoodenRaft(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        WoodenRaft(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
