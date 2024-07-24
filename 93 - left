@@ -1,0 +1,145 @@
+// https://codeforces.com/problemset/problem/1730/E
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+/*
+
+Input :
+
+A vector of integers nums.
+
+Constraints :
+
+nums.size() : ranges from 1 to 500000.
+nums : ranges from 1 to 10^6.
+
+*/
+
+int MaximumsAndMinimums(std::vector<int> &nums)
+{
+    int len = nums.size();
+    int mxi_range = 1000013;
+    if (len < 1 || len > 500000)
+    {
+        throw std::invalid_argument("Invalid input: Ensure 1 <= len <= 500000");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (nums[i] < 1 || nums[i] > 1000000)
+        {
+            throw std::invalid_argument("Invalid input: Ensure 1 <= nums[i] <= 1000000");
+        }
+    }
+    std::vector<int> greater_left(len), greater_right(len);
+    std::vector<int> less_left(len), less_right(len);
+    std::vector<std::vector<int>> positions(mxi_range);
+    std::vector<int> index(mxi_range, 0);
+    std::vector<std::vector<int>> divisors(mxi_range);
+    for (int i = 1; i < mxi_range; i++)
+    {
+        for (int j = i; j < mxi_range; j += i)
+        {
+            divisors[j].push_back(i);
+        }
+    }
+    for (int i = 0; i < len; i++)
+    {
+        positions[nums[i]].push_back(i);
+    }
+    std::stack<int> stack_gl;
+    for (int i = 0; i < len; i++)
+    {
+        while (!stack_gl.empty() && nums[stack_gl.top()] < nums[i])
+        {
+            stack_gl.pop();
+        }
+        greater_left[i] = (stack_gl.empty() ? -1 : stack_gl.top());
+        stack_gl.push(i);
+    }
+    std::stack<int> stack_gr;
+    for (int i = len - 1; i >= 0; i--)
+    {
+        while (!stack_gr.empty() && nums[stack_gr.top()] <= nums[i])
+        {
+            stack_gr.pop();
+        }
+        greater_right[i] = (stack_gr.empty() ? len : stack_gr.top());
+        stack_gr.push(i);
+    }
+
+    std::stack<int> stack_ll;
+    for (int i = 0; i < len; i++)
+    {
+        while (!stack_ll.empty() && nums[stack_ll.top()] >= nums[i])
+        {
+            stack_ll.pop();
+        }
+        less_left[i] = (stack_ll.empty() ? -1 : stack_ll.top());
+        stack_ll.push(i);
+    }
+
+    std::stack<int> stack_lr;
+    for (int i = len - 1; i >= 0; i--)
+    {
+        while (!stack_lr.empty() && nums[stack_lr.top()] >= nums[i])
+        {
+            stack_lr.pop();
+        }
+        less_right[i] = (stack_lr.empty() ? len : stack_lr.top());
+        stack_lr.push(i);
+    }
+
+    long long answer = 0;
+    for (int i = 0; i < len; i++)
+    {
+        for (int x : divisors[nums[i]])
+        {
+            if (index[x] >= 1)
+            {
+                int j = positions[x][index[x] - 1];
+                if (j > greater_left[i] && less_right[j] > i)
+                {
+                    answer += (j - std::max(greater_left[i], less_left[j])) * 1ll * (std::min(greater_right[i], less_right[j]) - i);
+                }
+            }
+
+            if (index[x] < positions[x].size())
+            {
+                int j = positions[x][index[x]];
+                if (j < greater_right[i] && less_left[j] < i)
+                {
+                    answer += (i - std::max({greater_left[i], less_left[j], index[x] >= 1 ? positions[x][index[x] - 1] : -1})) * 1ll * (std::min(greater_right[i], less_right[j]) - j);
+                }
+            }
+        }
+        index[nums[i]]++;
+    }
+
+    return answer;
+}
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+
+    int len;
+    std::cin >> len;
+    std::vector<int> nums(len);
+    for (int i = 0; i < len; i++)
+    {
+        std::cin >> nums[i];
+    }
+    int ans = MaximumsAndMinimums(nums);
+    std::cout << ans << std::endl;
+}
