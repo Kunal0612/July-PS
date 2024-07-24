@@ -1,4 +1,45 @@
-// https://codeforces.com/problemset/problem/1453/F
+
+
+/*
+
+https://codeforces.com/problemset/problem/1453/F
+
+Write a C++ Solution EvenHarder to find the minimum number of different labels that 
+should be changed to 0
+so that there remains exactly one way to win.
+
+Gildong is now developing a puzzle game. The puzzle consists of len platforms 
+numbered from 1 to len. 
+
+The player plays the game as a character that can stand on each platform and the 
+goal of the game is to move the character from the 1-st platform to the len-th platform.
+
+The i-th platform is labeled with an integer platforms_i(0≤platforms[i]≤len−i). 
+When the character is standing on the i-th platform, the player can 
+move the character to any of the j-th platforms where i+1≤j≤i+platforms[i]. If the character is on the i-th platform where platforms[i]=0 and i≠len, the player loses the game.
+
+Since Gildong thinks the current game is not hard enough, he wants to make it even harder. He wants to change some (possibly zero) labels to 0
+so that there remains exactly one way to win. He wants to modify the game as little as possible, so he's asking you to find the minimum number of platforms that should have their labels changed. Two ways are different if and only if there exists a platform the character gets to in one way but not in the other way.
+
+Take inf as 3000
+
+Input :
+
+A vector of integers platforms.
+
+Constraints :
+
+platforms.size() : ranges from 2 to 3000.
+platforms : platforms[i] ranges from 0 to platforms.size() - i.
+
+Output:
+
+An integer ans to find the minimum number of different labels that should be changed to 0 so that there remains exactly one way to win.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
 
 
 #include <iostream>
@@ -10,19 +51,7 @@
 
 
 
-/*
-// take inf as 3000
 
-Input :
-
-A vector of integers platforms.
-
-Constraints :
-
-platform.size() : ranges from 2 to 3000.
-platforms : platforms[i] ranges from 0 to platform.size() - i.
-
-*/
 
 int EvenHarder(std::vector<int> platforms)
 {
@@ -69,14 +98,135 @@ int EvenHarder(std::vector<int> platforms)
 #include <stdexcept>
 
 
-int main()
-{
-	int len;
-    std::cin>>len;
-    std::vector<int> platforms(len);
-    for(int i=0; i<len; i++){
-        std::cin>>platforms[i];
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {4,3,2,1,0};
+    int expected_1 = 3;
+    int result_1 = EvenHarder(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {5,4,3,2,1};
+    int expected_2 = 3000;
+    int result_2 = EvenHarder(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1,1,0};
+    int expected_3 = 0;
+    int result_3 = EvenHarder(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {4,1,4,2,1,0,2,1,0};
+    int expected_4 = 2;
+    int result_4 = EvenHarder(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 2, 2, 2, 1, 0};
+    int expected_5 = 1;
+    int result_5 = EvenHarder(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {4, 1, 2, 1, 1,0};
+    int expected_6 =2;
+    int result_6 = EvenHarder(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {4, 1, 1, 1, 1,0};
+    int expected_7 = 1;
+    int result_7 = EvenHarder(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 1, 1, 1, 1,0};
+    int expected_8 = 1;
+    int result_8 = EvenHarder(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        EvenHarder(nums_9);
+        assert(false);
     }
-    int ans=EvenHarder(platforms);
-    std::cout<<ans<<std::endl;
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        EvenHarder(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        EvenHarder(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        EvenHarder(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        EvenHarder(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_14={5};
+    try
+    {
+        EvenHarder(nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
 }
