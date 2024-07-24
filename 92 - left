@@ -1,0 +1,184 @@
+// https://codeforces.com/problemset/problem/1809/F
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+/*
+Input :
+
+An integer num_cities.
+An integer fuel_voloume.
+A vector of integers fuel_cost
+A vector of integers city_type.
+
+
+Constraints :
+
+city_type.size() ==  fuel_cost.size() : ranges from 3 to 200000.
+fuel_voloume : ranges from 1 to 10^9.
+city_type : ranges from 1 to 2.
+fuel_cost : ranges from 1 to fuel_voloume.
+
+*/
+
+
+
+std::vector<int> TravelingInBerland(int fuel_voloume, std::vector<int> fuel_cost, std::vector<int> city_type)
+{
+    int num_cities = fuel_cost.size();
+
+    if (num_cities < 3 || num_cities > 200000 || fuel_voloume < 1 || fuel_voloume > 1000000000)
+    {
+        throw std::invalid_argument("Invalid input: Ensure 3 <= num_cities <= 200000 and 1 <= fuel_voloume <= 1000000000");
+    }
+    for (int i = 0; i < num_cities; ++i)
+    {
+        if (fuel_cost[i] < 1 || fuel_cost[i] > fuel_voloume)
+        {
+            throw std::invalid_argument("Invalid input: Ensure 1 <= fuel_cost[i] <= fuel_voloume");
+        }
+    }
+    for (int i = 0; i < num_cities; ++i)
+    {
+        if (city_type[i] < 1 || city_type[i] > 2)
+        {
+            throw std::invalid_argument("Invalid input: Ensure 1 <= city_type[i] <= 2");
+        }
+    }
+
+    std::vector<long long> prefix_sum(2 * num_cities + 1);
+    for (int i = 0; i < 2 * num_cities; ++i)
+    {
+        prefix_sum[i + 1] = prefix_sum[i] + fuel_cost[i % num_cities];
+    }
+
+    std::vector<long long> distance(num_cities);
+    std::vector<long long> cost(num_cities);
+    int count = 0;
+    for (int i = 2 * num_cities - 1; i >= 0; --i)
+    {
+        if (i < num_cities)
+        {
+            if (city_type[i] == 2)
+            {
+                distance[i] = 1;
+                cost[i] = fuel_cost[i] * 2;
+            }
+            else if (count == 0)
+            {
+                distance[i] = 1;
+                cost[i] = fuel_cost[i];
+            }
+            else
+            {
+                int jdx = std::lower_bound(prefix_sum.begin() + i, prefix_sum.begin() + i + count + 1, prefix_sum[i] + fuel_voloume) - prefix_sum.begin();
+                assert(jdx > i);
+                distance[i] = jdx - i;
+                if (prefix_sum[jdx] - prefix_sum[i] <= fuel_voloume){
+                    cost[i] = prefix_sum[jdx] - prefix_sum[i];
+                }
+                else{
+                    cost[i] = 2 * (prefix_sum[jdx] - prefix_sum[i]) - fuel_voloume;
+                }
+            }
+        }
+        if (city_type[i % num_cities] == 2)
+        {
+            ++count;
+        }
+        else
+        {
+            count = 0;
+        }
+    }
+
+    int power = 0;
+    while ((1 << power) <= num_cities){
+        ++power;
+    }
+
+    std::vector<std::vector<long long>> distance_k(power, distance);
+    std::vector<std::vector<long long>> cost_k(power, cost);
+    for (int jdx = 1; jdx < power; ++jdx)
+    {
+        for (int i = 0; i < num_cities; ++i)
+        {
+            distance_k[jdx][i] = distance_k[jdx - 1][i] + distance_k[jdx - 1][(i + distance_k[jdx - 1][i]) % num_cities];
+            cost_k[jdx][i] = cost_k[jdx - 1][i] + cost_k[jdx - 1][(i + distance_k[jdx - 1][i]) % num_cities];
+        }
+    }
+    std::vector<int> ans;
+    for (int i = 0; i < num_cities; ++i)
+    {
+        int position = i;
+        long long total = 0;
+        long long answer = 0;
+        for (int jdx = power - 1; jdx >= 0; --jdx)
+        {
+            if (total + distance_k[jdx][position] <= num_cities)
+            {
+                total += distance_k[jdx][position];
+                answer += cost_k[jdx][position];
+                position = (position + distance_k[jdx][position]) % num_cities;
+            }
+        }
+        if (total < num_cities){
+            answer += prefix_sum[i + num_cities] - prefix_sum[i + total];
+        }
+        ans.push_back(answer);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+    int testCases;
+    if (scanf("%d", &testCases) != 1)
+    {
+        throw std::invalid_argument("Failed to read the number of test cases.");
+    }
+    while (testCases--)
+    {
+        int num_cities, fuel_voloume;
+        if (scanf("%d%d", &num_cities, &fuel_voloume) != 2)
+        {
+            throw std::invalid_argument("Failed to read input values.");
+        }
+        std::vector<int> fuel_cost(num_cities);
+        for (int i = 0; i < num_cities; ++i)
+        {
+            if (scanf("%d", &fuel_cost[i]) != 1)
+            {
+                throw std::invalid_argument("Failed to read input values.");
+            }
+            if (fuel_cost[i] < 1 || fuel_cost[i] > fuel_voloume)
+            {
+                throw std::invalid_argument("Invalid input: Ensure 1 <= fuel_cost[i] <= fuel_voloume");
+            }
+        }
+
+        std::vector<int> city_type(num_cities);
+        for (int i = 0; i < num_cities; ++i)
+        {
+            if (scanf("%d", &city_type[i]) != 1)
+            {
+                throw std::invalid_argument("Failed to read input values.");
+            }
+        }
+        std::vector<int> ans=TravelingInBerland(fuel_voloume,fuel_cost,city_type);
+        for(auto x:ans){
+            std::cout<<x<<" ";
+        }
+        std::cout<<std::endl;
+    }
+}
