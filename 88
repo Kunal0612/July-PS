@@ -1,0 +1,231 @@
+/*
+
+https://codeforces.com/problemset/problem/1223/F
+
+Write a C++ Solution StackExterminableArrays to find the number of stack 
+exterminable subarrays of the array nums.
+
+Let's look at the following process: initially you have an empty stack and 
+an array s of the length l. 
+You are trying to push array elements to the stack in the order s1,s2,s3,…sl. 
+
+Moreover, if the stack is empty or the element at the top of this stack is not 
+equal to the current element, then you just push the current element to the top 
+of the stack. Otherwise, you don't push the current element to the stack and, 
+moreover, pop the top element of the stack.
+
+If after this process the stack remains empty, the array s is considered stack exterminable.
+
+There are samples of stack exterminable arrays: [1,1], [2,1,1,2], [1,1,2,2], 
+[1,3,3,1,2,2], [3,1,3,3,1,3], [3,3,3,3,3,3], [5,1,2,2,1,4,4,5]
+
+Let's consider the changing of stack more details if s=[5,1,2,2,1,4,4,5] 
+(the top of stack is highlighted).
+
+after pushing s1=5 the stack turn into [5]
+after pushing s2=1 the stack turn into [5,1]
+after pushing s3=2 the stack turn into [5,1,2]
+after pushing s4=2 the stack turn into [5,1]
+after pushing s5=1 the stack turn into [5]
+after pushing s6=4 the stack turn into [5,4]
+after pushing s7=4 the stack turn into [5]
+after pushing s8=5 the stack is empty.
+
+You are given an array nums_1,nums_2,…,nums_len. You have to calculate 
+the number of its subarrays which are stack exterminable.
+
+Input :
+
+A vector of integers nums.
+
+Constraints :
+
+nums : ranges from 1 to nums.size().
+nums.size() : ranges from 1 to 300000.
+
+Output:
+
+An integer ans to find the number of its subarrays which are stack exterminable.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <stdexcept>
+
+
+
+long long StackExterminableArrays(std::vector<int> nums)
+{
+    int len=nums.size();
+    if (len < 1 || len > 300000) {
+        throw std::invalid_argument("Invalid limit");
+    }
+    for (int i = 0; i < len; ++i) {
+        if (nums[i] < 1 || nums[i] > len) {
+            throw std::invalid_argument("Invalid limit");
+        }
+    }
+    std::vector<int> nxt(len + 2, -1);
+    std::vector<int> dp_table(len + 2, 0);
+    std::vector<std::map<int, int>> nxt_x(len + 2);
+
+    for (int i = len - 1; i >= 0; --i)
+    {
+        if (nxt_x[i + 1].count(nums[i]))
+        {
+            int pos = nxt_x[i + 1][nums[i]];
+            assert(pos < len && nums[pos] == nums[i]);
+            nxt[i] = pos;
+            std::swap(nxt_x[i], nxt_x[pos + 1]);
+            if (pos < len - 1){
+                nxt_x[i][nums[pos + 1]] = pos + 1;
+            }
+        }
+        nxt_x[i][nums[i]] = i;
+    }
+
+    long long res = 0;
+    for (int i = len - 1; i >= 0; --i)
+    {
+        if (nxt[i] == -1){
+            continue;
+        }
+        dp_table[i] = 1 + dp_table[nxt[i] + 1];
+        res += dp_table[i];
+    }
+
+    return res;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {2,1,1,2,2};
+    int expected_1 = 4;
+    int result_1 = StackExterminableArrays(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 3, 5, 7, 1,2,3,4};
+    int expected_2 = 0;
+    int result_2 = StackExterminableArrays(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1,2,3,4,5,5};
+    int expected_3 = 1;
+    int result_3 = StackExterminableArrays(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 4, 4, 5};
+    int expected_4 = 1;
+    int result_4 = StackExterminableArrays(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 2, 2, 4, 5, 6};
+    int expected_5 = 1;
+    int result_5 = StackExterminableArrays(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 2, 1, 2, 5, 5};
+    int expected_6 =1;
+    int result_6 = StackExterminableArrays(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7,1,1,1};
+    int expected_7 = 10;
+    int result_7 = StackExterminableArrays(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    int expected_8 = 12;
+    int result_8 = StackExterminableArrays(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        StackExterminableArrays(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        StackExterminableArrays(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        StackExterminableArrays(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        StackExterminableArrays(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        StackExterminableArrays(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
