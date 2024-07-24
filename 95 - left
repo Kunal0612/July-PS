@@ -1,0 +1,102 @@
+// https://codeforces.com/problemset/problem/1516/E
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+ 
+
+long long ComputeNcr(int total, int choose, const std::vector<long long>& inv, const std::vector<std::vector<long long>>& comb) {
+    long long result = 1;
+    int mod = 1000000007;
+    for (int i = total - choose + 1; i <= total; ++i){
+        result = (result * i) % mod;
+    }
+    for (int i = 1; i <= choose; ++i){
+        result = (result * inv[i]) % mod;
+    }
+    return result;
+}
+
+/*
+
+Input :
+
+An integer num.
+An integer k_value.
+
+Constraints :
+
+num : ranges from 2 to 10^9.
+k_value : ranges from 1 to 200.
+
+*/
+
+
+
+
+std::vector<int> BabyEhabPlaysWithPermutations(int num, int k_value){
+    if (num< 2 || num > 1000000000) {
+        throw std::invalid_argument("Invalid value for n: Ensure 2 ≤ num ≤ 10^9");
+    }
+    if (k_value < 1 || k_value > 200) {
+        throw std::invalid_argument("Invalid value for k: Ensure 1 ≤ k_value ≤ 200");
+    }
+    int mx_size = 405;
+    std::vector<std::vector<long long>> comb(mx_size, std::vector<long long>(mx_size, 0));
+    std::vector<std::vector<long long>> dp_table(mx_size, std::vector<long long>(mx_size, 0));
+    std::vector<long long> inv(mx_size, 0);
+
+    comb[0][0] = 1;
+    int mod = 1000000007;
+    for (int i = 1; i <= 2 * k_value; ++i) {
+        dp_table[i][0] = 1;
+        comb[i][0] = 1;
+        for (int j = 1; j <= 2 * k_value; ++j) {
+            dp_table[i][j] = (dp_table[i - 1][j] + (i - 1) * dp_table[i - 1][j - 1]) % mod;
+            comb[i][j] = (comb[i - 1][j] + comb[i - 1][j - 1]) % mod;
+        }
+    }
+    inv[1] = 1;
+    for (int i = 2; i <= 2 * k_value; ++i){
+        inv[i] = inv[mod % i] * (mod - mod / i) % mod;
+    }
+    std::vector<int> results(2, 0);
+    results[0] = 1;
+    std::vector<int> ans;
+    for (int j = 1; j <= k_value; ++j) {
+        for (int i = 1; i <= std::min(num, 2 * j); ++i) {
+            int count = 0;
+            for (int f = 0; f <= i; ++f){
+                count = (count + (f % 2 ? -1 : 1) * comb[i][f] * dp_table[i - f][j] % mod + mod) % mod;
+            }
+            results[j % 2] = (results[j % 2] + ComputeNcr(num, i, inv, comb) * count) % mod;
+        }
+        ans.push_back(results[j % 2]);
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int main() {
+    int num, k_value;
+    std::cin >> num >> k_value;
+    std::vector<int> ans=BabyEhabPlaysWithPermutations(num, k_value);
+    for(auto x:ans){
+        std::cout<<x<<" ";
+    }
+    std::cout<<std::endl;
+    return 0;
+}
