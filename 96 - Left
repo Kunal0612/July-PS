@@ -1,0 +1,88 @@
+// https://codeforces.com/problemset/problem/850/F
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+long long ModuloInverse(long long first, long long sec) {
+    long long mod = 1e9 + 7;
+    long long sum = 1;
+    for (; sec; sec >>= 1, first = first * first % mod){
+        if (sec & 1){
+            sum = sum * first % mod;
+        }
+    }
+    return sum;
+}
+
+/*
+
+Input :
+
+A vector of integer nums.
+
+Constraints:
+
+nums.size() : ranges from 1 to 2500.
+nums : ranges from 1 to 10^5.
+
+*/
+
+int RainbowBalls(std::vector<long long> nums){
+    int len=nums.size();
+    if (len < 1 || len > 2500) {
+        throw std::invalid_argument("The number of colors (len) must be between 1 and 2500.");
+    }
+    for (int i = 0; i < len; ++i) {
+        if (nums[i] < 1 || nums[i] > 100000) {
+            throw std::invalid_argument("Each element of the array nums must be between 1 and 10^5.");
+        }
+    }
+    std::vector<long long> arr(len + 1);
+    long long sum = 0, mxi = 0;
+    long long mod = 1e9 + 7;
+    for (long long i = 1; i <= len; i++) {
+        arr[i]=nums[i-1];
+        sum = (sum + arr[i]) % mod;
+        mxi = std::max(mxi, arr[i]);
+    }
+    
+    std::vector<long long> gmap(mxi + 1), frr(mxi + 1);
+    
+    gmap[0] = (mod - ModuloInverse(sum, mod - 2) * (sum - 1) % mod) % mod;
+    
+    for (long long i = 1; i <= mxi; i++) {
+        gmap[i] = (gmap[i - 1] + ModuloInverse(i - sum + mod, mod - 2) * (sum - 1) % mod) % mod;
+        frr[i] = (frr[i - 1] + gmap[i - 1]) % mod;
+    }
+    
+    long long ans = 0;
+    for (long long i = 1; i <= len; i++) {
+        ans = (ans + frr[arr[i]]) % mod;
+    }
+    
+    ans = (ans + sum * (sum - 1) % mod) % mod;
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    long long len;
+    std::cin >> len;
+    std::vector<long long int> nums(len);
+    for(int i=0;i<len;i++){
+        std::cin>>nums[i];
+    }
+    long long int ans=RainbowBalls(nums);
+    std::cout << ans << std::endl;
+
+    return 0;
+}
