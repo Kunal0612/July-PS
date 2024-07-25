@@ -1,0 +1,278 @@
+/*
+
+https://codeforces.com/problemset/problem/1178/F2
+
+Write a C++ Solution LongColorfulStrip to find the number of ways Alice can 
+perform the painting, modulo 998244353.
+
+Alice has a paper strip of length m centimeters, initially painted entirely 
+with color 0. She wants to repaint parts of the strip using len
+other colors (numbered 1 to len).
+
+The Painting Process:
+
+Alice chooses len pairs of integers: (a_1, b_1), (a_2, b_2), ..., (a_len, b_len), 
+where 0 <= a_i < b_i <= m. For each pair (a_i, b_i), she repaints the segment 
+of the paper from a_i to b_i (inclusive) with color i.
+
+
+Each segment being repainted must be currently painted with a single color (color 0 initially).
+After the process, every centimeter of the paper must have a color other than 0.
+
+
+Your task is to determine the total number of distinct ways Alice can choose the 
+pairs (a_i, b_i) to achieve a final paper strip where every centimeter is painted with 
+a color other than 0. Since the answer can be very large, the final count should be 
+calculated modulo 998244353.
+
+
+Input :
+
+An integer len.
+A vector of integer color_visible.
+
+Constraints :
+
+len : ranges from 1 to 500.
+color_visible.size() : ranges from len to 1000000.
+color_visible : ranges from 1 to len.
+
+Output:
+
+An integer ans to find the number of ways Alice can perform the painting, modulo 998244353.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int ComputeResult(int left, int right, const std::vector<int>& array, 
+const std::vector<int>& left_pos, const std::vector<int>& right_pos, std::vector<std::vector<int>>& dpp, 
+int len) {
+    int mod = 998244353;
+    if (left > right) return 1;
+    if (dpp[left][right] != -1) return dpp[left][right];
+
+    int min_value = len + 1;
+    for (int i = left; i <= right; ++i) {
+        if (left_pos[array[i]] < left || right_pos[array[i]] > right) {
+            return dpp[left][right] = 0;
+        }
+        min_value = std::min(min_value, array[i]);
+    }
+
+    dpp[left][right] = 1;
+    int xec = 0, yec = 0, pec = 0;
+
+    for (int i = left; i <= right; ++i) {
+        if (array[i] == min_value) {
+            if (!pec) {
+                pec = i;
+                for (int j = left; j <= pec; ++j) {
+                    xec = (xec + 1LL * ComputeResult(left, j - 1, array, left_pos, right_pos, dpp, len) * ComputeResult(j, pec - 1, array, left_pos, right_pos, dpp, len)) % mod;
+                }
+            } else {
+                dpp[left][right] = 1LL * dpp[left][right] * ComputeResult(pec + 1, i - 1, array, left_pos, right_pos, dpp, len) % mod;
+                pec = i;
+            }
+        }
+    }
+
+    for (int j = pec; j <= right; ++j) {
+        yec = (yec + 1LL * ComputeResult(pec + 1, j, array, left_pos, right_pos, dpp, len) * ComputeResult(j + 1, right, array, left_pos, right_pos, dpp, len)) % mod;
+    }
+
+    return dpp[left][right] = 1LL * dpp[left][right] * xec % mod * yec % mod;
+}
+
+
+int LongColorfulStrip(int len,std::vector<int> color_visible){
+    if(len<1 or len>500){
+        throw std::invalid_argument("Invalid num_element length");
+    }
+    if(color_visible.size()<len or color_visible.size()>1000000){
+        throw std::invalid_argument("Invalid color_visible length");
+    }
+    for(int i=0;i<color_visible.size();i++){
+        if(color_visible[i]>len or color_visible[i]<1){
+            throw std::invalid_argument("Invalid color_visible value");
+        }
+    }
+    int max_n = 510;
+    std::vector<int> array(2 * len + 1);
+    std::vector<int> left_pos(max_n, 0), right_pos(max_n, 0);
+    std::vector<std::vector<int>> dpp(2 * len + 1, std::vector<int>(2 * len + 1, -1));
+
+    int array_size = 0;
+    for(int i=0;i<color_visible.size();i++){
+        array[array_size + 1]=color_visible[i];
+        if (array[array_size] == array[array_size + 1]){
+            continue;
+        }
+        ++array_size;
+        if (array_size > 2 * len) {
+            return 0;
+        }
+        if (!left_pos[array[array_size]]){
+            left_pos[array[array_size]] = array_size;
+        }
+        right_pos[array[array_size]] = array_size;
+    }
+
+    int ans=ComputeResult(1, array_size, array, left_pos, right_pos, dpp, len);
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::vector<int> color_visible_1 = {1,1,2,3,4};
+    int len_1=5;
+    int expected_1 = 14;
+    int result_1 = LongColorfulStrip(len_1,color_visible_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_2 = {1,1,2,1,1};
+    int len_2=3;
+    int expected_2 =1;
+    int result_2 = LongColorfulStrip(len_2,color_visible_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_3 = {2,1,1,2,2};
+    int len_3=2;
+    int expected_3 =0;
+    int result_3 = LongColorfulStrip(len_3,color_visible_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_4 = {3,1,1,2};
+    int len_4=3;
+    int expected_4 =4;
+    int result_4 = LongColorfulStrip(len_4,color_visible_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_5 = {4,1,1,2};
+    int len_5=4;
+    int expected_5 =4;
+    int result_5 = LongColorfulStrip(len_5,color_visible_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_6 = {3,1,2,1,2};
+    int len_6=3;
+    int expected_6 =0;
+    int result_6 = LongColorfulStrip(len_6,color_visible_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_7 = {1,1,5,2,2};
+    int len_7=5;
+    int expected_7 =5;
+    int result_7 = LongColorfulStrip(len_7,color_visible_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_8 = {1,1,4,2,2};
+    int len_8=5;
+    int expected_8 = 5;
+    int result_8 = LongColorfulStrip(len_8,color_visible_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // // TEST
+    std::vector<int> color_visible_9 = {0,1,4,2,2};
+    int len_9=2;
+    try
+    {
+        LongColorfulStrip(len_9,color_visible_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_10 = {};
+    int len_10=2;
+    try
+    {
+        LongColorfulStrip(len_10,color_visible_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_11(1000005,0);
+    int len_11=2;
+    try
+    {
+        LongColorfulStrip(len_11,color_visible_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_12 = {-1,1,-2,0,0};
+    int len_12=2;
+    try
+    {
+        LongColorfulStrip(len_12,color_visible_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_13 = {1,1,1,2,2};
+    int len_13=10;
+    try
+    {
+        LongColorfulStrip(len_13,color_visible_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> color_visible_14 = {1,1,1,1,1};
+    int len_14=-1;
+    try
+    {
+        LongColorfulStrip(len_14,color_visible_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
