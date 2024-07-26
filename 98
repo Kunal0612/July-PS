@@ -1,0 +1,151 @@
+// https://codeforces.com/problemset/problem/1436/F
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+
+void Addmod(long long &first, long long sec) {
+    first += sec;
+    int mod = 998244353;
+    if (first >= mod) {
+        first -= mod;
+    }
+    if (first < 0) {
+        first += mod;
+    }
+}
+
+long long Powmod(long long first, long long sec) {
+    long long result = 1;
+    long long base = first;
+    int mod = 998244353;
+    while (sec) {
+        if (sec & 1) {
+            result = result * base % mod;
+        }
+        base = base * base % mod;
+        sec >>= 1;
+    }
+    return result;
+}
+
+/*
+
+Input :
+
+A vector of vector of integers vec.
+
+Constraints :
+
+vec.size() : ranges from 1 to 10^5.
+vec : vec[i][0] ranges from 1 to 10^5.
+      vec[i][1] ranges from 1 to 10^9.
+
+*/
+
+
+int SumOverSubsets(std::vector<std::vector<int>> vec){
+    int lem=vec.size();
+    if (lem < 1 || lem > 100000) {
+        throw std::invalid_argument("lem must be between 1 and 100000");
+    }
+    for (const std::vector<int>& it : vec) {
+        int aec=it[0],freq=it[1];
+        if (aec < 1 || aec > 100000) {
+            throw std::invalid_argument("it must be between 1 and 100000");
+        }
+        if (freq < 1 || freq > 1000000000) {
+            throw std::invalid_argument("freq must be between 1 and 1000000000");
+        }
+    }
+    int mx_range = 1e5;
+    int mod = 998244353;
+    std::vector<long long> sum(mx_range + 1, 0);
+    std::vector<long long> sum_1(mx_range + 1, 0);
+    std::vector<long long> sum_2(mx_range + 1, 0);
+    std::vector<long long> cnt(mx_range + 1, 0);
+
+    for (int i = 0; i < lem; ++i) {
+        long long xec=vec[i][0], freq=vec[i][1];
+        long long sumi = xec * freq % mod;
+        long long sumi_1 = xec * xec % mod * freq % mod;
+        long long sumi_2 = xec * xec % mod * ((freq - 1) * freq % mod) % mod;
+        for (int j = 1; j * j <= xec; ++j) {
+            if (xec % j == 0) {
+                Addmod(sum_2[j], (sumi_2 + 2 * sumi * sum[j]) % mod);Addmod(sum_1[j], sumi_1);
+                Addmod(sum[j], sumi);
+                cnt[j] += freq;
+                if (xec / j != j) {
+                    int idx=xec/j;
+                    Addmod(sum_2[idx], (sumi_2 + 2 * sumi * sum[idx]) % mod);
+                    Addmod(sum_1[idx], sumi_1);
+                    Addmod(sum[idx], sumi);
+                    cnt[idx] += freq;
+                }
+            }
+        }
+    }
+
+    std::vector<long long> freq(mx_range + 1, 0);
+    for (int i = mx_range; i >= 1; --i) {
+        if (!cnt[i]){
+            continue;
+        }
+        long long &result = freq[i];
+        long long cnt_1 = cnt[i];
+        long long pcnt_1 = 0, pcnt_2 = 0;
+        if (cnt_1 > 2) {
+            pcnt_1 = Powmod(2, cnt_1 - 3);
+            pcnt_2 = pcnt_1 * 2 % mod;
+        } else if (cnt_1 > 1) {
+            pcnt_2 = Powmod(2, cnt_1 - 2);
+        }
+
+        if (cnt_1 > 1) {
+            Addmod(result, pcnt_2 * ((cnt_1 - 1) % mod) % mod * sum_1[i] % mod);
+            Addmod(result, pcnt_2 % mod * sum_2[i] % mod);
+        }
+        if (cnt_1 > 2) {
+            Addmod(result, pcnt_1 * ((cnt_1 - 2) % mod) % mod * sum_2[i] % mod);
+        }
+
+        for (int j = i + i; j <= mx_range; j += i) {
+            Addmod(result, -freq[j]);
+        }
+    }
+
+    int ans=freq[1];
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    int lem;
+    std::cin>>lem;
+    std::vector<std::vector<int>> vec;
+    for(int i=0;i<lem;i++){
+        int x,y;
+        std::cin>>x>>y;
+        vec.push_back({x,y});
+    }
+    int ans=SumOverSubsets(vec);
+    std::cout<<ans;
+    return 0;
+}
