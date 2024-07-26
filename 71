@@ -1,0 +1,379 @@
+/*
+https://codeforces.com/problemset/problem/1887/D
+
+Write a C++ Solution Split to find for each query, output 1 
+(without quotes) if the array nums[l],nums[l+1],…,nums[r] is good, and 0 (without quotes) otherwise.
+
+Let's call an array b1,b2,…,bm (m≥2) good if it can be split into two 
+parts such that all elements in the left part are strictly smaller than 
+all elements in the right part. In other words, there must exist an index 
+1≤i<m such that every element from b1,…,bi is strictly smaller than every element from bi+1,…,bm.
+
+Given an array nums_1,nums_2,…nums_n consisting of distinct integers from 1 to len. 
+There are q_len queries. Each query consists of two numbers l
+and r. For each query, determine whether the array nums[l],nums[l+1],…,nums[r] is good.
+
+Input :
+
+A vector of integers nums.
+A vector of vector of integers query.
+
+Constraints :
+
+nums.size() : ranges from 2 to 300000.
+nums : ranges from 1 to nums.size() , all elements are distincts.
+query.size() : ranges from 1 to 300000.
+query : query[i][0] ranges from 1 to right - 1, query[i][1] ranges from left+1 to nums.size().
+
+
+Output:
+
+An vector of integers ans to find for each query, output 1 (without quotes) if the 
+array nums[l],nums[l+1],…,nums[r] is good, and 0 (without quotes) otherwise.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+void AddValue(std::vector<int>& crr, int xec, int val, int len) {
+    while (xec <= len) {
+        crr[xec] += val;
+        xec += xec & -xec;
+    }
+}
+
+int QueryValue(const std::vector<int>& crr, int xec) {
+    int res = 0;
+    while (xec) {
+        res += crr[xec];
+        xec -= xec & -xec;
+    }
+    return res;
+}
+
+
+std::vector<int> Split(std::vector<int> nums,std::vector<std::vector<int>> query){
+
+    int len=nums.size(), q_len=query.size();
+    std::set<int> unique;
+    if (len < 2 || len > 300000) {
+        throw std::invalid_argument("Invalid size of the nums.");
+    }
+    for (int element : nums) {
+        unique.insert(element);
+        if (element < 1 || element > len) {
+            throw std::invalid_argument("nums element out of valid range.");
+        }
+    }
+    if(unique.size()!=len){
+        throw std::invalid_argument("nums contain duplicate elements.");
+    }
+    if (q_len < 1 || q_len > 300000) {
+        throw std::invalid_argument("Invalid size of the query.");
+    }
+    for (std::vector<int>& quer : query) {
+        int left = quer[0];
+        int right = quer[1];
+        if (left < 1 || left >= right || right > len) {
+            throw std::invalid_argument("Invalid query range.");
+        }
+    }
+    std::vector<int> arr(len + 1), pos(len + 1), stk(len + 1), left(len + 1), right(len + 1), crr(len + 1), ans(len + 1);
+    std::vector<std::vector<std::pair<int, int>>> pairs(len + 1), chr(len + 1);
+    std::set<int> stt;
+
+    for (int i = 1; i <= len; ++i) {
+        arr[i]=nums[i-1];
+        pos[arr[i]] = i;
+    }
+    for (int i = 1; i <= q_len; ++i) {
+        int q_left=query[i-1][0], q_right=query[i-1][1];
+        pairs[q_right].emplace_back(q_left, i);
+    }
+
+    for (int i = 1, j = 0; i <= len; left[i] = stk[j], stk[++j] = i++) {
+        while (j and arr[stk[j]] < arr[i]){
+            --j;
+        }
+    }
+    for (int i = len, j = 0; i >= 1; right[i] = stk[j], stk[++j] = i--) {
+        while (j and arr[stk[j]] < arr[i]){
+            --j;
+        }
+    }
+
+    for (int i = 1; i <= len; ++i) {
+        int jdx = pos[i];
+        if (right[jdx]) {
+            auto it = stt.upper_bound(right[jdx]);
+            chr[right[jdx]].emplace_back(left[jdx] + 1, 1);
+            chr[right[jdx]].emplace_back(jdx + 1, -1);
+            if (it != stt.end()) {
+                chr[*it].emplace_back(left[jdx] + 1, -1);
+                chr[*it].emplace_back(jdx + 1, 1);
+            }
+        }
+        stt.insert(jdx);
+    }
+
+    for (int i = 1; i <= len; ++i) {
+        for (auto xec : chr[i]){
+            AddValue(crr, xec.first, xec.second, len);
+        }
+        for (auto xec : pairs[i]){
+            ans[xec.second] = QueryValue(crr, xec.first);
+        }
+    }
+    std::vector<int> answer;
+    for (int i = 1; i <= q_len; ++i) {
+        if(ans[i]){
+            answer.push_back(1);
+        }
+        else{
+            answer.push_back(0);
+        }
+    }
+    return answer;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {2,1,6,3,7,5,4};
+    std::vector<std::vector<int>> query_1 = {{1, 2}, {3,7}, {4,5},{6,7},{3,5}};
+    std::vector<int> expected_1 = {0, 0, 1, 0, 1};
+    std::vector<int> result_1 = Split(nums_1, query_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 1, 3};
+    std::vector<std::vector<int>> query_2 = {{1, 3}};
+    std::vector<int> expected_2 = {1};
+    std::vector<int> result_2 = Split(nums_2, query_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {3, 2, 1};
+    std::vector<std::vector<int>> query_3 = {{1, 2}, {2, 3}, {1, 3}};
+    std::vector<int> expected_3 = {0, 0, 0};
+    std::vector<int> result_3 = Split(nums_3, query_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {3, 4, 1, 2};
+    std::vector<std::vector<int>> query_4 = {{1, 2}, {3, 4}, {1, 4}};
+    std::vector<int> expected_4 = {1, 1, 0};
+    std::vector<int> result_4 = Split(nums_4, query_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {5, 2, 1, 3, 4};
+    std::vector<std::vector<int>> query_5 = {{1, 3}, {2, 4}, {1, 5}};
+    std::vector<int> expected_5 ={0, 1, 0};
+    std::vector<int> result_5 = Split(nums_5, query_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 3, 5, 4, 2};
+    std::vector<std::vector<int>> query_6 = {{1, 5}, {2, 4}, {2, 3}};
+    std::vector<int> expected_6 = {1, 1, 1};
+    std::vector<int> result_6 = Split(nums_6, query_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {5, 4, 3, 2, 1};
+    std::vector<std::vector<int>> query_7 = {{1, 2}, {3, 4}, {2, 5}};
+    std::vector<int> expected_7 = {0, 0, 0};
+    std::vector<int> result_7 = Split(nums_7, query_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1, 5, 4, 3, 2};
+    std::vector<std::vector<int>> query_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    std::vector<int> expected_8 = {1, 0, 0, 0};
+    std::vector<int> result_8 = Split(nums_8, query_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {1, 0, 4, 3, 2};
+    std::vector<std::vector<int>> query_9 = {{1, 2}, {2, 2}, {3, 4}, {4, 5}};
+    try
+    {
+        Split(nums_9, query_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {1, 1000000004, 4, 3, 2};
+    std::vector<std::vector<int>> query_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Split(nums_10, query_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1, 5, -4, 3, 2};
+    std::vector<std::vector<int>> query_11 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Split(nums_11, query_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    std::vector<std::vector<int>> query_12 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+
+    try
+    {
+        Split(nums_12, query_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13(400000,5);
+    std::vector<std::vector<int>> query_13 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+
+    try
+    {
+        Split(nums_13, query_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14(4,1);
+    std::vector<std::vector<int>> query_14 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Split(nums_14, query_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(1,1);
+    std::vector<std::vector<int>> query_15 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Split(nums_15, query_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16(1,1);
+    std::vector<std::vector<int>> query_16 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        Split(nums_16, query_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_17(1,1);
+    std::vector<std::vector<int>> query_17 = {{1,0}};
+    try
+    {
+        Split(nums_17, query_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_18(1,1);
+    std::vector<std::vector<int>> query_18(500000,{1,2});
+    try
+    {
+        Split(nums_18, query_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_19(1,1);
+    std::vector<std::vector<int>> query_19(5,{2,1});
+    try
+    {
+        Split(nums_19, query_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_20(1,1);
+    std::vector<std::vector<int>> query_20(5,{1,-1});
+    try
+    {
+        Split(nums_20, query_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
