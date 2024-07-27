@@ -1,0 +1,344 @@
+/*
+
+
+https://codeforces.com/contest/1380/problem/F
+
+Write a C++ Solution StrangeAddition to find the i-th value should be equal to the number of 
+pairs (a,b) such that both a and b are non-negative integers and the result of a strange addition 
+of a and b is equal to str after i updates are applied.Use mod as  998244353.
+
+
+Let  a and b be some non-negative integers. Let's define strange addition of a and b as following:
+
+write down the numbers one under another and align them by their least significant digit
+
+add them up digit by digit and concatenate the respective sums together.
+
+Assume that both numbers have an infinite number of leading zeros.
+
+For example, let's take a look at a strange addition of numbers 3248 and 908 :
+
+You are given a string str, consisting of len digits from 0 to 9. You are also given lem updates of form:
+
+position , newvalue— replace the digit at the x-th position of str with a digit newvalue.
+
+Note that string str might have leading zeros at any point of time.
+
+After each update print the number of pairs (a,b) such that both a and b are non-negative 
+integers and the result of a strange addition of a and b is equal to c.
+
+Note that the numbers of pairs can be quite large, so print them modulo 998244353.
+
+Input :
+
+A string str.
+A vector of vector of integer desc.
+
+Constraints: 
+
+str: consist of only digits
+str.size() , desc.size() : ranges from 1 to 500000.
+desc : desc[i][0] ranges from 1 to len , desc[i][1] ranges from 0 to 9.
+
+Output:
+
+An vector of integers ans to find  the  i-th value should be equal to the number of 
+pairs (a,b) such that both a and b are non-negative integers and the result of a strange addition of a
+and b is equal to str after i updates are applied.Use mod as  998244353.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int Add(int first, int sec) {
+    first += sec;
+    int mod = 998244353;
+    if (first >= mod){
+        first -= mod;
+    }
+    return first;
+}
+
+int Multiply(int first, int sec) {
+    int mod = 998244353;
+    return first * 1ll * sec % mod;
+}
+
+struct Node {
+    int value[4], length;
+};
+
+Node Merge(const Node& left_node, const Node& right_node, int left_char, int right_char) {
+    Node result_node;
+    int left_index = left_node.length == 1 ? 0 : 1;
+    int right_index = right_node.length == 1 ? 0 : 2;
+    result_node.length = left_node.length + right_node.length;
+    result_node.value[0] = Multiply(left_node.value[left_index], right_node.value[right_index]);
+    result_node.value[1] = Multiply(left_node.value[left_index], right_node.value[3]);
+    result_node.value[2] = Multiply(left_node.value[3], right_node.value[right_index]);
+    result_node.value[3] = Multiply(left_node.value[3], right_node.value[3]);
+    if (left_char == 1) {
+        left_index = left_node.length == 1 ? 2 : 0;
+        right_index = right_node.length == 1 ? 1 : 0;
+        result_node.value[left_index + right_index] = Add(result_node.value[left_index + right_index], Multiply(Multiply(left_node.value[0], right_node.value[0]), 19 - (left_char * 10 + right_char)));
+        result_node.value[1 + left_index] = Add(result_node.value[1 + left_index], Multiply(Multiply(left_node.value[0], right_node.value[1]), 19 - (left_char * 10 + right_char)));
+        result_node.value[2 + right_index] = Add(result_node.value[2 + right_index], Multiply(Multiply(left_node.value[2], right_node.value[0]), 19 - (left_char * 10 + right_char)));
+        result_node.value[3] = Add(result_node.value[3], Multiply(Multiply(left_node.value[2], right_node.value[1]), 19 - (left_char * 10 + right_char)));
+    }
+    return result_node;
+}
+
+void BuildTree(std::vector<Node>& seg_tree,std::string& str, int index, int left, int right) {
+    seg_tree[index].length = right - left;
+    if (left == right - 1) {
+        seg_tree[index].value[0] = 1;
+        seg_tree[index].value[3] = str[left] + 1;
+        return;
+    }
+    int middle = (left + right) / 2;
+    BuildTree(seg_tree, str, index * 2, left, middle);
+    BuildTree(seg_tree, str, index * 2 + 1, middle, right);
+    seg_tree[index] = Merge(seg_tree[index * 2], seg_tree[index * 2 + 1], str[middle - 1], str[middle]);
+}
+
+void UpdateTree(std::vector<Node>& seg_tree, std::string& str, int index, int left, int right, 
+int position, int new_value) {
+    if (left == right - 1) {
+        str[left] = new_value;
+        seg_tree[index].value[3] = str[left] + 1;
+        return;
+    }
+    int middle = (left + right) / 2;
+    if (position < middle){
+        UpdateTree(seg_tree, str, index * 2, left, middle, position, new_value);
+    }
+    else{
+        UpdateTree(seg_tree, str, index * 2 + 1, middle, right, position, new_value);
+    }
+    seg_tree[index] = Merge(seg_tree[index * 2], seg_tree[index * 2 + 1], str[middle - 1], str[middle]);
+}
+
+
+
+std::vector<int> StrangeAddition(std::string str,std::vector<std::vector<int>> desc){
+
+    int len=str.size(), lem=desc.size();
+    if(len<1 or len>500000){
+        throw std::invalid_argument("Invalid str length");
+    } 
+    if(lem<1 or lem>500000){
+        throw std::invalid_argument("Invalid desc length");
+    } 
+    for (int i = 0; i < len; i++){
+        if(!isdigit(str[i])){
+            throw std::invalid_argument("Invalid str length");
+        }
+    }
+    for (int i = 0; i < lem; i++){
+        if(desc[i][0]<1 or desc[i][0]>len or desc[i][1]<0 or desc[i][1]>9){
+            throw std::invalid_argument("Invalid desc length");
+        }
+    }
+    for (int i = 0; i < len; i++){
+        str[i] -= '0';
+    }
+
+    std::vector<Node> seg_tree(4 * len * 4);
+    BuildTree(seg_tree, str, 1, 0, len);
+    std::vector<int> ans;
+    for (int i = 0; i < lem; i++) {
+        int position=desc[i][0], new_value=desc[i][1];
+        --position;
+        UpdateTree(seg_tree, str, 1, 0, len, position, new_value);
+        ans.push_back(seg_tree[1].value[3]);
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::string str_1 = "14";
+    std::vector<std::vector<int>> quer_1 = {{2, 4}, {2, 1},{1,0}};
+    std::vector<int> expected_1 = {15,12,2};
+    std::vector<int> result_1 = StrangeAddition(str_1, quer_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::string str_2 = "15";
+    std::vector<std::vector<int>> quer_2 = {{1, 6}, {2, 5}};
+    std::vector<int> expected_2 = {42,42};
+    std::vector<int> result_2 = StrangeAddition(str_2, quer_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "0123";
+    std::vector<std::vector<int>> quer_3 = {{1, 6}, {1, 2}, {3, 4}};
+    std::vector<int> expected_3 = {364,156,180};
+    std::vector<int> result_3 = StrangeAddition(str_3, quer_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "1230";
+    std::vector<std::vector<int>> quer_4 = {{1, 6}, {2, 5}, {1, 4}};
+    std::vector<int> expected_4 = {84,168,120};
+    std::vector<int> result_4 = StrangeAddition(str_4, quer_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "1325";
+    std::vector<std::vector<int>> quer_5 = {{1, 2}, {1, 3}};
+    std::vector<int> expected_5 = {216,288};
+    std::vector<int> result_5 = StrangeAddition(str_5, quer_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "12354";
+    std::vector<std::vector<int>> quer_6 = {{1, 8}, {3, 6}, {5, 8}};
+    std::vector<int> expected_6 = {3240,5670,10206};
+    std::vector<int> result_6 = StrangeAddition(str_6, quer_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "12340";
+    std::vector<std::vector<int>> quer_7 = {{1, 6}, {2, 5}, {4, 6}};
+    std::vector<int> expected_7 = {420,840,1176};
+    std::vector<int> result_7 = StrangeAddition(str_7, quer_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "85451";
+    std::vector<std::vector<int>> quer_8 = {{1, 8}, {1, 4}, {5, 8}};
+    std::vector<int> expected_8 = {3240,1800,8100};
+    std::vector<int> result_8 = StrangeAddition(str_8, quer_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    std::vector<std::vector<int>> quer_9 = {{1, 8}, {1, 4}, {5, 8}};
+    try
+    {
+        StrangeAddition(str_9, quer_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "5a";
+    std::vector<std::vector<int>> quer_10 = {{1, 8}, {1, 4}, {5, 8}};
+    try
+    {
+        StrangeAddition(str_10, quer_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = "54";
+    std::vector<std::vector<int>> quer_11 = {};
+    try
+    {
+        StrangeAddition(str_11, quer_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_12 = "41";
+    std::vector<std::vector<int>> quer_12 = {{1,10}};
+    try
+    {
+        StrangeAddition(str_12, quer_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_13 = "452";
+    std::vector<std::vector<int>> quer_13 = {{1,-1}};
+    try
+    {
+        StrangeAddition(str_13, quer_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_14 =std::string(2000000,'0');
+    std::vector<std::vector<int>> quer_14 = {{1,5}};
+    try
+    {
+        StrangeAddition(str_14, quer_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_15 =std::string(20,'1');
+    std::vector<std::vector<int>> quer_15(1000005,{1,5});
+    try
+    {
+        StrangeAddition(str_15, quer_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_16 =std::string(15,'5');
+    std::vector<std::vector<int>> quer_16(105,{20,2});
+    try
+    {
+        StrangeAddition(str_16, quer_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
