@@ -1,0 +1,163 @@
+// https://codeforces.com/problemset/problem/1946/F
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <cassert>
+#include <stdexcept>
+
+
+template<class Info>
+struct Fenwick {
+    std::vector<Info> tree;
+    int len;
+    
+    Fenwick(int len = 0) : len(len) {
+        tree.resize(len);
+    }
+    
+    void Add(int idx, const Info &val) {
+        for (int i = idx + 1; i <= len; i += i & -i) {
+            tree[i - 1] = tree[i - 1] + val;
+        }
+    }
+    
+    Info Sum(int idx) {
+        idx++;
+        Info res = Info();
+        for (int i = idx; i > 0; i -= i & -i) {
+            res = res + tree[i - 1];
+        }
+        return res;
+    }
+    
+    Info rangeSum(int left, int right) {
+        Info res = Sum(right) - Sum(left - 1);
+        return res;
+    }
+};
+
+/*
+Input :
+
+A vector of integers arr.
+A vector of vectors of integers query.
+
+Constraints :
+
+arr.size() , query.size() : ranges from 1 to 1000000.
+arr : ranges from 1 to arr.size() , it is a permutation of size arr.size().
+query : query[i][0] ranges from 1 to query[i][1], query[i][1] ranges from query[i][0] to arr.size().
+
+
+
+*/
+
+
+
+
+
+std::vector<long long int> NobodyIsNeeded(std::vector<int> &arr,std::vector<std::vector<int>> query) {
+    int len=arr.size(), q_len=query.size();
+    std::set<int> per;
+    if (len < 1 || len > 1000000) {
+        throw std::invalid_argument("Invalid value of len: " + std::to_string(len) + ". It should be within the range 1 ≤ len ≤ 10^6.");
+    }
+    if (q_len < 1 || q_len > 1000000) {
+        throw std::invalid_argument("Invalid value of q_len: " + std::to_string(q_len) + ". It should be within the range 1 ≤ q_len ≤ 10^6.");
+    }
+    for (int i = 0; i < len; ++i) {
+        per.insert(arr[i]);
+        if (arr[i] < 1 || arr[i] > len) {
+            throw std::invalid_argument("Invalid value in arr: " + std::to_string(arr[i]) + ". It should be within the range 1 ≤ arr[i] ≤ len.");
+        }
+    }
+    if(per.size()!=len){
+        throw std::invalid_argument("Invalid Permutation arr");
+    }
+    for (std::vector<int>& it : query) {
+        int left = it[0];
+        int right = it[1];
+        if (left < 1 || left > right || right > len) {
+            throw std::invalid_argument("Invalid it: (" + std::to_string(left) + ", " + std::to_string(right) + "). It should satisfy 1 ≤ left ≤ right ≤ len.");
+        }
+    }
+    std::vector<int> pos(len + 1);
+    std::reverse(arr.begin(), arr.end());
+    for (int i = 0; i < len; i++) {
+        pos[arr[i]] = i;
+    }
+    std::vector<long long int> res(q_len);
+    std::vector<std::vector<std::pair<int, int>>> qry(len);
+    for (int i = 0; i < q_len; i++) {
+        int left=query[i][0], right=query[i][1];;
+        left--, right--;
+        std::swap(left, right);
+        left = len - left - 1;
+        right = len - right - 1;
+        qry[right].emplace_back(left, i);
+    }
+    std::vector<long long int> dp_table(len + 1);
+    Fenwick<long long int> fnwk_tree(len);
+    for (int right = 0; right < len; right++) {
+        int idx = arr[right];
+        dp_table[idx] = 1;
+        for (int y = idx; y <= len; y += idx) {
+            if (pos[y] > pos[idx]) {
+                continue;
+            }
+            for (int z = 2 * y; z <= len; z += y) {
+                if (pos[z] > pos[y]) {
+                    continue;
+                }
+                dp_table[z] += dp_table[y];
+            }
+        }
+        for (int y = idx; y <= len; y += idx) {
+            fnwk_tree.Add(pos[y], dp_table[y]);
+            dp_table[y] = 0;
+        }
+        for (std::pair<int,int> it : qry[right]) {
+            int left=it.first;
+            int i=it.second;
+            res[i] += fnwk_tree.rangeSum(left, right);
+        }
+    }
+    return res;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+signed main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    int tree = 1;
+    std::cin >> tree;
+
+    while (tree--) {
+        int n,m;
+        std::cin>>n>>m;
+        std::vector<int> arr(n);
+        for(int i=0; i<n; i++){
+            std::cin>>arr[i];
+        }
+        std::vector<std::vector<int>> vp;
+        for(int i=0;i<m;i++){
+            int l,r;
+            std::cin>>l>>r;
+            vp.push_back({l,r});
+        }
+        std::vector<long long int> ans=NobodyIsNeeded(arr,vp);
+        for(auto x:ans){
+            std::cout<<x<<" ";
+        }
+        std::cout<<std::endl;
+    }
+}
