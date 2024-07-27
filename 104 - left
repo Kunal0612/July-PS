@@ -1,0 +1,257 @@
+// https://codeforces.com/contest/1830/problem/F
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+
+
+struct Line
+{
+    long long slope, intercept;
+
+    Line(long long _slope, long long _intercept)
+    {
+        slope = _slope, intercept = _intercept;
+    }
+
+    long long Get(long long xec)
+    {
+        return slope * xec + intercept;
+    }
+};
+
+struct Node
+{
+    int start, end, mid;
+    int val_start = 0, val_end = 0, val_mid = 0;
+    long long INF = 1e18;
+    Line line_val = {0, -INF};
+    int lazy = 0;
+    Node *left, *right;
+
+    Node(int _start, int _end)
+    {
+        start = _start, end = _end, mid = (start + end) / 2;
+
+        if (start != end)
+        {
+            left = new Node(start, mid);
+            right = new Node(mid + 1, end);
+        }
+    }
+
+    void Propagate()
+    {
+        if (lazy == 0){
+            return;
+        }
+
+        line_val.intercept -= line_val.slope * lazy;
+        val_start += lazy;
+        val_end += lazy;
+        val_mid += lazy;
+
+        if (start != end)
+        {
+            left->lazy += lazy;
+            right->lazy += lazy;
+        }
+        lazy = 0;
+    }
+
+    void Update(int index)
+    {
+        if (start == index){
+            lazy++;
+        }
+        else
+        {
+            if (line_val.intercept != -INF)
+            {
+                left->Propagate();
+                right->Propagate();
+                left->Update(line_val);
+                right->Update(line_val);
+                line_val = {0, -INF};
+            }
+
+            if (mid < index){
+                right->Update(index);
+            }
+            else
+            {
+                left->Update(index);
+                right->Update(mid + 1);
+            }
+
+            left->Propagate();
+            right->Propagate();
+            val_start = left->val_start;
+            val_mid = left->val_end;
+            val_end = right->val_end;
+        }
+    }
+
+    void Update(Line new_line)
+    {
+        bool is_low = new_line.Get(val_start) > line_val.Get(val_start);
+        bool is_mid = new_line.Get(val_mid) > line_val.Get(val_mid);
+        bool is_high = new_line.Get(val_end) > line_val.Get(val_end);
+
+        if (is_mid){
+            std::swap(new_line, line_val);
+        }
+
+        if (start == end || new_line.intercept == -INF || is_low == is_high){
+            return;
+        }
+
+        left->Propagate();
+        right->Propagate();
+        if (is_low != is_mid){
+            left->Update(new_line);
+        }
+        else{
+            right->Update(new_line);
+        }
+    }
+
+    std::pair<long long, int> query(long long index)
+    {
+        Propagate();
+
+        if (start == end){
+            return {line_val.Get(val_start), val_start};
+        }
+        else if (index <= mid)
+        {
+            std::pair<long long, int> temp = left->query(index);
+            return {std::max(temp.first, line_val.Get(temp.second)), temp.second};
+        }
+        else
+        {
+            std::pair<long long, int> temp = right->query(index);
+            return {std::max(temp.first, line_val.Get(temp.second)), temp.second};
+        }
+    }
+};
+
+
+/*
+Input :
+
+A vector of integers coefficient.
+A vector of vector of integers interval.
+
+Constraints : 
+
+coefficient.size() : ranges from 1 to 1000000.
+interval.size() : ranges from 1 to 1000000.
+coefficient : ranges from 0 to 1000000000 .
+interval : interval[i][0] ranges from 1 to interval[i][1]-1, 
+           interval[i][1] ranges from interval[i][0] to coefficient.size().
+
+*/
+
+
+int TheThirdGrace(std::vector<long long int> coefficient, std::vector<std::pair<long long, long long>> interval)
+{
+    int num_intervals=interval.size(), num_points=coefficient.size();
+    if (num_intervals < 1 || num_intervals > 1000000 || num_points < 1 || num_points > 1000000)
+    {
+        throw std::invalid_argument("Invalid value for n or m");
+    }
+
+    std::vector<std::pair<long long, long long>> intervals(num_intervals + 1);
+    for (int i = 1; i <= num_intervals; ++i)
+    {
+        intervals[i].first=interval[i-1].first;
+        intervals[i].second=interval[i-1].second;
+        if (intervals[i].first < 1 || intervals[i].first > intervals[i].second || intervals[i].second > num_points)
+        {
+            throw std::invalid_argument("Invalid value for l_i or r_i");
+        }
+    }
+
+    std::vector<long long> coefficients(num_points + 1);
+    for (int i = 1; i <= num_points; ++i)
+    {
+        coefficients[i]=coefficient[i-1];
+        if (coefficients[i] < 0 || coefficients[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid value for p_i");
+        }
+    }
+
+    std::sort(intervals.begin() + 1, intervals.begin() + num_intervals + 1);
+
+    Node *root = new Node(0, num_points + 1);
+    root->Update({0, 0});
+
+    int current = 1;
+    for (int i = 0; i <= num_points + 1; ++i)
+    {
+        while (current <= num_intervals && intervals[current].first == i){
+            root->Update(intervals[current++].second + 1);
+        }
+        std::pair<long long, int> temp = root->query(i);
+        root->Update({coefficients[i], temp.first - coefficients[i] * temp.second});
+    }
+
+    int ans=root->query(num_points + 1).first;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+    std::ios::sync_with_stdio(0);
+    std::cin.tie(0);
+    std::cout.tie(0);
+    std::cin.exceptions(std::ios::badbit | std::ios::failbit);
+
+    int test_cases;
+    std::cin >> test_cases;
+    if (test_cases < 1 || test_cases > 100000)
+    {
+        throw std::invalid_argument("Invalid number of test cases");
+    }
+
+    while (test_cases--)
+    {
+        int num_intervals, num_points;
+        std::cin >> num_intervals >> num_points;
+        std::vector<std::pair<long long, long long>> intervals(num_intervals);
+        for (int i = 0; i <num_intervals; ++i)
+        {
+            std::cin >> intervals[i].first >> intervals[i].second;
+        }
+
+        std::vector<long long> coefficients(num_points);
+        for (int i = 0; i <num_points; ++i)
+        {
+            std::cin >> coefficients[i];
+        }
+        int ans=TheThirdGrace(coefficients,intervals);
+        std::cout << ans << std::endl;
+    }
+
+    return 0;
+}
