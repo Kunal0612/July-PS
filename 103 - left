@@ -1,0 +1,244 @@
+// https://codeforces.com/contest/1830/problem/E
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+#include <chrono>
+#include <random>
+#include <utility>
+#include <set>
+
+
+
+struct Decomp {
+    std::vector<int> array;
+    std::vector<std::pair<int, int>> buckets;
+    std::vector<int> prefix_sum;
+    std::vector<int> bucket_prefix_sum;
+    std::vector<int> position;
+    int bucket_size = 400;
+
+    void Resize(int len) {
+        array.resize(len + 1);
+        prefix_sum.resize(len + 1);
+        position.resize(len + 1);
+        for (int i = 1; i <= len; i += bucket_size) {
+            int start = i;
+            int end = std::min(len, start + bucket_size - 1);
+            for (int j = start; j <= end; ++j) {
+                position[j] = buckets.size();
+            }
+            buckets.push_back({start, end});
+            bucket_prefix_sum.push_back(0);
+        }
+    }
+
+    void Update(int pos, int value) {
+        array[pos] += value;
+        int bucket_idx = position[pos];
+        prefix_sum[buckets[bucket_idx].first] = array[buckets[bucket_idx].first];
+        for (int i = buckets[bucket_idx].first + 1; i <= buckets[bucket_idx].second; ++i) {
+            prefix_sum[i] = prefix_sum[i - 1] + array[i];
+        }
+        bucket_prefix_sum[0] = prefix_sum[buckets[0].second];
+        for (int i = 1; i < buckets.size(); ++i) {
+            bucket_prefix_sum[i] = bucket_prefix_sum[i - 1] + prefix_sum[buckets[i].second];
+        }
+    }
+
+    int Query(int pos) {
+        int bucket_idx = position[pos];
+        int result = prefix_sum[pos];
+        if (bucket_idx) {
+            result += bucket_prefix_sum[bucket_idx - 1];
+        }
+        return result;
+    }
+};
+
+struct Geralt {
+    std::vector<int> array;
+    std::vector<Decomp> decomps;
+    std::vector<std::pair<int, int>> buckets;
+    std::vector<int> position;
+    int bucket_size = 3000;
+
+    void Resize(int n) {
+        array.resize(n + 1);
+        position.resize(n + 1);
+        for (int i = 1; i <= n; i += bucket_size) {
+            int start = i;
+            int end = std::min(n, start + bucket_size - 1);
+            for (int j = start; j <= end; ++j) {
+                position[j] = buckets.size();
+            }
+            buckets.push_back({start, end});
+            decomps.push_back({});
+            decomps.back().Resize(n);
+        }
+    }
+
+    void Update(int pos, int value) {
+        int bucket_idx = position[pos];
+        if (array[pos] != 0) {
+            decomps[bucket_idx].Update(array[pos], -1);
+        }
+        array[pos] = value;
+        decomps[bucket_idx].Update(array[pos], 1);
+    }
+
+    int QueryBrute(int start, int end, int value) {
+        int result = 0;
+        for (int i = start; i <= end; ++i) {
+            if (array[i] <= value) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    int QuerySmaller(int start, int end, int value) {
+        if (position[start] == position[end]) {
+            return QueryBrute(start, end, value);
+        }
+        int bucket_idx_1 = position[start], bucket_idx_2 = position[end];
+        int result = QueryBrute(start, buckets[bucket_idx_1].second, value) + QueryBrute(buckets[bucket_idx_2].first, end, value);
+        bucket_idx_1++;
+        bucket_idx_2--;
+        for (int i = bucket_idx_1; i <= bucket_idx_2; ++i) {
+            result += decomps[i].Query(value);
+        }
+        return result;
+    }
+
+    int QueryGreater(int start, int end, int value) {
+        return (end - start + 1) - QuerySmaller(start, end, value);
+    }
+};
+
+/*
+Input :
+
+A vector of integers nums.
+A vector of vector of integers query.
+
+Constraints : 
+
+nums.size() : ranges from 2 to 500000.
+query.size() : ranges from 1 to 500000.
+nums : ranges from 1 to nums.size() , it is a permutation.
+query : query[i][0] ranges from 1 to query[i][1]-1, 
+        query[i][1] ranges from query[i][0] to nums.size().
+
+*/
+
+
+
+std::vector<int> BullySort(std::vector<int> &nums,std::vector<std::vector<int>> query){
+    int len=nums.size(), q_len=query.size();
+    if (len < 2 || len > 500000) {
+        throw std::out_of_range("n is out of bounds: should be between 2 and 500000.");
+    }
+    if (q_len < 1 || q_len > 50000) {
+        throw std::out_of_range("q is out of bounds: should be between 1 and 50000.");
+    }
+    std::set<int> unique_elements;
+    for (int i = 0; i < len; ++i) {
+        if (nums[i] < 1 || nums[i] > len) {
+            throw std::out_of_range("nums element out of bounds: should be between 1 and n.");
+        }
+        unique_elements.insert(nums[i]);
+    }
+
+    if (unique_elements.size() != len) {
+        throw std::invalid_argument("nums does not contain all distinct elements.");
+    }
+    for (int i = 0; i < q_len; ++i) {
+        int xec=query[i][0], yec=query[i][1];
+        if (xec < 1 || xec >= yec || yec > len) {
+            throw std::out_of_range("query values out of bounds or invalid: x should be between 1 and y-1, y should be between x+1 and n.");
+        }
+    }
+    std::vector<int> array(len + 1);
+    for (int i = 1; i <= len; ++i) {
+        array[i]=nums[i-1];
+    }
+
+    Geralt geralt;
+    geralt.Resize(len);
+
+    long long int inversions = 0;
+
+    for (int i = 1; i <= len; ++i) {
+        geralt.Update(i, array[i]);
+        inversions += geralt.QueryGreater(1, i, array[i]);
+    }
+
+    long long int sum = 0;
+
+    for (int i = 1; i <= len; ++i) {
+        sum += std::max(array[i] - i, 0);
+    }
+    std::vector<int> ans;
+    for(int i=0;i<q_len; ++i) {
+        int xec=query[i][0], yec=query[i][1];
+        if (xec != yec) {
+            sum -= std::max(array[xec] - xec, 0);
+            sum -= std::max(array[yec] - yec, 0);
+            if (xec + 1 <= yec - 1) {
+                int less_than_x = geralt.QuerySmaller(xec + 1, yec - 1, array[xec]);
+                int greater_than_y = geralt.QueryGreater(xec + 1, yec - 1, array[yec]);
+                inversions += 2 * (yec - xec - 1 - less_than_x - greater_than_y);
+            }
+
+            if (array[xec] > array[yec]) {
+                inversions--;
+            } else {
+                inversions++;
+            }
+
+            std::swap(array[xec], array[yec]);
+            sum += std::max(array[xec] - xec, 0);
+            sum += std::max(array[yec] - yec, 0);
+            geralt.Update(xec, array[xec]);
+            geralt.Update(yec, array[yec]);
+        }
+        ans.push_back(sum + sum - inversions);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+#include <chrono>
+#include <random>
+#include <utility>
+#include <set>
+
+
+
+int32_t main() {
+    std::cin.tie(nullptr)->sync_with_stdio(false);
+    int len, q_len;
+    std::cin >> len >> q_len;
+    std::vector<int> array(len);
+    for (int i = 1; i <= len; ++i) {
+        std::cin >> array[i-1];
+    }
+    std::vector<std::vector<int>> query;
+    for(int i=0;i<q_len;i++){
+        int xec,yec;
+        std::cin>>xec>>yec;
+        query.push_back({xec,yec});
+    }
+    std::vector<int> ans=BullySort(array,query);
+    for(auto x:ans){
+        std::cout<<x;
+        std::cout<<std::endl;
+    }
+}
