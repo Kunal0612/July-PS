@@ -1,0 +1,93 @@
+// https://codeforces.com/problemset/problem/1765/J
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+#include <cassert>
+
+
+/*
+Input :
+
+A vector of integers arr.
+A vector of integers brr.
+
+Constraints :
+
+arr.size() = brr.size() : ranges from 2 to 200000.
+arr , brr : ranges from 0 to 10^8.
+
+*/
+
+
+
+
+int HeroToZero(std::vector<int> arr,std::vector<int> brr){
+    int len=arr.size();
+    if (len < 2 || len > 200000)
+    {
+        throw std::invalid_argument("len must be between 2 and 200000");
+    }
+    for (int &a : arr)
+    {
+        if (a < 0 || a > 1e8)
+        {
+            throw std::invalid_argument("Each element in arr must be between 0 and 108");
+        }
+    }
+    for (int &b : brr)
+    {
+        if (b < 0 || b > 1e8)
+        {
+            throw std::invalid_argument("Each element in brr must be between 0 and 108");
+        }
+    }
+    std::sort(arr.begin(), arr.end());
+    std::sort(brr.begin(), brr.end());
+
+    long long total = 0;
+    for (int i = 0; i < len; i++)
+    {
+        total += len * 1ll * (arr[i] + brr[i]);
+        total -= arr[i] * 2ll * (brr.end() - std::lower_bound(brr.begin(), brr.end(), arr[i]));
+        total -= brr[i] * 2ll * (arr.end() - std::upper_bound(arr.begin(), arr.end(), brr[i]));
+    }
+
+    for (int i = 0; i < len; i++)
+    {
+        total -= (len - 1) * 1ll * std::abs(arr[i] - brr[i]);
+    }
+
+    return total;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+#include <cassert>
+
+int main()
+{
+
+    int len;
+    std::cin >> len;
+
+    std::vector<int> arr(len), brr(len);
+    for (int i = 0; i < len; i++)
+    {
+        std::cin >> arr[i];
+    }
+    for (int i = 0; i < len; i++)
+    {
+        std::cin >> brr[i];
+    }
+    int total=HeroToZero(arr,brr);
+    std::cout << total << std::endl;
+
+    return 0;
+}
