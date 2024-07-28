@@ -1,0 +1,244 @@
+/*
+
+https://codeforces.com/problemset/problem/1516/E
+
+Write a C++ Solution BabyEhabPlaysWithPermutations to determine the ans vector where 
+the i-th of them is the number of possible sequences you can end up with if you do 
+exactly i operations. Since this number can be very large, return the remainder when 
+it's divided by 10^9+7.
+
+
+This time around, Baby Ehab will play with permutations. He has num cubes arranged 
+in a row, with numbers from 1 to num
+written on them. He'll make exactly j operations. In each operation, he'll pick up 
+2 cubes and switch their positions.
+
+He's wondering: how many different sequences of cubes can I have at the end? Since 
+Baby Ehab is a turbulent person, 
+he doesn't know how many operations he'll make, so he wants the answer for every 
+possible j between 1 and k_value.
+
+Input :
+
+An integer num.
+An integer k_value.
+
+Constraints :
+
+num : ranges from 2 to 10^9.
+k_value : ranges from 1 to 200.
+
+Output:
+
+An vector of integer ans where the i-th of them is the number of possible sequences 
+you can end up with if you do exactly i operations. Since this number can be very large, 
+return the remainder when it's divided by 10^9+7.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+ 
+
+long long ComputeNcr(int total, int choose, const std::vector<long long>& inv, const std::vector<std::vector<long long>>& comb) {
+    long long result = 1;
+    int mod = 1000000007;
+    for (int i = total - choose + 1; i <= total; ++i){
+        result = (result * i) % mod;
+    }
+    for (int i = 1; i <= choose; ++i){
+        result = (result * inv[i]) % mod;
+    }
+    return result;
+}
+
+
+std::vector<int> BabyEhabPlaysWithPermutations(int num, int k_value){
+    if (num< 2 || num > 1000000000) {
+        throw std::invalid_argument("Invalid value for n: Ensure 2 ≤ num ≤ 10^9");
+    }
+    if (k_value < 1 || k_value > 200) {
+        throw std::invalid_argument("Invalid value for k: Ensure 1 ≤ k_value ≤ 200");
+    }
+    int mx_size = 405;
+    std::vector<std::vector<long long>> comb(mx_size, std::vector<long long>(mx_size, 0));
+    std::vector<std::vector<long long>> dp_table(mx_size, std::vector<long long>(mx_size, 0));
+    std::vector<long long> inv(mx_size, 0);
+
+    comb[0][0] = 1;
+    int mod = 1000000007;
+    for (int i = 1; i <= 2 * k_value; ++i) {
+        dp_table[i][0] = 1;
+        comb[i][0] = 1;
+        for (int j = 1; j <= 2 * k_value; ++j) {
+            dp_table[i][j] = (dp_table[i - 1][j] + (i - 1) * dp_table[i - 1][j - 1]) % mod;
+            comb[i][j] = (comb[i - 1][j] + comb[i - 1][j - 1]) % mod;
+        }
+    }
+    inv[1] = 1;
+    for (int i = 2; i <= 2 * k_value; ++i){
+        inv[i] = inv[mod % i] * (mod - mod / i) % mod;
+    }
+    std::vector<int> results(2, 0);
+    results[0] = 1;
+    std::vector<int> ans;
+    for (int j = 1; j <= k_value; ++j) {
+        for (int i = 1; i <= std::min(num, 2 * j); ++i) {
+            int count = 0;
+            for (int f = 0; f <= i; ++f){
+                count = (count + (f % 2 ? -1 : 1) * comb[i][f] * dp_table[i - f][j] % mod + mod) % mod;
+            }
+            results[j % 2] = (results[j % 2] + ComputeNcr(num, i, inv, comb) * count) % mod;
+        }
+        ans.push_back(results[j % 2]);
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int main() {
+    // TEST
+    int num_1 = 2, k_value_1 = 3;
+    std::vector<int> expected_1 = {1,1,1};
+    std::vector<int> result_1 = BabyEhabPlaysWithPermutations(num_1, k_value_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 7, k_value_2 = 4;
+    std::vector<int> expected_2 = {21,176,756,1800};
+    std::vector<int> result_2 = BabyEhabPlaysWithPermutations(num_2, k_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 10, k_value_3 = 7;
+    std::vector<int> expected_3 = {45,871,9495,64144,278820,787824,1451520};
+    std::vector<int> result_3 = BabyEhabPlaysWithPermutations(num_3, k_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 8, k_value_4 = 5;
+    std::vector<int> expected_4 = {28,323,1988,7092,15120};
+    std::vector<int> result_4 = BabyEhabPlaysWithPermutations(num_4, k_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 12, k_value_5 = 8;
+    std::vector<int> expected_5 = {66,1926,32736,359349,2670294,13698884,48666024,118956960};
+    std::vector<int> result_5 = BabyEhabPlaysWithPermutations(num_5, k_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 12, k_value_6 = 5;
+    std::vector<int> expected_6 ={66,1926,32736,359349,2670294};
+    std::vector<int> result_6 = BabyEhabPlaysWithPermutations(num_6, k_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 9, k_value_7 = 6;
+    std::vector<int> expected_7 ={36,547,4572,22996,71856,141120};
+    std::vector<int> result_7 = BabyEhabPlaysWithPermutations(num_7, k_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 4, k_value_8 = 2;
+    std::vector<int> expected_8 = {6,12};
+    std::vector<int> result_8 = BabyEhabPlaysWithPermutations(num_8, k_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = 0, k_value_9 = 2;
+    try
+    {
+        BabyEhabPlaysWithPermutations(num_9, k_value_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = -1, k_value_10 = 2;
+    try
+    {
+        BabyEhabPlaysWithPermutations(num_10, k_value_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = 1000000009, k_value_11 = 2;
+    try
+    {
+        BabyEhabPlaysWithPermutations(num_11, k_value_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_12 = 101, k_value_12 = -1;
+    try
+    {
+        BabyEhabPlaysWithPermutations(num_12, k_value_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_13 = 101, k_value_13 = 10000000009;
+    try
+    {
+        BabyEhabPlaysWithPermutations(num_13, k_value_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_14 = 101, k_value_14 = 0;
+    try
+    {
+        BabyEhabPlaysWithPermutations(num_14, k_value_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
+    return 0;
+}
