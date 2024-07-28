@@ -1,0 +1,276 @@
+/*
+
+https://codeforces.com/problemset/problem/1731/F
+
+Write a C++ Solution FunctionSum to determine the sum of f over all arrays nums of 
+size len modulo 998244353.
+
+Suppose you have an integer array nums_1,nums_2,…,nums_len.
+
+Let lsl(i) be the number of indices j (1≤j<i) such that nums_j<nums_i.
+
+Analogically, let grr(i) be the number of indices j (i<j≤len) such that nums_j>nums_i.
+
+Let's name position i good in the array nums if lsl(i)<grr(i).
+
+Finally, let's define a function f on array nums f(nums) as the sum of all nums[i] such 
+that i is good in nums.
+
+Given two integers len and k_value , find the sum of f(nums) over all arrays nums of size 
+len such that 1≤nums[i]≤k_value for all 1≤i≤len modulo 998244353.
+
+Input :
+
+An integer len.
+An integer k_value.
+
+Constraints :
+
+len : ranges from 1 to 50.
+k_value : ranges from 2 to 998244353.
+
+Output:
+
+An integer ans to determine the sum of f over all arrays nums of size len modulo 998244353.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+long long Power(long long base, long long exponent, long long mod)
+{
+    long long ans = 1;
+    base = (base % mod + mod) % mod;
+    while (exponent)
+    {
+        if (exponent & 1){
+            ans = (ans * base) % mod;
+        }
+        base = (base * base) % mod;
+        exponent /= 2;
+    }
+    return ans;
+}
+
+int Ncr(int len, int r_value, const std::vector<int> &fact, const std::vector<int> &inv_fact)
+{
+    if (r_value > len || r_value < 0){
+        return 0;
+    }
+    int mod = 998244353;
+    return (1ll * fact[len] * inv_fact[r_value] % mod) * inv_fact[len - r_value] % mod;
+}
+
+
+int Interpolate(const std::vector<int> &y_value, int r_value, int len, const std::vector<int> &fact, 
+const std::vector<int> &inv_fact)
+{
+    int mod = 998244353;
+    int ans = 0, prod = 1, temp;
+    for (int i = 1; i <= r_value; ++i)
+    {
+        prod = (1ll * prod * (len - i)) % mod;
+    }
+    for (int i = 0; i < r_value; ++i)
+    {
+        temp = (1ll * prod * Power(len - i - 1, mod - 2, mod)) % mod;
+        temp = (1ll * temp * y_value[i]) % mod;
+        temp = (1ll * temp * inv_fact[i]) % mod;
+        temp = (1ll * temp * inv_fact[r_value - i - 1]) % mod;
+        if ((r_value - i) % 2 == 0){
+            temp = mod - temp;
+        }
+        ans = (ans + temp) % mod;
+    }
+    return ans;
+}
+
+
+int FunctionSum(int len, int k_value)
+{
+    int max_num = 201;
+    std::vector<int> fact(max_num);
+    std::vector<int> inv_fact(max_num);
+    fact[0] = 1;
+    inv_fact[0] = 1;
+    int mod = 998244353;
+    for (int i = 1; i < max_num; ++i)
+    {
+        fact[i] = (1ll * i * fact[i - 1]) % mod;
+        inv_fact[i] = Power(fact[i], mod - 2, mod);
+    }
+    if (len < 1 || len > 50 || k_value < 2 || k_value >= mod)
+    {
+        throw std::invalid_argument("Invalid input: Ensure 1 <= len <= 50 and 2 <= k_value < 998244353");
+    }
+
+    std::vector<int> values_of_polynomial(len + 3, 0);
+    for (int i = 1; i <= len; ++i)
+    {
+        for (int x = 0; x < i; ++x)
+        {
+            for (int y_value = x + 1; y_value <= len - i; ++y_value)
+            {
+                for (int val = 1; val <= len + 3; ++val)
+                {
+                    long long calculation = (1ll * Ncr(i - 1, x, fact, inv_fact) * Power(val - 1, x, mod)) % mod;
+                    calculation = (calculation * Power(k_value + 1 - val, i - 1 - x, mod)) % mod;
+                    calculation = (calculation * (1ll * Ncr(len - i, y_value, fact, inv_fact) * Power(k_value - val, y_value, mod)) % mod) % mod;
+                    calculation = (calculation * Power(val, len - i - y_value, mod)) % mod;
+                    calculation = (calculation * val) % mod;
+                    values_of_polynomial[val - 1] = (values_of_polynomial[val - 1] + calculation) % mod;
+                }
+            }
+        }
+    }
+
+    for (int i = 1; i < len + 3; ++i)
+    {
+        values_of_polynomial[i] = (values_of_polynomial[i] + values_of_polynomial[i - 1]) % mod;
+    }
+    int ans;
+    if (k_value <= len + 3)
+    {
+        ans=values_of_polynomial[k_value - 1];
+    }
+    else
+    {
+        ans=Interpolate(values_of_polynomial, len + 3, k_value, fact, inv_fact);
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    int num_1 = 4, k_value_1 = 4;
+    int expected_1 = 570;
+    int result_1 = FunctionSum(num_1, k_value_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 7, k_value_2 = 4;
+    int expected_2 = 77370;
+    int result_2 = FunctionSum(num_2, k_value_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 10, k_value_3 = 7;
+    int expected_3 = 332197653;
+    int result_3 = FunctionSum(num_3, k_value_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 8, k_value_4 = 5;
+    int expected_4 = 2636720;
+    int result_4 = FunctionSum(num_4, k_value_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 12, k_value_5 = 8;
+    int expected_5 = 113844275;
+    int result_5 = FunctionSum(num_5, k_value_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 12, k_value_6 = 30;
+    int expected_6 = 920711694;
+    int result_6 = FunctionSum(num_6, k_value_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 9, k_value_7 = 6;
+    int expected_7 =91707035;
+    int result_7 = FunctionSum(num_7, k_value_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 4, k_value_8 = 2;
+    int expected_8 = 17;
+    int result_8 = FunctionSum(num_8, k_value_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = 0, k_value_9 = 2;
+    try
+    {
+        FunctionSum(num_9, k_value_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = -1, k_value_10 = 2;
+    try
+    {
+        FunctionSum(num_10, k_value_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = 1001, k_value_11 = 2;
+    try
+    {
+        FunctionSum(num_11, k_value_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_12 = 101, k_value_12 = -1;
+    try
+    {
+        FunctionSum(num_12, k_value_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_13 = 101, k_value_13 = 10000000009;
+    try
+    {
+        FunctionSum(num_13, k_value_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
+    return 0;
+}
