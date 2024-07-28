@@ -1,0 +1,203 @@
+// https://codeforces.com/problemset/problem/1691/F
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+class Comb {
+public:
+    std::vector<long long int> fac;
+    std::vector<long long int> inv_fac;
+    long long int num;
+    long long int mod = 1e9 + 7;
+    Comb(long long int num) {
+        this->num = num;
+        fac.resize(num + 1, 0);
+        inv_fac.resize(num + 1, 0);
+
+        fac[0] = 1;
+        for (long long int i = 1; i <= num; i++){
+            fac[i] = (fac[i - 1] * i) % mod;
+        }
+        inv_fac[num] = Power(fac[num], mod - 2);
+        for (long long int i = num - 1; i >= 0; i--){
+            inv_fac[i] = (inv_fac[i + 1] * (i + 1)) % mod;
+        }
+    }
+
+    static long long int Power(long long int first, long long int sec) {
+        long long int ret = 1;
+        long long int mod = 1e9 + 7;
+        while (sec) {
+            if (sec & 1){
+                ret = (ret * first) % mod;
+            }
+            sec >>= 1;
+            first = (first * first) % mod;
+        }
+        return ret;
+    }
+
+    long long int NCR(long long int num, long long int r_value) {
+        if (num < 0 || r_value < 0 || num < r_value){
+            return 0;
+        }
+        long long int ans = (fac[num] * ((inv_fac[r_value] * inv_fac[num - r_value]) % mod)) % mod;
+        return ans;
+    }
+};
+
+class Tree {
+public:
+    std::vector<std::vector<int>> adj;
+    std::vector<int> size;
+    std::vector<long long int> cnt;
+    std::vector<long long int> cnt_sz;
+    Comb cmb;
+    long long int cur_ans;
+    long long int ans;
+
+    Tree(int num) : cmb(2e5 + 5), adj(num), size(num), cnt(num), cnt_sz(num), cur_ans(0), ans(0) {}
+
+    void DFS1(int node_v, int parent, int k_value) {
+        size[node_v] = 1;
+        long long int sub = 0;
+        long long int mod = 1e9 + 7;
+        for (int node_u : adj[node_v]) {
+            if (node_u != parent) {
+                DFS1(node_u, node_v, k_value);
+                size[node_v] += size[node_u];
+                sub = (sub + cmb.NCR(size[node_u], k_value)) % mod;
+            }
+        }
+        cnt[node_v] = (cmb.NCR(size[node_v], k_value) - sub + mod) % mod;
+        cnt_sz[node_v] = (cnt[node_v] * size[node_v]) % mod;
+        cur_ans = (cur_ans + cnt_sz[node_v]) % mod;
+    }
+
+    void DFS2(int node_v, int parent, int k_value) {
+        long long int mod = 1e9 + 7;
+        ans = (ans + cur_ans) % mod;
+        for (int node_u : adj[node_v]) {
+            if (node_u != parent) {
+                int store_v_sz = size[node_v];
+                long long int store_v_cnt = cnt[node_v];
+                long long int store_v_cntsz = cnt_sz[node_v];
+                int store_u_sz = size[node_u];
+                long long int store_u_cnt = cnt[node_u];
+                long long int store_u_cntsz = cnt_sz[node_u];
+                long long int store_cur_ans = cur_ans;
+                size[node_v] -= size[node_u];
+                size[node_u] = size.size();
+                cnt[node_v] = (cnt[node_v] - cmb.NCR(store_v_sz, k_value) + mod) % mod;
+                cnt[node_v] = (cnt[node_v] + cmb.NCR(size[node_v], k_value)) % mod;
+                cnt[node_v] = (cnt[node_v] + cmb.NCR(store_u_sz, k_value)) % mod;
+                cnt[node_u] = (cnt[node_u] - cmb.NCR(store_u_sz, k_value) + mod) % mod;
+                cnt[node_u] = (cnt[node_u] + cmb.NCR(size[node_u], k_value)) % mod;
+                cnt[node_u] = (cnt[node_u] - cmb.NCR(size[node_v], k_value) + mod) % mod;
+                cnt_sz[node_v] = (cnt[node_v] * size[node_v]) % mod;
+                cnt_sz[node_u] = (cnt[node_u] * size[node_u]) % mod;
+                cur_ans = (cur_ans - store_v_cntsz - store_u_cntsz + mod + mod) % mod;
+                cur_ans = (cur_ans + cnt_sz[node_v] + cnt_sz[node_u]) % mod;
+                DFS2(node_u, node_v, k_value);
+                size[node_v] = store_v_sz;
+                cnt[node_v] = store_v_cnt;
+                cnt_sz[node_v] = store_v_cntsz;
+                size[node_u] = store_u_sz;
+                cnt[node_u] = store_u_cnt;
+                cnt_sz[node_u] = store_u_cntsz;
+                cur_ans = store_cur_ans;
+            }
+        }
+    }
+};
+
+/*
+
+Input :
+
+An integer num.
+An integer k_value.
+A vector of vector of integers edges.
+
+Constraints :
+
+num : ranges from 3 to 200000.
+k_value : ranges from 1 to num.
+edges.size() : is of size equal to num - 1.
+edges : ranges from 1 to num.
+
+*/
+
+
+int KSetTree(int num,int k_value,std::vector<std::vector<int>> &edges){
+    if (num < 3 || num > 200000) {
+        throw std::invalid_argument("n must be between 3 and 200000");
+    }
+    if (k_value < 1 || k_value > num) {
+        throw std::invalid_argument("k must be between 1 and n");
+    }
+    std::set<std::pair<int, int>> edge_set;
+    for (const std::vector<int>& edge : edges) {
+        int node_x = edge[0];
+        int node_y = edge[1];
+        if (node_x < 1 || node_x > num || node_y < 1 || node_y > num) {
+            throw std::invalid_argument("node_x and node_y must be between 1 and n");
+        }
+        if (node_x == node_y) {
+            throw std::invalid_argument("No self-loops allowed in a tree");
+        }
+        if (edge_set.count({node_x, node_y}) || edge_set.count({node_y, node_x})) {
+            throw std::invalid_argument("Duplicate edges are not allowed");
+        }
+
+        edge_set.insert({node_x, node_y});
+    }
+    if (edges.size() != num - 1) {
+        throw std::invalid_argument("The number of edges must be n-1 for a tree");
+    }
+    Tree tree(num);
+    
+    for (int i = 0; i < num - 1; ++i) {
+        int node_u=edges[i][0], node_v=edges[i][1];
+        --node_u, --node_v;
+        tree.adj[node_u].push_back(node_v);
+        tree.adj[node_v].push_back(node_u);
+    }
+
+    tree.DFS1(0, 0, k_value);
+    tree.DFS2(0, 0, k_value);
+
+    int ans=tree.ans;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    std::ios_base::sync_with_stdio(0);
+    std::cin.tie(0);
+    std::cout.tie(0);
+
+    int num, k_value;
+    std::cin >> num >> k_value;
+    std::vector<std::vector<int>> vp;
+    for (int i = 0; i < num - 1; ++i) {
+        int node_u, node_v;
+        std::cin >> node_u >> node_v;
+        vp.push_back({node_u,node_v});
+    }
+    int ans=KSetTree(num,k_value,vp);
+    std::cout << ans << std::endl;
+    return 0;
+}
