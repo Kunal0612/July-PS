@@ -1,13 +1,24 @@
-// https://codeforces.com/problemset/problem/1730/E
-
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <algorithm>
-#include <cassert>
-#include <stdexcept>
-
 /*
+
+https://codeforces.com/problemset/problem/1730/E
+
+Write a C++ Solution MaximumsAndMinimums to determine the count of subarrays 
+within the given array where the maximum element in the subarray is divisible 
+by the minimum element within the same subarray.
+
+Given an array nums of positive integers, count the number of subarrays where 
+the maximum value in the subarray is divisible by the minimum value in the same subarray.
+
+Details:
+
+A subarray is a contiguous portion of the array.
+The count represents the total number of such valid subarrays in the given array.
+
+Challenge:
+
+Efficiently identify subarrays where the divisibility condition holds and count their 
+occurrences within the given array.
+
 
 Input :
 
@@ -18,12 +29,29 @@ Constraints :
 nums.size() : ranges from 1 to 500000.
 nums : ranges from 1 to 10^6.
 
+Output:
+
+An integer ans to determine the count of subarrays within the given array where the 
+maximum element in the subarray is divisible by the minimum element within the same subarray.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
 */
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
 
 int MaximumsAndMinimums(std::vector<int> &nums)
 {
     int len = nums.size();
-    int mxi_range = 1000013;
+    int mxi_range = 0;
     if (len < 1 || len > 500000)
     {
         throw std::invalid_argument("Invalid input: Ensure 1 <= len <= 500000");
@@ -34,7 +62,9 @@ int MaximumsAndMinimums(std::vector<int> &nums)
         {
             throw std::invalid_argument("Invalid input: Ensure 1 <= nums[i] <= 1000000");
         }
+        mxi_range=std::max(mxi_range, nums[i]);
     }
+    mxi_range+=10;
     std::vector<int> greater_left(len), greater_right(len);
     std::vector<int> less_left(len), less_right(len);
     std::vector<std::vector<int>> positions(mxi_range);
@@ -130,16 +160,123 @@ int MaximumsAndMinimums(std::vector<int> &nums)
 #include <cassert>
 #include <stdexcept>
 
-int main()
-{
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {2,4,7,14};
+    int expected_1 = 7;
+    int result_1 = MaximumsAndMinimums(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
 
-    int len;
-    std::cin >> len;
-    std::vector<int> nums(len);
-    for (int i = 0; i < len; i++)
+    // TEST
+    std::vector<int> nums_2 = {16,14,2,6,16,2};
+    int expected_2 = 19;
+    int result_2 = MaximumsAndMinimums(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {1,2,3,4,5,5};
+    int expected_3 = 13;
+    int result_3 = MaximumsAndMinimums(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 4, 4, 5};
+    int expected_4 = 12;
+    int result_4 = MaximumsAndMinimums(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1, 2, 2, 4, 5, 6};
+    int expected_5 = 16;
+    int result_5 = MaximumsAndMinimums(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 2, 1, 2, 5, 5};
+    int expected_6 =19;
+    int result_6 = MaximumsAndMinimums(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7,1,1,1};
+    int expected_7 = 36;
+    int result_7 = MaximumsAndMinimums(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    int expected_8 = 28;
+    int result_8 = MaximumsAndMinimums(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {-1000000009};
+    try
     {
-        std::cin >> nums[i];
+        MaximumsAndMinimums(nums_9);
+        assert(false);
     }
-    int ans = MaximumsAndMinimums(nums);
-    std::cout << ans << std::endl;
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        MaximumsAndMinimums(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1000000009);
+    try
+    {
+        MaximumsAndMinimums(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,1000000009);
+    try
+    {
+        MaximumsAndMinimums(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        MaximumsAndMinimums(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
 }
