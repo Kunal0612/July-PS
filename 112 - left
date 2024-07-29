@@ -1,0 +1,139 @@
+// https://codeforces.com/problemset/problem/1036/G
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+void DepthFirstSearch(int node, const std::vector<std::vector<int>>& graph, std::vector<bool>& visited) {
+    if (visited[node]){
+        return;
+    }
+    visited[node] = true;
+    for (int neighbor : graph[node]) {
+        DepthFirstSearch(neighbor, graph, visited);
+    }
+}
+
+/*
+
+Input :
+
+An integer num_nodes.
+An integer num_edges.
+A vector of pair of integer edges.
+
+Constraints : 
+
+num_nodes : ranges from 1 to 10^6.
+num_edges : ranges from 1 to 10^6.
+edges : ranges from 1 to num_nodes and edges[i][0]!=edges[i][1].
+
+*/
+
+
+
+bool SourcesAndSinks(int num_nodes, int num_edges, const std::vector<std::pair<int, int>>& edges) {
+    if (num_nodes < 1 || num_nodes > 1000000) {
+        throw std::out_of_range("The number of vertices (n) must be between 1 and 1,000,000.");
+    }
+
+    if (num_edges < 1 || num_edges > 1000000) {
+        throw std::out_of_range("The number of edges (m) must be between 1 and 1,000,000.");
+    }
+
+    std::set<std::pair<int, int>> edge_set;
+    for (const std::pair<int,int>& edge : edges) {
+        int node_a = edge.first;
+        int node_b = edge.second;
+
+        if (node_a == node_b) {
+            throw std::invalid_argument("Self-loops are not allowed.");
+        }
+
+        if (node_a < 1 || node_a > num_nodes || node_b < 1 || node_b > num_nodes) {
+            throw std::out_of_range("Edge vertices are out of bounds.");
+        }
+
+        if (!edge_set.insert({node_a, node_b}).second) {
+            throw std::invalid_argument("Multiple edges between the same vertices are not allowed.");
+        }
+    }
+    std::vector<std::vector<int>> graph(num_nodes);
+    std::vector<std::vector<int>> reverse_graph(num_nodes);
+    std::vector<int> sources;
+    std::vector<int> sinks;
+    std::vector<int> reachability(20, 0);
+    std::vector<bool> visited(num_nodes, false);
+
+
+    for (const std::pair<int, int>& edge : edges) {
+        int node_a = edge.first;
+        int node_b = edge.second;
+        graph[node_a-1].push_back(node_b-1);
+        reverse_graph[node_b-1].push_back(node_a-1);
+    }
+
+    for (int i = 0; i < num_nodes; i++) {
+        if (graph[i].empty()) {
+            sinks.push_back(i);
+        }
+        if (reverse_graph[i].empty()) {
+            sources.push_back(i);
+        }
+    }
+
+    int num_sources = sources.size();
+    for (int i = 0; i < num_sources; i++) {
+        std::fill(visited.begin(), visited.end(), false);
+        DepthFirstSearch(sources[i], graph, visited);
+        for (int j = 0; j < num_sources; j++) {
+            if (visited[sinks[j]]) {
+                reachability[i] ^= (1 << j);
+            }
+        }
+    }
+
+    bool ans = true;
+    for (int mask = 0; mask < (1 << num_sources); mask++) {
+        int combined_reachability = 0;
+        for (int j = 0; j < num_sources; j++) {
+            if (mask & (1 << j)) {
+                combined_reachability |= reachability[j];
+            }
+        }
+        int selected_count = __builtin_popcount(mask);
+        int reachable_count = __builtin_popcount(combined_reachability);
+        if (reachable_count < selected_count || (reachable_count == selected_count && selected_count != 0 && selected_count != num_sources)) {
+            ans = false;
+        }
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    int num_nodes, num_edges;
+    scanf("%d %d", &num_nodes, &num_edges);
+
+    std::vector<std::pair<int, int>> edges(num_edges);
+    for (int i = 0; i < num_edges; i++) {
+        int node_a, node_b;
+        scanf("%d %d", &node_a, &node_b);
+        edges[i] = {node_a, node_b};
+    }
+
+    int ans=SourcesAndSinks(num_nodes, num_edges, edges);
+    std::cout<<ans<<std::endl;
+    return 0;
+}
