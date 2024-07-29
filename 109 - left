@@ -1,0 +1,94 @@
+// https://codeforces.com/problemset/problem/17/C
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+
+/*
+
+Input :
+
+A string str.
+
+Constraints :
+
+str.size() : ranges from 1 to 150;
+str : contains either 'a' , 'b' or 'c'
+
+*/
+
+
+
+int Balance(std::string str){
+    int mod = 51123987;
+    int len=str.size();
+    if(len<1 or len>150){
+        throw std::invalid_argument("Invalid Str len.");
+    }
+    for(char ch:str){
+        if(ch!='a' and ch!='b' and ch!='c'){
+            throw std::invalid_argument("Invalid Str.");
+        }
+    }
+    str = ' ' + str;  
+
+    std::vector<std::vector<int>> trr(3, std::vector<int>(len + 2, 0));
+    std::vector<std::vector<std::vector<std::vector<int>>>> dp_table(152, 
+        std::vector<std::vector<std::vector<int>>>(52, 
+        std::vector<std::vector<int>>(52, 
+        std::vector<int>(52, 0))));
+
+    for (int x = len; x >= 1; --x) {
+        for (int y = 0; y <= 2; ++y){
+            trr[y][x] = trr[y][x + 1];
+        }
+        trr[str[x] - 'a'][x] = x;
+    }
+
+    dp_table[1][0][0][0] = 1;
+    int ans = 0, cnt = 0;
+
+    for (int l = 1; l <= len; ++l) {
+        for (int x = 0; x <= (len + 2) / 3; ++x) {
+            for (int y = 0; y <= (len + 2) / 3; ++y) {
+                for (int z = 0; z <= (len + 2) / 3; ++z) {
+                    cnt = dp_table[l][x][y][z];
+                    if (trr[0][l] != 0){
+                        (dp_table[trr[0][l]][x + 1][y][z] += cnt) %= mod;
+                    }
+                    if (trr[1][l] != 0){
+                        (dp_table[trr[1][l]][x][y + 1][z] += cnt) %= mod;
+                    }
+                    if (trr[2][l] != 0){
+                        (dp_table[trr[2][l]][x][y][z + 1] += cnt) %= mod;
+                    }
+                    if (x + y + z == len && std::abs(x - y) <= 1 && std::abs(y - z) <= 1 && std::abs(z - x) <= 1){
+                        ans = (ans + cnt) % mod;
+                    }
+                }
+            }
+        }
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    int len;
+    std::string str;
+    std::cin >> len >> str;
+    int ans=Balance(str);
+    std::cout << ans << std::endl;
+    return 0;
+}
