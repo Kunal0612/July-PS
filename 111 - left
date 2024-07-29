@@ -1,0 +1,96 @@
+// https://codeforces.com/problemset/problem/887/F
+
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+/*
+Input :
+
+An integer num_model.
+An integer required_distance.
+A vector of integers heights.
+
+Constraints :
+
+num_model : ranges from 1 to 500000.
+required_distance : ranges from 1 to num_model.
+height : ranges from 1 to 10^9.
+
+
+*/
+
+
+bool RowOfModels(int num_model, int required_distance, std::vector<int>& heights) {
+    if (num_model < 1 || num_model > 500000) {
+        throw std::invalid_argument("The number of models (n) must be between 1 and 500,000.");
+    }
+
+    if (required_distance < 1 || required_distance > num_model) {
+        throw std::invalid_argument("The required distance (k) must be between 1 and n.");
+    }
+
+    for (int height : heights) {
+        if (height < 1 || height > 1000000000) {
+            throw std::invalid_argument("The height of each model (ai) must be between 1 and 1,000,000,000.");
+        }
+    }
+    std::vector<int> elements(num_model+1);
+    for(int i=1;i<=num_model;i++){
+        elements[i] = heights[i-1];
+    }
+    int leftmost_min_index = 1;
+    int interval_count = 0;
+    int flag = 0;
+    int min_after_l_index = 0;
+
+    for (int current_index = 2; current_index <= num_model; current_index++) {
+        if (elements[current_index] < elements[leftmost_min_index]) {
+            leftmost_min_index = current_index;
+            interval_count = 0;
+        } else {
+            interval_count++;
+        }
+
+        if (interval_count >= required_distance) {
+            if (flag) {
+                return 0;
+            }
+            flag = 1;
+            min_after_l_index = 0;
+
+            for (int j = leftmost_min_index + 1; j <= num_model; j++) {
+                if (elements[leftmost_min_index] > elements[j] && elements[j] > elements[min_after_l_index]) {
+                    min_after_l_index = j;
+                }
+            }
+
+            if (!min_after_l_index) {
+                return 0;
+            }
+
+            std::swap(elements[leftmost_min_index + required_distance], elements[min_after_l_index]);
+            leftmost_min_index += required_distance;
+            interval_count = 0;
+        }
+    }
+    return 1;
+}
+
+int main() {
+    int num_model, required_distance;
+    scanf("%d%d", &num_model, &required_distance);
+    std::vector<int> elements(num_model);
+
+    for (int i = 0; i <num_model; i++) {
+        scanf("%d", &elements[i]);
+    }
+
+    int ans=RowOfModels(num_model, required_distance, elements);
+    std::cout<<ans<<std::endl;
+    return 0;
+}
