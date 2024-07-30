@@ -1,0 +1,135 @@
+// https://codeforces.com/problemset/problem/1487/F
+
+#include <iostream>  
+#include <vector>    
+#include <algorithm> 
+#include <string>    
+#include <climits>   
+#include <cassert>
+#include <stdexcept>
+
+
+/*
+
+Input : 
+
+A string num.
+
+Constraints :
+
+num.size() : ranges from 1 to 50, contains only digits.
+
+
+*/
+
+
+int Ones(std::string &num)
+{
+    if (num.empty() || num.length() >= 50 || (num.length() == 49 && num >= "10000000000000000000000000000000000000000000000000")) {
+        throw std::invalid_argument("n must be between 1 and 10^50 exclusive");
+    }
+    
+    for (char c : num) {
+        if (!std::isdigit(c)) {
+            throw std::invalid_argument("n must be a positive integer");
+        }
+    }
+    int max_digits = 250;
+    int max_carry = 28;
+    int inf = INT_MAX;
+    std::vector<std::vector<std::vector<std::vector<int>>>> dp(
+        2, std::vector<std::vector<std::vector<int>>>(
+               max_carry * 2 + 1,
+               std::vector<std::vector<int>>(
+                   max_digits,
+                   std::vector<int>(max_digits, inf))));
+    dp[0][max_carry][max_digits - 1][max_digits - 1] = 0;
+
+    std::string reversed_string = num;
+    std::reverse(reversed_string.begin(), reversed_string.end());
+    reversed_string += "0";
+
+    for (int i = 0; i < reversed_string.size(); ++i)
+    {
+        for (int carry = 0; carry <= max_carry * 2; ++carry)
+        {
+            for (int pos_plus = 0; pos_plus < max_digits; ++pos_plus)
+            {
+                for (int pos_minus = 0; pos_minus < max_digits; ++pos_minus)
+                {
+                    dp[1][carry][pos_plus][pos_minus] = inf;
+                }
+            }
+        }
+
+        for (int carry = 0; carry <= max_carry * 2; ++carry)
+        {
+            for (int pos_plus = max_digits - 1; pos_plus >= 0; --pos_plus)
+            {
+                for (int pos_minus = max_digits - 1; pos_minus >= 0; --pos_minus)
+                {
+                    if (dp[0][carry][pos_plus][pos_minus] != inf)
+                    {
+                        
+                        if (pos_plus > 0)
+                        {
+                            dp[0][carry][pos_plus - 1][pos_minus] = std::min(
+                                dp[0][carry][pos_plus - 1][pos_minus],
+                                dp[0][carry][pos_plus][pos_minus]);
+                        }
+                        if (pos_minus > 0)
+                        {
+                            dp[0][carry][pos_plus][pos_minus - 1] = std::min(
+                                dp[0][carry][pos_plus][pos_minus - 1],
+                                dp[0][carry][pos_plus][pos_minus]);
+                        }
+                        int real_carry = carry - max_carry;
+                        int val = real_carry + pos_plus - pos_minus;
+                        int digit = val % 10;
+                        if (digit < 0){
+                            digit += 10;
+                        }
+                        int new_carry = val / 10;
+                        if (val < 0 && digit != 0){
+                            --new_carry;
+                        }
+                        if (digit == reversed_string[i] - '0')
+                        {
+                            dp[1][new_carry + max_carry][pos_plus][pos_minus] = std::min(
+                                dp[1][new_carry + max_carry][pos_plus][pos_minus],
+                                dp[0][carry][pos_plus][pos_minus] + pos_plus + pos_minus);
+                        }
+                    }
+                }
+            }
+        }
+        std::swap(dp[0], dp[1]);
+    }
+    int answer = inf;
+    for (int i = 0; i < max_digits; ++i)
+    {
+        for (int j = 0; j < max_digits; ++j)
+        {
+            answer = std::min(answer, dp[0][max_carry][i][j]);
+        }
+    }
+
+    return answer;
+}
+
+#include <iostream>  
+#include <vector>    
+#include <algorithm> 
+#include <string>    
+#include <climits>   
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+    std::string num;
+    std::cin >> num;
+    std::cout << Ones(num) << std::endl;
+    return 0;
+}
