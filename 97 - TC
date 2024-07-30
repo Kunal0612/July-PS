@@ -1,4 +1,40 @@
-// https://codeforces.com/problemset/problem/1612/F
+/*
+
+https://codeforces.com/problemset/problem/1612/F
+
+Write a C++ Solution ArmorAndWeapons to determine the minimum number of hours Monocarp has to spend to obtain both the num_armor-th armor set and the num_weapon-th weapon.
+
+
+Monocarp plays a computer game. There are num_armor different sets of armor and num_weapon different weapons in this game. If a character equips the i-th set of armor and wields the j-th weapon, their power is usually equal to i+j : but some combinations of armor and weapons synergize well. Formally, there is a list of q_len
+ordered pairs, and if the pair (i,j) belongs to this list, the power of the character equipped with the i-th set of armor and wielding the j-th weapon is not i+j, 
+but i+j+1.
+
+Initially, Monocarp's character has got only the 1-st armor set and the 1-st weapon. Monocarp can obtain a new weapon or a new set of armor in one hour. 
+If he wants to obtain the k-th armor set or the k-th weapon, he must possess a combination of an armor set and a weapon that gets his power to k
+or greater. Of course, after Monocarp obtains a weapon or an armor set, he can use it to obtain new armor sets or weapons, but he can go with any of the older armor sets and/or weapons as well.
+
+Monocarp wants to obtain the num_armor-th armor set and the num_weapon-th weapon. What is the minimum number of hours he has to spend on it?
+
+Input : 
+
+An integer num_armor.
+An integer num_weapon.
+A vector of a pair of integers synergistic_pair.
+
+Constraints :
+
+num_armor: ranges from 2 to 200000.
+num_weapon: ranges from 2 to 200000.
+synergistic_pair.size() : ranges from 0 to min(200000,num_armor*num_weapon).
+synergistic_pair : synergistic_pair[i][0] ranges from 1 to num_armor.
+                   synergistic_pair[i][1] ranges from 1 to num_weapon.
+Output:
+
+An integer hours_spent is the minimum number of hours Monocarp has to spend to obtain both the num_armor-th armor set and the num_weapon-th weapon.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
 
 
 
@@ -25,24 +61,6 @@ bool ComparePairs(const std::pair<int, int>& pair_1, const std::pair<int, int>& 
     }
     return pair_1.second > pair_2.second;
 }
-
-/*
-
-Input : 
-
-An integer num_armor.
-An integer num_weapon.
-A vector of pair of integers synergistic_pair.
-
-Constraints :
-
-num_armor : ranges from 2 to 200000.
-num_weapon : ranges from 2 to 200000.
-synergistic_pair.size() : ranges from 0 to min(200000,num_armor*num_weapon).
-synergistic_pair : synergistic_pair[i][0] ranges from 1 to num_armor.
-                   synergistic_pair[i][1] ranges from 1 to num_weapon.
-
-*/
 
 
 
