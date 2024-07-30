@@ -1,0 +1,220 @@
+/*
+
+https://codeforces.com/problemset/problem/850/F
+
+Write a C++ Solution RainbowBalls to find the ans after applying the operation told.
+
+You have a bag of balls of len different colors. You have nums[i] balls of the i-th color.
+
+While there are at least two different colored balls in the bag, perform the following steps:
+
+Take out two random balls without replacement one by one. These balls might be the same color.
+
+Color the second ball to the color of the first ball. You are not allowed to switch the order of the balls in this step.
+
+Place both balls back in the bag.
+
+All these actions take exactly one second.
+
+Let M = 10^9 + 7. It can be proven that the expected amount of time needed before you stop can be represented as a rational number , where P and Q are coprime integers and where Q is not divisible by M. Return the value P*Q^(-1) % mod.
+
+Input :
+
+A vector of long long integer nums.
+
+Constraints:
+
+nums.size() : ranges from 1 to 2500.
+nums : ranges from 1 to 10^5.
+
+Output:
+
+An long long integer ans after applying the operation told.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+long long ModuloInverse(long long first, long long sec) {
+    long long mod = 1e9 + 7;
+    long long sum = 1;
+    for (; sec; sec >>= 1, first = first * first % mod){
+        if (sec & 1){
+            sum = sum * first % mod;
+        }
+    }
+    return sum;
+}
+
+
+
+long long int RainbowBalls(std::vector<long long> nums){
+    int len=nums.size();
+    if (len < 1 || len > 2500) {
+        throw std::invalid_argument("The number of colors (len) must be between 1 and 2500.");
+    }
+    for (int i = 0; i < len; ++i) {
+        if (nums[i] < 1 || nums[i] > 100000) {
+            throw std::invalid_argument("Each element of the array nums must be between 1 and 10^5.");
+        }
+    }
+    std::vector<long long> arr(len + 1);
+    long long sum = 0, mxi = 0;
+    long long mod = 1e9 + 7;
+    for (long long i = 1; i <= len; i++) {
+        arr[i]=nums[i-1];
+        sum = (sum + arr[i]) % mod;
+        mxi = std::max(mxi, arr[i]);
+    }
+    
+    std::vector<long long> gmap(mxi + 1), frr(mxi + 1);
+    
+    gmap[0] = (mod - ModuloInverse(sum, mod - 2) * (sum - 1) % mod) % mod;
+    
+    for (long long i = 1; i <= mxi; i++) {
+        gmap[i] = (gmap[i - 1] + ModuloInverse(i - sum + mod, mod - 2) * (sum - 1) % mod) % mod;
+        frr[i] = (frr[i - 1] + gmap[i - 1]) % mod;
+    }
+    
+    long long ans = 0;
+    for (long long i = 1; i <= len; i++) {
+        ans = (ans + frr[arr[i]]) % mod;
+    }
+    
+    ans = (ans + sum * (sum - 1) % mod) % mod;
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+     // TEST
+    std::vector<long long int> nums_1 = {1,2,3};
+    long long int expected_1 = 750000026;
+    long long int result_1 = RainbowBalls(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_2 = {16,14,2,6,16,2};
+    long long int expected_2 = 682766832;
+    long long int result_2 = RainbowBalls(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_3 = {1,2,3,4,5,5};
+    long long int expected_3 = 595588569;
+    long long int result_3 = RainbowBalls(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_4 = {1,1};
+    long long int expected_4 = 1;
+    long long int result_4 = RainbowBalls(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_5 = {1, 2, 2, 4, 5, 6};
+    long long int expected_5 = 335539544;
+    long long int result_5 = RainbowBalls(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_6 = {1, 2, 1, 2, 5, 5};
+    long long int expected_6 =840659548;
+    long long int result_6 = RainbowBalls(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_7 = {7, 7, 7, 7, 7,1,1,1};
+    long long int expected_7 = 114515626;
+    long long int result_7 = RainbowBalls(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    long long int expected_8 = 894737227;
+    long long int result_8 = RainbowBalls(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> nums_9 = {-1000000009};
+    try
+    {
+        RainbowBalls(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<long long int> nums_10(6000000,0);
+    try
+    {
+        RainbowBalls(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<long long int> nums_11(6,-1000000009);
+    try
+    {
+        RainbowBalls(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_12(6,1000000009);
+    try
+    {
+        RainbowBalls(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> nums_13={};
+    try
+    {
+        RainbowBalls(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
