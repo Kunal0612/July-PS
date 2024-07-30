@@ -1,0 +1,408 @@
+/*
+
+https://codeforces.com/problemset/problem/1809/F
+
+Write a C++ Solution TravelingInBerland to find a ans vector where the i-th of
+them is equal to the minimum cost of the journey if you start and finish in the
+i-th city.
+
+There are num_cities cities in Berland, arranged in a circle and numbered from
+1 to num_cities in clockwise order.
+
+You want to travel all over Berland, starting in some city, visiting all the other
+cities and returning to the starting city. Unfortunately, you can only drive along
+the Berland Ring Highway, which connects all num_cities cities. The road was designed
+by a very titled and respectable minister, so it is one-directional — it can only be
+traversed clockwise, only from the city i to the
+city (i%num_cities)+1 (i.e. from 1 to 2, from 2 in 3, ..., from num_cities to 1).
+
+The fuel tank of your car holds up to fuel_volume liters of fuel. To drive from
+the i-th city to the next one, fuel_cost[i]
+liters of fuel are needed (and are consumed in the process).
+
+Every city has a fuel station :  a liter of fuel in the i-th city costs city_type[i] burles.
+Refueling between cities is not allowed :  if fuel has run out between cities, then
+your journey is considered incomplete.
+
+For each city, calculate the minimum cost of the journey if you start and finish it in that city.
+
+
+Input :
+
+An integer fuel_voloume.
+A vector of integers fuel_cost
+A vector of integers city_type.
+
+
+Constraints :
+
+city_type.size() ==  fuel_cost.size() : ranges from 3 to 200000.
+fuel_voloume : ranges from 1 to 10^9.
+city_type : ranges from 1 to 2.
+fuel_cost : ranges from 1 to fuel_voloume.
+
+Output:
+
+An vector of integer ans where the i-th of them is equal to the minimum cost of the
+journey if you start and finish in the i-th city.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+std::vector<int> TravelingInBerland(int fuel_voloume, std::vector<int> fuel_cost, std::vector<int> city_type)
+{
+    int num_cities = fuel_cost.size();
+
+    if (num_cities < 3 || num_cities > 200000 || num_cities!=city_type.size() || fuel_voloume < 1 || fuel_voloume > 1000000000)
+    {
+        throw std::invalid_argument("Invalid input: Ensure 3 <= num_cities <= 200000 and 1 <= fuel_voloume <= 1000000000");
+    }
+    for (int i = 0; i < num_cities; ++i)
+    {
+        if (fuel_cost[i] < 1 || fuel_cost[i] > fuel_voloume)
+        {
+            throw std::invalid_argument("Invalid input: Ensure 1 <= fuel_cost[i] <= fuel_voloume");
+        }
+    }
+    for (int i = 0; i < num_cities; ++i)
+    {
+        if (city_type[i] < 1 || city_type[i] > 2)
+        {
+            throw std::invalid_argument("Invalid input: Ensure 1 <= city_type[i] <= 2");
+        }
+    }
+
+    std::vector<long long> prefix_sum(2 * num_cities + 1);
+    for (int i = 0; i < 2 * num_cities; ++i)
+    {
+        prefix_sum[i + 1] = prefix_sum[i] + fuel_cost[i % num_cities];
+    }
+
+    std::vector<long long> distance(num_cities);
+    std::vector<long long> cost(num_cities);
+    int count = 0;
+    for (int i = 2 * num_cities - 1; i >= 0; --i)
+    {
+        if (i < num_cities)
+        {
+            if (city_type[i] == 2)
+            {
+                distance[i] = 1;
+                cost[i] = fuel_cost[i] * 2;
+            }
+            else if (count == 0)
+            {
+                distance[i] = 1;
+                cost[i] = fuel_cost[i];
+            }
+            else
+            {
+                int jdx = std::lower_bound(prefix_sum.begin() + i, prefix_sum.begin() + i + count + 1, prefix_sum[i] + fuel_voloume) - prefix_sum.begin();
+                assert(jdx > i);
+                distance[i] = jdx - i;
+                if (prefix_sum[jdx] - prefix_sum[i] <= fuel_voloume)
+                {
+                    cost[i] = prefix_sum[jdx] - prefix_sum[i];
+                }
+                else
+                {
+                    cost[i] = 2 * (prefix_sum[jdx] - prefix_sum[i]) - fuel_voloume;
+                }
+            }
+        }
+        if (city_type[i % num_cities] == 2)
+        {
+            ++count;
+        }
+        else
+        {
+            count = 0;
+        }
+    }
+
+    int power = 0;
+    while ((1 << power) <= num_cities)
+    {
+        ++power;
+    }
+
+    std::vector<std::vector<long long>> distance_k(power, distance);
+    std::vector<std::vector<long long>> cost_k(power, cost);
+    for (int jdx = 1; jdx < power; ++jdx)
+    {
+        for (int i = 0; i < num_cities; ++i)
+        {
+            distance_k[jdx][i] = distance_k[jdx - 1][i] + distance_k[jdx - 1][(i + distance_k[jdx - 1][i]) % num_cities];
+            cost_k[jdx][i] = cost_k[jdx - 1][i] + cost_k[jdx - 1][(i + distance_k[jdx - 1][i]) % num_cities];
+        }
+    }
+    std::vector<int> ans;
+    for (int i = 0; i < num_cities; ++i)
+    {
+        int position = i;
+        long long total = 0;
+        long long answer = 0;
+        for (int jdx = power - 1; jdx >= 0; --jdx)
+        {
+            if (total + distance_k[jdx][position] <= num_cities)
+            {
+                total += distance_k[jdx][position];
+                answer += cost_k[jdx][position];
+                position = (position + distance_k[jdx][position]) % num_cities;
+            }
+        }
+        if (total < num_cities)
+        {
+            answer += prefix_sum[i + num_cities] - prefix_sum[i + total];
+        }
+        ans.push_back(answer);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int main()
+{
+    // TEST
+    int fuel_voloume_1 = 5;
+    std::vector<int> fuel_cost_1 = {3, 4, 4};
+    std::vector<int> city_type_1 = {1, 2, 2};
+    std::vector<int> expected_1 = {17, 19, 17};
+    std::vector<int> result_1 = TravelingInBerland(fuel_voloume_1, fuel_cost_1, city_type_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_2 = 7;
+    std::vector<int> fuel_cost_2 = {1,3,2,5,1};
+    std::vector<int> city_type_2 = {2,1,1,1,2};
+    std::vector<int> expected_2 = {13,12,12,12,14};
+    std::vector<int> result_2 = TravelingInBerland(fuel_voloume_2, fuel_cost_2, city_type_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_3 = 3;
+    std::vector<int> fuel_cost_3 = {1,2,1,3};
+    std::vector<int> city_type_3 = {2,2,2,2};
+    std::vector<int> expected_3 = {14,14,14,14};
+    std::vector<int> result_3 = TravelingInBerland(fuel_voloume_3, fuel_cost_3, city_type_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_4 = 2;
+    std::vector<int> fuel_cost_4 = {2,2,2};
+    std::vector<int> city_type_4 = {1,2,1};
+    std::vector<int> expected_4 = {8,8,8};
+    std::vector<int> result_4 = TravelingInBerland(fuel_voloume_4, fuel_cost_4, city_type_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_5 = 25;
+    std::vector<int> fuel_cost_5 = {3, 4, 5, 6, 7, 8};
+    std::vector<int> city_type_5 = {2, 1, 2, 1, 2, 1};
+    std::vector<int> expected_5 = {36,33,38,33,40,33};
+    std::vector<int> result_5 = TravelingInBerland(fuel_voloume_5, fuel_cost_5, city_type_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_6 = 30;
+    std::vector<int> fuel_cost_6 = {5, 6, 7, 8, 9, 10};
+    std::vector<int> city_type_6 = {1, 2, 1, 2, 1, 2};
+    std::vector<int> expected_6 = {45,51,45,53,45,55};
+    std::vector<int> result_6 = TravelingInBerland(fuel_voloume_6, fuel_cost_6, city_type_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_7 = 35;
+    std::vector<int> fuel_cost_7 = {6, 7, 8, 9, 10, 11};
+    std::vector<int> city_type_7 = {2, 1, 2, 1, 2, 1};
+    std::vector<int> expected_7 = {57,51,59,51,61,51};
+    std::vector<int> result_7 = TravelingInBerland(fuel_voloume_7, fuel_cost_7, city_type_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int fuel_voloume_8 = 40;
+    std::vector<int> fuel_cost_8 = {7, 8, 9, 10, 11, 12};
+    std::vector<int> city_type_8 = {1, 2, 1, 2, 1, 2};
+    std::vector<int> expected_8 = {57,65,57,67,57,69};
+    std::vector<int> result_8 = TravelingInBerland(fuel_voloume_8, fuel_cost_8, city_type_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST 
+    int fuel_voloume_9 = 0;
+    std::vector<int> fuel_cost_9 = {7, 9, 9, 10, 11, 12};
+    std::vector<int> city_type_9 = {1, 2, 1, 2, 1, 2};
+    try
+    {
+        TravelingInBerland(fuel_voloume_9, fuel_cost_9, city_type_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_10 = 1000000005;
+    std::vector<int> fuel_cost_10 = {7, 10, 10, 10, 11, 12};
+    std::vector<int> city_type_10 = {1, 2, 1, 2, 1, 2};
+    try
+    {
+        TravelingInBerland(fuel_voloume_10, fuel_cost_10, city_type_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_11 = 10;
+    std::vector<int> fuel_cost_11 = {1};
+    std::vector<int> city_type_11 = {};
+    try
+    {
+        TravelingInBerland(fuel_voloume_11, fuel_cost_11, city_type_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_12 = 10;
+    std::vector<int> fuel_cost_12 = {};
+    std::vector<int> city_type_12 = {1};
+    try
+    {
+        TravelingInBerland(fuel_voloume_12, fuel_cost_12, city_type_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_13 = 10;
+    std::vector<int> fuel_cost_13 = {-1};
+    std::vector<int> city_type_13 = {1};
+    try
+    {
+        TravelingInBerland(fuel_voloume_13, fuel_cost_13, city_type_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_14 = 10;
+    std::vector<int> fuel_cost_14 = {1};
+    std::vector<int> city_type_14 = {-1};
+    try
+    {
+        TravelingInBerland(fuel_voloume_14, fuel_cost_14, city_type_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_15 = 10;
+    std::vector<int> fuel_cost_15(200005,1);
+    std::vector<int> city_type_15 = {-1};
+    try
+    {
+        TravelingInBerland(fuel_voloume_15, fuel_cost_15, city_type_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_16 = 10;
+    std::vector<int> fuel_cost_16(5,1);
+    std::vector<int> city_type_16(2000005,1);
+    try
+    {
+        TravelingInBerland(fuel_voloume_16, fuel_cost_16, city_type_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_17 = -10;
+    std::vector<int> fuel_cost_17(5,1);
+    std::vector<int> city_type_17(5,1);
+    try
+    {
+        TravelingInBerland(fuel_voloume_17, fuel_cost_17, city_type_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_18 = 10;
+    std::vector<int> fuel_cost_18(5,1);
+    std::vector<int> city_type_18(5,5);
+    try
+    {
+        TravelingInBerland(fuel_voloume_18, fuel_cost_18, city_type_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    int fuel_voloume_19 = 10;
+    std::vector<int> fuel_cost_19(5,15);
+    std::vector<int> city_type_19(5,1);
+    try
+    {
+        TravelingInBerland(fuel_voloume_19, fuel_cost_19, city_type_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All testcases passed";
+    return 0;
+}
