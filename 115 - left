@@ -1,0 +1,158 @@
+// https://codeforces.com/contest/1487/problem/G
+
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int Add(int first, int sec) {
+    int mod = 998244353;
+    first += sec;
+    while (first >= mod) first -= mod;
+    while (first < 0) first += mod;
+    return first;
+}
+
+int Sub(int first, int sec) {
+    return Add(first, -sec);
+}
+
+int Mul(int first, int sec) {
+    int mod = 998244353;
+    return (first * 1ll * sec) % mod;
+}
+
+int StringCounting(int num,std::vector<int>& nums) {
+    if (num < 3 || num > 400) {
+        throw std::invalid_argument("The integer num must satisfy 3 ≤ num ≤ 400.");
+    }
+
+    if (nums.size() != 26) {
+        throw std::invalid_argument("The list of integers must contain exactly 26 elements.");
+    }
+    int lower_bound = num / 3;
+    for (int ci : nums) {
+        if (ci <= lower_bound || ci > num) {
+            throw std::invalid_argument("Each integer ci must satisfy num/3 < ci ≤ num.");
+        }
+    }
+    std::vector<std::vector<std::vector<std::vector<std::vector<int>>>>> dp_table(2,
+        std::vector<std::vector<std::vector<std::vector<int>>>>(
+            num, std::vector<std::vector<std::vector<int>>>(
+                num, std::vector<std::vector<int>>(
+                    3, std::vector<int>(3, 0)
+                )
+            )
+        )
+    );
+    
+    std::vector<std::vector<int>> sum_dp(num, std::vector<int>(num, 0));
+    std::vector<std::vector<int>> pre_1(num, std::vector<int>(num, 0));
+    std::vector<std::vector<int>> pre_2(num, std::vector<int>(num, 0));
+
+    for (int i = 0; i < 26; i++) {
+        for (int j = 0; j < 26; j++) {
+            for (int k = 0; k < 26; k++) {
+                if (i != k) {
+                    std::multiset<int> s = {i, j, k};
+                    dp_table[1][s.count(0)][s.count(1)][std::min(2, j)][std::min(2, k)]++;
+                }
+            }
+        }
+    }
+
+    for (int i = 4; i <= num; i++) {
+        for (int j = 0; j < num; j++) {
+            for (int k = 0; k < num; k++) {
+                for (int x = 0; x < 3; x++) {
+                    for (int y = 0; y < 3; y++) {
+                        dp_table[0][j][k][x][y] = dp_table[1][j][k][x][y];
+                        dp_table[1][j][k][x][y] = 0;
+                    }
+                }
+            }
+        }
+
+        for (int j = 0; j < num; j++) {
+            for (int k = 0; k < num; k++) {
+                for (int x = 0; x < 3; x++) {
+                    for (int y = 0; y < 3; y++) {
+                        int cur = dp_table[0][j][k][x][y];
+                        if (cur == 0){
+                            continue;
+                        }
+                        for (int z = 0; z < 3; z++) {
+                            int& nww = dp_table[1][j + (z == 0 ? 1 : 0)][k + (z == 1 ? 1 : 0)][y][z];
+                            nww = Add(nww, Mul(cur, (z == 2 ? 24 : 1) - (z == x ? 1 : 0)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < num; i++) {
+        for (int j = 0; j < num; j++) {
+            for (int k = 0; k < 3; k++) {
+                for (int l = 0; l < 3; l++) {
+                    sum_dp[i][j] = Add(sum_dp[i][j], dp_table[1][i][j][k][l]);
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < num; i++) {
+        pre_1[i][num - 1] = sum_dp[i][num - 1];
+        for (int j = num - 2; j >= 0; j--) {
+            pre_1[i][j] = Add(sum_dp[i][j], pre_1[i][j + 1]);
+        }
+    }
+
+    for (int j = 0; j < num; j++) {
+        pre_2[num - 1][j] = pre_1[num - 1][j];
+        for (int i = num - 2; i >= 0; i--) {
+            pre_2[i][j] = Add(pre_1[i][j], pre_2[i + 1][j]);
+        }
+    }
+
+    int result = pre_2[0][0];
+    for (int i = 0; i < 26; i++) {
+        for (int j = 0; j < num; j++) {
+            for (int k = nums[i] + 1; k < num; k++) {
+                result = Sub(result, sum_dp[k][j]);
+            }
+        }
+    }
+
+    for (int i = 0; i < 26; i++) {
+        for (int j = 0; j < i; j++) {
+            result = Add(result, pre_2[nums[i] + 1][nums[j] + 1]);
+        }
+    }
+
+    return result;
+}
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    int num;
+    std::cin >> num;
+    std::vector<int> nums(26);
+    for (int i = 0; i < 26; i++) {
+        std::cin >> nums[i];
+    }
+    int ans=StringCounting(num, nums);
+    std::cout << ans << std::endl;
+    return 0;
+}
