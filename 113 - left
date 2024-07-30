@@ -45,8 +45,23 @@ struct TreeSolver {
     }
 };
 
+/*
+Input :
 
-int Subsequence(int len,int max_m,std::vector<int> &nums) {
+An integer max_m.
+A vector of nums.
+
+Constraints : 
+
+max_m : ranges from 1 to len.
+nums.size : ranges from 1 to 4000.
+nums : ranges from 1 to 2^31.
+
+*/
+
+
+int Subsequence(int max_m,std::vector<int> &nums) {
+    int len=nums.size();
     if (max_m < 1 || max_m > len) {
         throw std::invalid_argument("Invalid value of max_m: 1 ≤ max_m ≤ len must hold.");
     }
@@ -104,7 +119,7 @@ int main() {
     for(int i=0;i<len;i++){
         std::cin>>nums[i];
     }
-    int ans=Subsequence(len,max_m,nums);
+    int ans=Subsequence(max_m,nums);
     std::cout<<ans<<std::endl;
     return 0;
 }
