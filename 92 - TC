@@ -1,12 +1,32 @@
-// https://codeforces.com/problemset/problem/1809/F
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <cassert>
-#include <stdexcept>
-
 /*
+
+https://codeforces.com/problemset/problem/1809/F
+
+Write a C++ Solution TravelingInBerland to find a ans vector where the i-th of 
+them is equal to the minimum cost of the journey if you start and finish in the 
+i-th city.
+
+There are num_cities cities in Berland, arranged in a circle and numbered from 
+1 to num_cities in clockwise order.
+
+You want to travel all over Berland, starting in some city, visiting all the other 
+cities and returning to the starting city. Unfortunately, you can only drive along 
+the Berland Ring Highway, which connects all num_cities cities. The road was designed 
+by a very titled and respectable minister, so it is one-directional — it can only be 
+traversed clockwise, only from the city i to the 
+city (i%num_cities)+1 (i.e. from 1 to 2, from 2 in 3, ..., from num_cities to 1).
+
+The fuel tank of your car holds up to fuel_volume liters of fuel. To drive from 
+the i-th city to the next one, fuel_cost[i]
+liters of fuel are needed (and are consumed in the process).
+
+Every city has a fuel station :  a liter of fuel in the i-th city costs city_type[i] burles. 
+Refueling between cities is not allowed :  if fuel has run out between cities, then 
+your journey is considered incomplete.
+
+For each city, calculate the minimum cost of the journey if you start and finish it in that city.
+
+
 Input :
 
 An integer num_cities.
@@ -22,8 +42,20 @@ fuel_voloume : ranges from 1 to 10^9.
 city_type : ranges from 1 to 2.
 fuel_cost : ranges from 1 to fuel_voloume.
 
+Output:
+
+An vector of integer ans where the i-th of them is equal to the minimum cost of the 
+journey if you start and finish in the i-th city.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
 */
 
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
 
 
 std::vector<int> TravelingInBerland(int fuel_voloume, std::vector<int> fuel_cost, std::vector<int> city_type)
@@ -176,7 +208,7 @@ int main()
             }
         }
         std::vector<int> ans=TravelingInBerland(fuel_voloume,fuel_cost,city_type);
-        for(auto x:ans){
+        for(int x:ans){
             std::cout<<x<<" ";
         }
         std::cout<<std::endl;
