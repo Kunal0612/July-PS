@@ -1,4 +1,39 @@
-// https://codeforces.com/problemset/problem/850/F
+/*
+
+https://codeforces.com/problemset/problem/850/F
+
+Write a C++ Solution RainbowBalls to find the ans after applying the operation told.
+
+You have a bag of balls of len different colors. You have nums[i] balls of the i-th color.
+
+While there are at least two different colored balls in the bag, perform the following steps:
+
+Take out two random balls without replacement one by one. These balls might be the same color.
+
+Color the second ball to the color of the first ball. You are not allowed to switch the order of the balls in this step.
+
+Place both balls back in the bag.
+
+All these actions take exactly one second.
+
+Let M = 10^9 + 7. It can be proven that the expected amount of time needed before you stop can be represented as a rational number , where P and Q are coprime integers and where Q is not divisible by M. Return the value P*Q^(-1) % mod.
+
+Input :
+
+A vector of long long integer nums.
+
+Constraints:
+
+nums.size() : ranges from 1 to 2500.
+nums : ranges from 1 to 10^5.
+
+Output:
+
+An integer ans after applying the operation told.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
 
 #include <iostream>
 #include <vector>
@@ -17,18 +52,7 @@ long long ModuloInverse(long long first, long long sec) {
     return sum;
 }
 
-/*
 
-Input :
-
-A vector of integer nums.
-
-Constraints:
-
-nums.size() : ranges from 1 to 2500.
-nums : ranges from 1 to 10^5.
-
-*/
 
 int RainbowBalls(std::vector<long long> nums){
     int len=nums.size();
