@@ -1,0 +1,360 @@
+/*
+
+https://codeforces.com/problemset/problem/1612/F
+
+Write a C++ Solution ArmorAndWeapons to determine the minimum number of hours Monocarp has to spend to obtain both the num_armor-th armor set and the num_weapon-th weapon.
+
+
+Monocarp plays a computer game. There are num_armor different sets of armor and num_weapon different weapons in this game. If a character equips the i-th set of armor and wields the j-th weapon, their power is usually equal to i+j : but some combinations of armor and weapons synergize well. Formally, there is a list of q_len
+ordered pairs, and if the pair (i,j) belongs to this list, the power of the character equipped with the i-th set of armor and wielding the j-th weapon is not i+j, 
+but i+j+1.
+
+Initially, Monocarp's character has got only the 1-st armor set and the 1-st weapon. Monocarp can obtain a new weapon or a new set of armor in one hour. 
+If he wants to obtain the k-th armor set or the k-th weapon, he must possess a combination of an armor set and a weapon that gets his power to k
+or greater. Of course, after Monocarp obtains a weapon or an armor set, he can use it to obtain new armor sets or weapons, but he can go with any of the older armor sets and/or weapons as well.
+
+Monocarp wants to obtain the num_armor-th armor set and the num_weapon-th weapon. What is the minimum number of hours he has to spend on it?
+
+Input : 
+
+An integer num_armor.
+An integer num_weapon.
+A vector of a pair of integers synergistic_pair.
+
+Constraints :
+
+num_armor: ranges from 2 to 200000.
+num_weapon: ranges from 2 to 200000.
+synergistic_pair.size() : ranges from 0 to min(200000,num_armor*num_weapon).
+synergistic_pair : synergistic_pair[i][0] ranges from 1 to num_armor.
+                   synergistic_pair[i][1] ranges from 1 to num_weapon.
+Output:
+
+An integer hours_spent is the minimum number of hours Monocarp has to spend to obtain both the num_armor-th armor set and the num_weapon-th weapon.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+
+#include <set>
+#include <vector>
+#include <algorithm>
+#include <cstdio>
+#include <utility>
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+std::pair<int, int> Normalize(const std::pair<int, int>& pair, int num_armor, int num_weapon)
+{
+    return std::make_pair(std::min(pair.first, num_armor), std::min(pair.second, num_weapon));
+}
+
+bool ComparePairs(const std::pair<int, int>& pair_1, const std::pair<int, int>& pair_2)
+{
+    if (pair_1.first != pair_2.first){
+        return pair_1.first > pair_2.first;
+    }
+    return pair_1.second > pair_2.second;
+}
+
+
+
+
+int ArmorAndWeapons(int num_armor,int num_weapon,std::vector<std::pair<int,int>> &synergistic_pair){
+    if (num_armor < 2 || num_armor > 200000) {
+        throw std::invalid_argument("The number of armor sets must be in the range [2, 210000].");
+    }
+    if (num_weapon < 2 || num_weapon > 200000) {
+        throw std::invalid_argument("The number of weapons must be in the range [2, 210000].");
+    }
+    int q_len=synergistic_pair.size();
+    int max_synergistic_pairs = std::min(200000, num_armor * num_weapon);
+    if (q_len < 0 || q_len > max_synergistic_pairs) {
+        throw std::invalid_argument("The number of synergistic pairs must be in the range [0, " + std::to_string(max_synergistic_pairs) + "].");
+    }
+    for (std::pair<int,int>& pair : synergistic_pair) {
+        int armor_index = pair.first;
+        int weapon_index = pair.second;
+        if (armor_index < 1 || armor_index > num_armor) {
+            throw std::invalid_argument("Armor index " + std::to_string(armor_index) + " is out of range [1, " + std::to_string(num_armor) + "].");
+        }
+        if (weapon_index < 1 || weapon_index > num_weapon) {
+            throw std::invalid_argument("Weapon index " + std::to_string(weapon_index) + " is out of range [1, " + std::to_string(num_weapon) + "].");
+        }
+    }
+    
+    std::set<std::pair<int, int>> synergistic_pairs;
+    for (int i = 0; i < q_len; i++)
+    {
+        int armor_index=synergistic_pair[i].first, weapon_index=synergistic_pair[i].second;
+        synergistic_pairs.insert(std::make_pair(armor_index, weapon_index));
+    }
+    
+    int hours_spent = 0;
+    std::vector<std::pair<int, int>> current_combinations;
+    current_combinations.push_back(std::make_pair(1, 1));
+    while (true)
+    {
+        if (current_combinations[0] == std::make_pair(num_armor, num_weapon)){
+            break;
+        }
+        std::vector<std::pair<int, int>> next_combinations;
+        for (int i = 0; i < current_combinations.size(); i++)
+        {
+            std::pair<int, int> current_pair = current_combinations[i];
+            int power_sum = current_pair.first + current_pair.second;
+            if (synergistic_pairs.count(current_pair)){
+                power_sum++;
+            }
+            std::pair<int, int> temp_pair = current_pair;
+            temp_pair.first = power_sum;
+            next_combinations.push_back(Normalize(temp_pair, num_armor, num_weapon));
+            temp_pair = current_pair;
+            temp_pair.second = power_sum;
+            next_combinations.push_back(Normalize(temp_pair, num_armor, num_weapon));
+        }
+        std::sort(next_combinations.begin(), next_combinations.end(), ComparePairs);
+        int max_weapon_power = 0;
+        std::vector<std::pair<int, int>> filtered_combinations;
+        for (int i = 0; i < next_combinations.size(); i++){
+            std::pair<int, int> next_pair = next_combinations[i];
+            if (next_pair.second <= max_weapon_power){
+                continue;
+            }
+            max_weapon_power = std::max(max_weapon_power, next_pair.second);
+            filtered_combinations.push_back(next_pair);
+        }
+        current_combinations = filtered_combinations;
+        hours_spent++;
+    }
+    return hours_spent;
+}
+
+#include <set>
+#include <vector>
+#include <algorithm>
+#include <cstdio>
+#include <utility>
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    int num_armor_1 = 3, num_weapon_1 = 4;
+    std::vector<std::pair<int, int>> synergistic_pair_1 = {};
+    int expected_1 = 3;
+    int result_1 = ArmorAndWeapons(num_armor_1, num_weapon_1, synergistic_pair_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_armor_2 = 5, num_weapon_2 = 5;
+    std::vector<std::pair<int, int>> synergistic_pair_2 = {{1, 1}, {2, 2}, {3, 3}};
+    int expected_2 = 4;
+    int result_2 = ArmorAndWeapons(num_armor_2, num_weapon_2, synergistic_pair_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_armor_3 = 2, num_weapon_3 = 2;
+    std::vector<std::pair<int, int>> synergistic_pair_3 = {{1, 2}};
+    int expected_3 = 2;
+    int result_3 = ArmorAndWeapons(num_armor_3, num_weapon_3, synergistic_pair_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_armor_4 = 10, num_weapon_4 = 10;
+    std::vector<std::pair<int, int>> synergistic_pair_4 = {{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}};
+    int expected_4 = 5;
+    int result_4 = ArmorAndWeapons(num_armor_4, num_weapon_4, synergistic_pair_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_armor_5 = 200000, num_weapon_5 = 200000;
+    std::vector<std::pair<int, int>> synergistic_pair_5 = {{1, 1}, {200000, 200000}};
+    int expected_5 = 26;
+    int result_5 = ArmorAndWeapons(num_armor_5, num_weapon_5, synergistic_pair_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_armor_6 = 100, num_weapon_6 = 50;
+    std::vector<std::pair<int, int>> synergistic_pair_6 = {{1, 1}, {2, 2}, {3, 3}, {4, 4}};
+    int expected_6 = 10;
+    int result_6 = ArmorAndWeapons(num_armor_6, num_weapon_6, synergistic_pair_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_armor_7 = 200000, num_weapon_7 = 200000;
+    std::vector<std::pair<int, int>> synergistic_pair_7 = {};
+    int expected_7 = 27;
+    int result_7 = ArmorAndWeapons(num_armor_7, num_weapon_7, synergistic_pair_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_armor_8 = 1000, num_weapon_8 = 1000;
+    std::vector<std::pair<int, int>> synergistic_pair_8 = {{500, 500}, {1000, 1000}, {1, 1}};
+    int expected_8 = 15;
+    int result_8 = ArmorAndWeapons(num_armor_8, num_weapon_8, synergistic_pair_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    int num_armor_9 = 1, num_weapon_9 = 1000;
+    std::vector<std::pair<int, int>> synergistic_pair_9 = {{500, 500}, {1000, 1000}, {1, 1}};
+    try
+    {
+        ArmorAndWeapons(num_armor_9, num_weapon_9, synergistic_pair_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_armor_10 = 200005, num_weapon_10 = 1000;
+    std::vector<std::pair<int, int>> synergistic_pair_10 = {{500, 500}, {1000, 1000}, {1, 1}};
+    try
+    {
+        ArmorAndWeapons(num_armor_10, num_weapon_10, synergistic_pair_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_armor_11 = -5, num_weapon_11 = 1100;
+    std::vector<std::pair<int, int>> synergistic_pair_11 = {{500, 500}, {1100, 1100}, {1, 1}};
+    try
+    {
+        ArmorAndWeapons(num_armor_11, num_weapon_11, synergistic_pair_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_armor_12 = 2, num_weapon_12 = 1;
+    std::vector<std::pair<int, int>> synergistic_pair_12 = {{500, 500}, {1200, 1200}, {1, 1}};
+    try
+    {
+        ArmorAndWeapons(num_armor_12, num_weapon_12, synergistic_pair_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_armor_13 = 2, num_weapon_13 = 1000000;
+    std::vector<std::pair<int, int>> synergistic_pair_13 = {{500, 500}, {1300, 1300}, {1, 1}};
+    try
+    {
+        ArmorAndWeapons(num_armor_13, num_weapon_13, synergistic_pair_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_armor_14 = 2, num_weapon_14 = -1;
+    std::vector<std::pair<int, int>> synergistic_pair_14 = {{500, 500}, {1400, 1400}, {1, 1}};
+    try
+    {
+        ArmorAndWeapons(num_armor_14, num_weapon_14, synergistic_pair_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_armor_15 = 2, num_weapon_15 = 2;
+    std::vector<std::pair<int, int>> synergistic_pair_15(200005,{1,1});
+    try
+    {
+        ArmorAndWeapons(num_armor_15, num_weapon_15, synergistic_pair_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_armor_16 = 2, num_weapon_16 = 2;
+    std::vector<std::pair<int, int>> synergistic_pair_16(205,{-1,1});
+    try
+    {
+        ArmorAndWeapons(num_armor_16, num_weapon_16, synergistic_pair_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_armor_17 = 2, num_weapon_17 = 2;
+    std::vector<std::pair<int, int>> synergistic_pair_17(205,{22,1});
+    try
+    {
+        ArmorAndWeapons(num_armor_17, num_weapon_17, synergistic_pair_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_armor_18 = 2, num_weapon_18 = 2;
+    std::vector<std::pair<int, int>> synergistic_pair_18(205,{2,5});
+    try
+    {
+        ArmorAndWeapons(num_armor_18, num_weapon_18, synergistic_pair_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_armor_19 = 2, num_weapon_19 = 2;
+    std::vector<std::pair<int, int>> synergistic_pair_19(25,{1,-1});
+    try
+    {
+        ArmorAndWeapons(num_armor_19, num_weapon_19, synergistic_pair_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
+    return 0;
+}
