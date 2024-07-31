@@ -1,0 +1,215 @@
+/*
+
+https://codeforces.com/problemset/problem/17/C
+
+Write a C++ Solution Balance to find ans the number of different balanced 
+strings that can be obtained by performing the described operations, perhaps 
+multiple times, on the given string str, modulo 51123987.
+
+
+Nick likes strings very much, he likes to rotate them, sort them, rearrange 
+characters within a string... Once he wrote a random string of characters 
+a, b, c on a piece of paper and began to perform the following operations:
+
+to take two adjacent characters and replace the second character with the first one,
+to take two adjacent characters and replace the first character with the second one
+To understand these actions better, let's take a look at a string «abc». All of the 
+following strings can be obtained by performing one of the described operations 
+on «abc»: «bbc», «abb», «acc». Let's denote the frequency of a character for each 
+of the characters a, b and c as the number of occurrences of this character in the 
+string. For example, for string «abc»: |a| = 1, |b| = 1, |c| = 1, and for string 
+«bbc»: |a| = 0, |b| = 2, |c| = 1.
+
+While performing the described operations, Nick sometimes got balanced strings. 
+Let's say that a string is balanced, if the frequencies of each character differ 
+by at most 1. That is  - 1 ≤ |a| - |b| ≤ 1,  - 1 ≤ |a| - |c| ≤ 1 и  - 1 ≤ |b| - |c| ≤ 1.
+
+Would you help Nick find the number of different balanced strings that can be 
+obtained by performing the operations described above, perhaps multiple times, 
+on the given string str. This number should be calculated modulo 51123987.
+
+
+Input :
+
+A string str.
+
+Constraints :
+
+str.size() : ranges from 1 to 150;
+str : contains either 'a' , 'b' or 'c'
+
+Output:
+
+An integer ans the number of different balanced strings that can be obtained by performing the described operations, perhaps multiple times, on the given string s, modulo 51123987.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+
+
+
+
+int Balance(std::string str){
+    int mod = 51123987;
+    int len=str.size();
+    if(len<1 or len>150){
+        throw std::invalid_argument("Invalid Str len.");
+    }
+    for(char ch:str){
+        if(ch!='a' and ch!='b' and ch!='c'){
+            throw std::invalid_argument("Invalid Str.");
+        }
+    }
+    str = ' ' + str;  
+
+    std::vector<std::vector<int>> trr(3, std::vector<int>(len + 2, 0));
+    std::vector<std::vector<std::vector<std::vector<int>>>> dp_table(152, 
+        std::vector<std::vector<std::vector<int>>>(52, 
+        std::vector<std::vector<int>>(52, 
+        std::vector<int>(52, 0))));
+
+    for (int x = len; x >= 1; --x) {
+        for (int y = 0; y <= 2; ++y){
+            trr[y][x] = trr[y][x + 1];
+        }
+        trr[str[x] - 'a'][x] = x;
+    }
+
+    dp_table[1][0][0][0] = 1;
+    int ans = 0, cnt = 0;
+
+    for (int l = 1; l <= len; ++l) {
+        for (int x = 0; x <= (len + 2) / 3; ++x) {
+            for (int y = 0; y <= (len + 2) / 3; ++y) {
+                for (int z = 0; z <= (len + 2) / 3; ++z) {
+                    cnt = dp_table[l][x][y][z];
+                    if (trr[0][l] != 0){
+                        (dp_table[trr[0][l]][x + 1][y][z] += cnt) %= mod;
+                    }
+                    if (trr[1][l] != 0){
+                        (dp_table[trr[1][l]][x][y + 1][z] += cnt) %= mod;
+                    }
+                    if (trr[2][l] != 0){
+                        (dp_table[trr[2][l]][x][y][z + 1] += cnt) %= mod;
+                    }
+                    if (x + y + z == len && std::abs(x - y) <= 1 && std::abs(y - z) <= 1 && std::abs(z - x) <= 1){
+                        ans = (ans + cnt) % mod;
+                    }
+                }
+            }
+        }
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    std::string str_1 = "aaabcaaaaa";
+    int expected_1 = 13;
+    int result_1 = Balance(str_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string str_2 = "ababcbabab";
+    int expected_2 = 540;
+    int result_2 = Balance(str_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string str_3 = "abcabcabc";
+    int expected_3 = 460;
+    int result_3 = Balance(str_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string str_4 = "abcabc";
+    int expected_4 = 21;
+    int result_4 = Balance(str_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string str_5 = "abacbbaa";
+    int expected_5 = 79;
+    int result_5 = Balance(str_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string str_6 = "abcacacabca";
+    int expected_6 = 2864;
+    int result_6 = Balance(str_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string str_7 = "abcacac";
+    int expected_7 = 44;
+    int result_7 = Balance(str_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string str_8 = "abababacc";
+    int expected_8 = 20;
+    int result_8 = Balance(str_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string str_9 = "";
+    try
+    {
+        Balance(str_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_10 = "abddk";
+    try
+    {
+        Balance(str_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string str_11 = std::string(5005,'a');
+    try
+    {
+        Balance(str_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+   std::cout << "All test cases passed!";
+    return 0;
+}
