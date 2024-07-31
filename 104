@@ -1,0 +1,469 @@
+/*
+
+
+https://codeforces.com/contest/1830/problem/F
+
+Write a C++ Solution TheThirdGrace to find ans the maximum possible sum of costs of all intervals.
+
+You are given num_interval intervals and num_points points on the number line. 
+The i-th intervals covers coordinates [li,ri] and the i-th point is on coordinate i
+and has coefficient coefficeint_i.
+
+Initially, all points are not activated. You should choose a subset of the num_points 
+points to activate. For each of num_intervals
+interval, we define its cost as: 0, if there are no activated points in the interval
+the coefficient of the activated point with the largest coordinate within it, otherwise.
+Your task is to maximize the sum of the costs of all intervals by choosing which points 
+to activate.
+
+Input :
+
+A vector of long long integers coefficient.
+A vector of vector of long long integers interval.
+
+Constraints : 
+
+coefficient.size() : ranges from 1 to 1000000.
+interval.size() : ranges from 1 to 1000000.
+coefficient : ranges from 0 to 1000000000 .
+interval : interval[i][0] ranges from 1 to interval[i][1]-1, 
+           interval[i][1] ranges from interval[i][0] to coefficient.size().
+
+Output:
+
+An integer ans the maximum possible sum of costs of all intervals.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+Take inf as 1e18.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+
+
+struct Line
+{
+    long long slope, intercept;
+
+    Line(long long slope_, long long intercept_)
+    {
+        slope = slope_, intercept = intercept_;
+    }
+
+    long long Get(long long xec)
+    {
+        return slope * xec + intercept;
+    }
+};
+
+struct Node
+{
+    int start, end, mid;
+    int val_start = 0, val_end = 0, val_mid = 0;
+    long long inf = 1e18;
+    Line line_val = {0, -inf};
+    int lazy = 0;
+    Node *left, *right;
+
+    Node(int _start, int _end)
+    {
+        start = _start, end = _end, mid = (start + end) / 2;
+
+        if (start != end)
+        {
+            left = new Node(start, mid);
+            right = new Node(mid + 1, end);
+        }
+    }
+
+    void Propagate()
+    {
+        if (lazy == 0){
+            return;
+        }
+
+        line_val.intercept -= line_val.slope * lazy;
+        val_start += lazy;
+        val_end += lazy;
+        val_mid += lazy;
+
+        if (start != end)
+        {
+            left->lazy += lazy;
+            right->lazy += lazy;
+        }
+        lazy = 0;
+    }
+
+    void Update(int index)
+    {
+        if (start == index){
+            lazy++;
+        }
+        else
+        {
+            if (line_val.intercept != -inf)
+            {
+                left->Propagate();
+                right->Propagate();
+                left->Update(line_val);
+                right->Update(line_val);
+                line_val = {0, -inf};
+            }
+
+            if (mid < index){
+                right->Update(index);
+            }
+            else
+            {
+                left->Update(index);
+                right->Update(mid + 1);
+            }
+
+            left->Propagate();
+            right->Propagate();
+            val_start = left->val_start;
+            val_mid = left->val_end;
+            val_end = right->val_end;
+        }
+    }
+
+    void Update(Line new_line)
+    {
+        bool is_low = new_line.Get(val_start) > line_val.Get(val_start);
+        bool is_mid = new_line.Get(val_mid) > line_val.Get(val_mid);
+        bool is_high = new_line.Get(val_end) > line_val.Get(val_end);
+
+        if (is_mid){
+            std::swap(new_line, line_val);
+        }
+
+        if (start == end || new_line.intercept == -inf || is_low == is_high){
+            return;
+        }
+
+        left->Propagate();
+        right->Propagate();
+        if (is_low != is_mid){
+            left->Update(new_line);
+        }
+        else{
+            right->Update(new_line);
+        }
+    }
+
+    std::pair<long long, int> Query(long long index)
+    {
+        Propagate();
+
+        if (start == end){
+            return {line_val.Get(val_start), val_start};
+        }
+        else if (index <= mid)
+        {
+            std::pair<long long, int> temp = left->Query(index);
+            return {std::max(temp.first, line_val.Get(temp.second)), temp.second};
+        }
+        else
+        {
+            std::pair<long long, int> temp = right->Query(index);
+            return {std::max(temp.first, line_val.Get(temp.second)), temp.second};
+        }
+    }
+};
+
+
+
+int TheThirdGrace(std::vector<long long int> coefficient, std::vector<std::vector<long long>> interval)
+{
+    int num_intervals=interval.size(), num_points=coefficient.size();
+    if (num_intervals < 1 || num_intervals > 1000000 || num_points < 1 || num_points > 1000000)
+    {
+        throw std::invalid_argument("Invalid value for num_intervals or num_points");
+    }
+
+    std::vector<std::pair<long long, long long>> intervals(num_intervals + 1);
+    for (int i = 1; i <= num_intervals; ++i)
+    {
+        intervals[i].first=interval[i-1][0];
+        intervals[i].second=interval[i-1][1];
+        if (intervals[i].first < 1 || intervals[i].first > intervals[i].second || intervals[i].second > num_points)
+        {
+            throw std::invalid_argument("Invalid value for l_i or r_i");
+        }
+    }
+
+    std::vector<long long> coefficients(num_points + 1);
+    for (int i = 1; i <= num_points; ++i)
+    {
+        coefficients[i]=coefficient[i-1];
+        if (coefficients[i] < 0 || coefficients[i] > 1000000000)
+        {
+            throw std::invalid_argument("Invalid value for coefficients_i");
+        }
+    }
+
+    std::sort(intervals.begin() + 1, intervals.begin() + num_intervals + 1);
+
+    Node *root = new Node(0, num_points + 1);
+    root->Update({0, 0});
+
+    int current = 1;
+    for (int i = 0; i <= num_points + 1; ++i)
+    {
+        while (current <= num_intervals && intervals[current].first == i){
+            root->Update(intervals[current++].second + 1);
+        }
+        std::pair<long long, int> temp = root->Query(i);
+        root->Update({coefficients[i], temp.first - coefficients[i] * temp.second});
+    }
+
+    int ans=root->Query(num_points + 1).first;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <chrono>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    std::vector<long long int> coefficient_1 = {2,1,6,3,7,5,4};
+    std::vector<std::vector<long long int>> interval_1 = {{1, 2}, {3,7}, {4,5},{6,7},{3,5}};
+    int expected_1 = 26;
+    int result_1 = TheThirdGrace(coefficient_1, interval_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_2 = {2, 1, 3};
+    std::vector<std::vector<long long int>> interval_2 = {{1, 3}};
+    int expected_2 = 3;
+    int result_2 = TheThirdGrace(coefficient_2, interval_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_3 = {3, 2, 1};
+    std::vector<std::vector<long long int>> interval_3 = {{1, 2}, {2, 3}, {1, 3}};
+    int expected_3 = 6;
+    int result_3 = TheThirdGrace(coefficient_3, interval_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_4 = {3, 4, 1, 2};
+    std::vector<std::vector<long long int>> interval_4 = {{1, 2}, {3, 4}, {1, 4}};
+    int expected_4 = 8;
+    int result_4 = TheThirdGrace(coefficient_4, interval_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_5 = {5, 2, 1, 3, 4};
+    std::vector<std::vector<long long int>> interval_5 = {{1, 3}, {2, 4}, {1, 5}};
+    int expected_5 =12;
+    int result_5 = TheThirdGrace(coefficient_5, interval_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_6 = {1, 3, 5, 4, 2};
+    std::vector<std::vector<long long int>> interval_6 = {{1, 5}, {2, 4}, {2, 3}};
+    int expected_6 = 15;
+    int result_6 = TheThirdGrace(coefficient_6, interval_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_7 = {5, 4, 3, 2, 1};
+    std::vector<std::vector<long long int>> interval_7 = {{1, 2}, {3, 4}, {2, 5}};
+    int expected_7 = 11;
+    int result_7 = TheThirdGrace(coefficient_7, interval_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<long long int> coefficient_8 = {1, 5, 4, 3, 2};
+    std::vector<std::vector<long long int>> interval_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    int expected_8 = 16;
+    int result_8 = TheThirdGrace(coefficient_8, interval_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_9 = {1, -1, 4, 3, 2};
+    std::vector<std::vector<long long int>> interval_9 = {{1, 2}, {2, 2}, {3, 4}, {4, 5}};
+    try
+    {
+        TheThirdGrace(coefficient_9, interval_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_10 = {1, 1000000004, 4, 3, 2};
+    std::vector<std::vector<long long int>> interval_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        TheThirdGrace(coefficient_10, interval_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_11 = {1, 5, -4, 3, 2};
+    std::vector<std::vector<long long int>> interval_11 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        TheThirdGrace(coefficient_11, interval_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_12 = {};
+    std::vector<std::vector<long long int>> interval_12 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+
+    try
+    {
+        TheThirdGrace(coefficient_12, interval_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_13(4000000,5);
+    std::vector<std::vector<long long int>> interval_13 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+
+    try
+    {
+        TheThirdGrace(coefficient_13, interval_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_14(4,1);
+    std::vector<std::vector<long long int>> interval_14 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        TheThirdGrace(coefficient_14, interval_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_15(1,1);
+    std::vector<std::vector<long long int>> interval_15 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        TheThirdGrace(coefficient_15, interval_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_16(1,1);
+    std::vector<std::vector<long long int>> interval_16 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        TheThirdGrace(coefficient_16, interval_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_17(1,1);
+    std::vector<std::vector<long long int>> interval_17 = {{1,0}};
+    try
+    {
+        TheThirdGrace(coefficient_17, interval_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_18(1,1);
+    std::vector<std::vector<long long int>> interval_18(500000,{1,2});
+    try
+    {
+        TheThirdGrace(coefficient_18, interval_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_19(1,1);
+    std::vector<std::vector<long long int>> interval_19(5,{2,1});
+    try
+    {
+        TheThirdGrace(coefficient_19, interval_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<long long int> coefficient_20(1,1);
+    std::vector<std::vector<long long int>> interval_20(5,{1,-1});
+    try
+    {
+        TheThirdGrace(coefficient_20, interval_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
