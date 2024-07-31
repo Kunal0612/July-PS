@@ -1,0 +1,395 @@
+/*
+
+https://codeforces.com/problemset/problem/1860/F
+
+Write a C++ Solution EvaluateRBS to find whether if it's possible to choose such x and y that 
+taking brackets c from the tuples in the resulting order produces a regular bracket sequence.
+
+
+You are given 2*num tuples of values (a,b,c) , where a and b are positive integers and c is a 
+bracket '(' or ')'. Exactly num tuples have c='(' and the other num
+tuples have c=')'.
+
+You are asked to choose two positive values x and y (x>0 and y>0 not necessarily integers) and 
+sort the tuples in the increasing value of a⋅x+b⋅y. 
+If several tuples have the same value, you can place them in any order among themselves.
+
+Is it possible to choose such x and y that taking brackets c from the tuples in the resulting 
+order produces a regular bracket sequence?
+
+A regular bracket sequence is a bracket sequence that can be transformed into a correct 
+arithmetic expression by inserting characters "1" and "+" between the original characters of the sequence.
+
+
+Input :
+
+A integer num.
+A vector<pair<int,pair<int,char>>> vec.
+
+Constraints : 
+
+num : ranges from 1 to 1500.
+vec.size() : is equal to num*2.
+vec[i].first , vec[i].second.first : ranges from 1 to 100000.
+vec[i].second.second : contain either '(' or ')'.
+
+
+Output:
+
+An boolean ans to check whether if it's possible to choose such x and y that taking brackets 
+c from the tuples in the resulting order produces a regular bracket sequence.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <numeric>
+#include <stdexcept> 
+#include <cassert>
+
+
+
+struct bracket {
+    int first, sec, brak;
+};
+
+struct point {
+    int x, y;
+};
+
+long long Cross(const point &first, const point &sec) {
+    return first.x * 1ll * sec.y - first.y * 1ll * sec.x;
+}
+
+long long dot(const point &first, const bracket &sec) {
+    return first.x * 1ll * sec.first + first.y * 1ll * sec.sec;
+}
+
+bool operator <(const point &first, const point &sec) {
+    return Cross(first, sec) > 0;
+}
+
+bool EvaluateRBS(int num,std::vector<std::pair<int,std::pair<int,char>>> vec) {
+    if (num < 1 || num > 1500 ){
+        throw std::invalid_argument("num must be between 1 and 1500");
+    }
+    if(num*2!=vec.size()){
+        throw std::invalid_argument("Invalid vec size");
+    }
+
+    std::vector<bracket> val;
+    int open_count = 0, close_count = 0;
+    int inf = 1e9;
+    for (int idx = 0; idx < 2 * num; idx++) {
+        int first=vec[idx].first, sec=vec[idx].second.first;
+        char brak=vec[idx].second.second;
+        if (first < 1 || first > 1000000 || sec < 1 || sec > 1000000) {
+            throw std::invalid_argument("first and sec must be between 1 and 1,000,000");
+        }
+        if (brak != '(' && brak != ')') {
+            throw std::invalid_argument("brak must be either '(' or ')'");
+        }
+
+        int type = (brak == '(') ? 1 : -1;
+        val.push_back({first, sec, type});
+
+        if (type == 1) {
+            open_count++;
+        }
+        else{
+            close_count++;
+        }
+    }
+
+    if (open_count != num || close_count != num) {
+        throw std::invalid_argument("There must be exactly num tuples with '(' and num tuples with ')'");
+    }
+
+    std::map<point, std::vector<int>> opts;
+    for (int idx = 0; idx < 2 * num; idx++) {
+        for (int jdx = 0; jdx < 2 * num; jdx++) {
+            int dxx = val[idx].sec - val[jdx].sec;
+            int dyy = val[jdx].first - val[idx].first;
+            if (dxx <= 0 || dyy <= 0){
+                continue;
+            }
+            opts[{dxx, dyy}].push_back(idx);
+            opts[{dxx, dyy}].push_back(jdx);
+        }
+    }
+    opts[{1, inf}];
+    std::vector<int> ord(2 * num), rord(2 * num);
+    std::iota(ord.begin(), ord.end(), 0);
+    std::sort(ord.begin(), ord.end(), [&](int idx, int jdx) {
+        long long dii = dot({inf, 1}, val[idx]);
+        long long djj = dot({inf, 1}, val[jdx]);
+        if (dii != djj) return dii < djj;
+        return val[idx].brak > val[jdx].brak;
+    });
+    for (int idx = 0; idx < 2 * num; idx++) {
+        rord[ord[idx]] = idx;
+    }
+    int neg = 0, cur = 0;
+    std::vector<int> bal(1, 0);
+    for (int idx : ord) {
+        cur += val[idx].brak;
+        bal.push_back(cur);
+        neg += cur < 0;
+    }
+    bool ans = neg == 0;
+    std::vector<int> prv;
+    for (auto it : opts) {
+        std::vector<int> tot = prv;
+        for (int x : it.second){
+            tot.push_back(x);
+        }
+        std::sort(tot.begin(), tot.end(), [&](int idx, int jdx) {
+            return rord[idx] < rord[jdx];
+        });
+        tot.resize(std::unique(tot.begin(), tot.end()) - tot.begin());
+        for (int x : tot){
+            neg -= bal[rord[x] + 1] < 0;
+        }
+        std::vector<int> tmp = tot;
+        std::sort(tot.begin(), tot.end(), [&](int idx, int jdx) {
+            long long dii = dot(it.first, val[idx]);
+            long long djj = dot(it.first, val[jdx]);
+            if (dii != djj) return dii < djj;
+            return val[idx].brak > val[jdx].brak;
+        });
+        std::vector<int> nrord(tot.size());
+        for (int idx = 0; idx < tot.size(); idx++) {
+            nrord[idx] = rord[tmp[idx]];
+        }
+        for (int idx = 0; idx < tot.size(); idx++) {
+            rord[tot[idx]] = nrord[idx];
+        }
+        for (int x : tot) {
+            bal[rord[x] + 1] = bal[rord[x]] + val[x].brak;
+            neg += bal[rord[x] + 1] < 0;
+        }
+        if (neg == 0) {
+            ans = true;
+            break;
+        }
+        prv = it.second;
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <numeric>
+#include <stdexcept> 
+#include <cassert>
+
+
+int main() {
+    // TEST
+    int num_1 = 1;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_1 = {{1, {4, '('}}, {2, {3, ')'}}};
+    bool expected_1 = true; 
+    bool result_1 = EvaluateRBS(num_1, vec_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 2;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_2 = {{2, {3, '('}}, {3, {1, ')'}}, {1, {2, '('}}, {4, {5, ')'}}};
+    bool expected_2 = true;
+    bool result_2 = EvaluateRBS(num_2, vec_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 3;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_3 = {{1, {4, '('}}, {2, {3, ')'}}, {3, {1, '('}}, {4, {2, ')'}}, {5, {6, '('}}, {7, {8, ')'}}};
+    bool expected_3 = true;
+    bool result_3 = EvaluateRBS(num_3, vec_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 2;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_4 = {{1, {2, '('}}, {2, {1, ')'}}, {3, {4, '('}}, {5, {6, ')'}}};
+    bool expected_4 = true;
+    bool result_4 = EvaluateRBS(num_4, vec_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 2;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_5 = {{100, {200, '('}}, {300, {400, ')'}}, {500, {600, '('}}, {700, {800, ')'}}};
+    bool expected_5 = true;
+    bool result_5 = EvaluateRBS(num_5, vec_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 3;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_6 = {{10, {20, '('}}, {30, {40, ')'}}, {50, {60, '('}}, {70, {80, ')'}}, {90, {100, '('}}, {110, {120, ')'}}};
+    bool expected_6 = true;
+    bool result_6 = EvaluateRBS(num_6, vec_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_7 = {{1, {2, '('}}, {2, {3, ')'}}, {3, {4, '('}}, {4, {5, ')'}}, {5, {6, '('}}, {6, {7, ')'}}, {7, {8, '('}}, {8, {9, ')'}}};
+    bool expected_7 = true;
+    bool result_7 = EvaluateRBS(num_7, vec_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_8 = {{1, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {8, {8, ')'}}};
+    bool expected_8 = true;
+    bool result_8 = EvaluateRBS(num_8, vec_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = -1;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_9 = {{1, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_9, vec_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = 0;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_10 = {{1, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_10, vec_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = 15000;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_11 = {{1, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_11, vec_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_12 = 15;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_12 = {{1, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_12, vec_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_13 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_13 = {{-1, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_13, vec_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_14 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_14 = {{100000000, {1, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_14, vec_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_15 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_15 = {{1, {10000000, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_15, vec_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_16 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_16 = {{1, {-2, '('}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_16, vec_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_17 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_17 = {{1, {2, 'a'}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_17, vec_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    int num_18 = 4;
+    std::vector<std::pair<int, std::pair<int, char>>> vec_18 = {{1, {2, ')'}}, {2, {2, ')'}}, {3, {3, '('}}, {4, {4, ')'}}, {5, {5, '('}}, {6, {6, ')'}}, {7, {7, '('}}, {9, {9, ')'}}};
+    try
+    {
+        EvaluateRBS(num_18, vec_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
+    return 0;
+}
