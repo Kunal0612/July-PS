@@ -2,7 +2,7 @@
 
 https://codeforces.com/problemset/problem/1436/F
 
-Write a C++ Solution ArmorAndWeapons to determine the for each such pair (A, B), 
+Write a C++ Solution SumOverSubsets to determine the for each such pair (A, B), 
 calculate the product of the sum of elements in A and the sum of elements in B. 
 Find the total sum of these products across all valid pairs (A, B), modulo 998244353.
 
