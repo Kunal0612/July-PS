@@ -1,0 +1,289 @@
+/*
+
+https://codeforces.com/problemset/problem/1847/F
+
+Write a C++ Solution TwoCentroids to find ans where ans[i] is the answer to the i-th query — 
+the least number of operations required to make the current tree have two centroids.
+
+
+You are given a tree (an undirected connected acyclic graph) which initially only contains vertex 1. 
+There will be several queries to the given tree. In the i-th query, vertex i+1 will appear 
+and be connected to vertex parent[i] (1≤parent[i]≤i).
+
+After each query, please find out the least number of operations required to make the 
+current tree has two centroids. In one operation, you can add one vertex and one edge to the tree such that it remains a tree.
+
+A vertex is called a centroid if its removal splits the tree into subtrees with at 
+most ⌊num_nodes/2⌋ vertices each, with num_nodes 
+as the number of vertices of the tree. For example, the centroid of the following 
+tree is 3 because the biggest subtree after removing the centroid has 2
+vertices.
+
+In the next tree, vertex 1 and 2 are both centroids.
+
+Input :
+
+An integer num_nodes.
+A vector of integers parent.
+
+Constraints :
+
+num_nodes : ranges from 2 to 500000.
+parent.size() : has a size of num_nodes - 1
+parent[i] : ranges from 1 to i-1.
+
+Output:
+
+An vector of integer ans where ans[i] is the answer to the i-th query — the least number of 
+operations required to make the current tree have two centroids.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+void Dfs(int node, const std::vector<int>& parent, const std::vector<std::vector<int>>& adj, std::vector<int>& tin, std::vector<int>& tout, std::vector<std::vector<int>>& par, std::vector<int>& depth, int& timer) {
+    tin[node] = ++timer;
+    int log = 19;
+    depth[node] = depth[par[0][node]] + 1;
+    for (int k = 1; k < log; k++) {
+        par[k][node] = par[k - 1][par[k - 1][node]];
+    }
+    for (int neighbor : adj[node]) {
+        Dfs(neighbor, parent, adj, tin, tout, par, depth, timer);
+    }
+    tout[node] = timer;  
+}
+
+void Add(int node, const std::vector<int>& tin, std::vector<int>& bit) {
+    for (int i = tin[node]; i < bit.size(); i += i & -i) {
+        bit[i]++;
+    }
+}
+
+int Get(int node, const std::vector<int>& tin, const std::vector<int>& tout, const std::vector<int>& bit) {
+    int result = 0;
+    for (int i = tout[node]; i > 0; i -= i & -i) {
+        result += bit[i];
+    }
+    for (int i = tin[node] - 1; i > 0; i -= i & -i) {
+        result -= bit[i];
+    }
+    return result;
+}
+
+int Jump(int node, int distance, const std::vector<std::vector<int>>& par) {
+    int log = 19;
+    for (int k = 0; k < log; k++) {
+        if (distance >> k & 1) {
+            node = par[k][node];
+        }
+    }
+    return node;
+}
+
+bool Cover(int u, int node_v, const std::vector<int>& tin, const std::vector<int>& tout) {
+    return tin[u] <= tin[node_v] && tin[node_v] <= tout[u];
+}
+
+std::vector<int> TwoCentroids(int num_nodes,std::vector<int> parent) {
+    if (num_nodes < 2 || num_nodes > 500000 || num_nodes!=parent.size()+1) {
+        throw std::invalid_argument("Invalid value for num_nodes. Must be 2 <= num_nodes <= 500000.");
+    }
+    int log = 19;
+    std::vector<std::vector<int>> adj(num_nodes + 1);
+    std::vector<int> tin(num_nodes + 1), tout(num_nodes + 1), bit(num_nodes + 1), depth(num_nodes + 1);
+    std::vector<std::vector<int>> par(log, std::vector<int>(num_nodes + 1));
+    int timer = 0;
+    for (int i = 2; i <= num_nodes; i++) {
+        par[0][i]=parent[i-2];
+        if (par[0][i] < 1 || par[0][i] > i - 1) {
+            throw std::invalid_argument("Invalid parent index. Must satisfy 1 <= parent[i] <= i.");
+        }
+        adj[par[0][i]].push_back(i);
+    }
+
+    Dfs(1, par[0], adj, tin, tout, par, depth, timer);
+    Add(1, tin, bit);
+
+    int centroid = 1, max_size = 0;
+    std::vector<int> ans;
+    for (int u = 2; u <= num_nodes; u++) {
+        Add(u, tin, bit);
+        if (Cover(centroid, u, tin, tout)) {
+            int node_v = Jump(u, depth[u] - depth[centroid] - 1, par);
+            int size = Get(node_v, tin, tout, bit);
+            if (size >= (u + 1) / 2) {
+                centroid = node_v; 
+                max_size = u / 2;
+            } else {
+                max_size = std::max(max_size, size);
+            }
+        } else {
+            int size = Get(centroid, tin, tout, bit);
+            if (size < (u + 1) / 2) {
+                centroid = par[0][centroid]; 
+                max_size = u / 2;
+            } else {
+                max_size = std::max(max_size, u - size);
+            }
+        }
+        ans.push_back(u - 2 * max_size);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::vector<int> parent_1 = {1,1,3,3};
+    int num_nodes_1=5;
+    std::vector<int> expected_1 = {0,1,0,1};
+    std::vector<int> result_1 = TwoCentroids(num_nodes_1,parent_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_2 = {1,1};
+    int num_nodes_2=3;
+    std::vector<int> expected_2 ={0,1};
+    std::vector<int> result_2 = TwoCentroids(num_nodes_2,parent_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_3 = {1,1,2,2,3};
+    int num_nodes_3=6;
+    std::vector<int> expected_3 ={0,1,0,1,0};
+    std::vector<int> result_3 = TwoCentroids(num_nodes_3,parent_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_4 = {1,1,2,2,3,3};
+    int num_nodes_4=7;
+    std::vector<int> expected_4 ={0,1,0,1,0,1};
+    std::vector<int> result_4 = TwoCentroids(num_nodes_4,parent_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_5 = {1,1,2};
+    int num_nodes_5=4;
+    std::vector<int> expected_5 ={0,1,0};
+    std::vector<int> result_5 = TwoCentroids(num_nodes_5,parent_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_6 = {1,2,3,2,5,2};
+    int num_nodes_6=7;
+    std::vector<int> expected_6 ={0,1,0,1,2,3};
+    std::vector<int> result_6 = TwoCentroids(num_nodes_6,parent_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_7 = {1,2,2};
+    int num_nodes_7=4;
+    std::vector<int> expected_7 ={0,1,2};
+    std::vector<int> result_7 = TwoCentroids(num_nodes_7,parent_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_8 = {1,2,2,3,3};
+    int num_nodes_8=6;
+    std::vector<int> expected_8 ={0,1,2,1,0};
+    std::vector<int> result_8 = TwoCentroids(num_nodes_8,parent_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_9 = {-1,1,0,0};
+    int num_nodes_9=2;
+    try
+    {
+        TwoCentroids(num_nodes_9,parent_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_10 = {};
+    int num_nodes_10=2;
+    try
+    {
+        TwoCentroids(num_nodes_10,parent_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_11(1000005,5);
+    int num_nodes_11=2;
+    try
+    {
+        TwoCentroids(num_nodes_11,parent_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_12 = {};
+    int num_nodes_12=2;
+    try
+    {
+        TwoCentroids(num_nodes_12,parent_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_13 = {-1,1,-1,0,0};
+    int num_nodes_13=10;
+    try
+    {
+        TwoCentroids(num_nodes_13,parent_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_14 = {-1,1,-1,0,0};
+    int num_nodes_14=-1;
+    try
+    {
+        TwoCentroids(num_nodes_14,parent_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
