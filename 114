@@ -1,4 +1,36 @@
-// https://codeforces.com/problemset/problem/1487/F
+/*
+
+https://codeforces.com/problemset/problem/1487/F
+
+Write a C++ Solution Ones to find ans the the minimum number of ones, such that there exist a representation of num
+as the sum of integers (possibly negative) that uses x ones in total.
+
+
+You are given a positive (greater than zero) integer num.
+
+You have to represent num as the sum of integers (possibly negative) consisting only of ones (digits '1'). For example, 24=11+11+1+1 and 102=111−11+1+1.
+
+Among all possible representations, you have to find the one that uses the minimum number of ones in total.
+
+
+Input : 
+
+A string num.
+
+Constraints :
+
+num.size() : ranges from 1 to 50
+num : contains only digits.
+
+Output:
+
+An integer ans the the minimum number of ones, such that there exist a representation of num 
+as the sum of integers (possibly negative) that uses x ones in total.
+
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
 
 #include <iostream>  
 #include <vector>    
@@ -8,19 +40,6 @@
 #include <cassert>
 #include <stdexcept>
 
-
-/*
-
-Input : 
-
-A string num.
-
-Constraints :
-
-num.size() : ranges from 1 to 50, contains only digits.
-
-
-*/
 
 
 int Ones(std::string &num)
@@ -34,7 +53,7 @@ int Ones(std::string &num)
             throw std::invalid_argument("n must be a positive integer");
         }
     }
-    int max_digits = 250;
+    int max_digits = num.size()+10;
     int max_carry = 28;
     int inf = INT_MAX;
     std::vector<std::vector<std::vector<std::vector<int>>>> dp(
@@ -105,16 +124,16 @@ int Ones(std::string &num)
         }
         std::swap(dp[0], dp[1]);
     }
-    int answer = inf;
+    int ans = inf;
     for (int i = 0; i < max_digits; ++i)
     {
         for (int j = 0; j < max_digits; ++j)
         {
-            answer = std::min(answer, dp[0][max_carry][i][j]);
+            ans = std::min(ans, dp[0][max_carry][i][j]);
         }
     }
 
-    return answer;
+    return ans;
 }
 
 #include <iostream>  
@@ -126,10 +145,98 @@ int Ones(std::string &num)
 #include <stdexcept>
 
 
-int main()
-{
-    std::string num;
-    std::cin >> num;
-    std::cout << Ones(num) << std::endl;
+int main() {
+    // TEST
+    std::string num_1 = "24";
+    int expected_1 = 6;
+    int result_1 = Ones(num_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::string num_2 = "1515";
+    int expected_2 = 28;
+    int result_2 = Ones(num_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::string num_3 = "102";
+    int expected_3 = 7;
+    int result_3 = Ones(num_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::string num_4 = "461";
+    int expected_4 = 20;
+    int result_4 = Ones(num_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::string num_5 = "65163";
+    int expected_5 = 56;
+    int result_5 = Ones(num_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::string num_6 = "561";
+    int expected_6 = 21;
+    int result_6 = Ones(num_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::string num_7 = "6516516";
+    int expected_7 = 97;
+    int result_7 = Ones(num_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::string num_8 = "62651";
+    int expected_8 = 61;
+    int result_8 = Ones(num_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::string num_9 = "";
+    try
+    {
+        Ones(num_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string num_10 = "abddk";
+    try
+    {
+        Ones(num_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::string num_11 = std::string(5005,'5');
+    try
+    {
+        Ones(num_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+   std::cout << "All test cases passed!";
     return 0;
 }
