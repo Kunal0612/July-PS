@@ -1,0 +1,319 @@
+/*
+
+https://codeforces.com/problemset/problem/1918/F
+
+Write a C++ Solution CaterpillarOnATree to find ans the minimum number of minutes required 
+to visit all the nodes of the tree.
+
+The caterpillar decided to visit every node of the tree. Initially, it is sitting at the root.
+
+The tree is represented as a rooted tree with the root at the node 1. 
+Each crawl to a neighboring node takes 1 minute for the caterpillar.
+
+And there is a trampoline under the tree. If the caterpillar detaches from the tree and falls 
+onto the trampoline, it will end up at the root of the tree in 0
+seconds. But the trampoline is old and can withstand no more than num_jumps caterpillar's falls.
+
+What is the minimum time the caterpillar can take to visit all the nodes of the tree?
+
+More formally, we need to find the minimum time required to visit all the nodes of the tree, 
+if the caterpillar starts at the root (node 1) and moves using two methods.
+
+Crawl along an edge to one of the neighboring nodes: takes 1 minute.
+Teleport to the root: takes no time, no new nodes become visited.
+The second method (teleportation) can be used at most num_jumps times. The caterpillar 
+can finish the journey at any node.
+
+Input :
+
+An interger num_nodes.
+An integer num_jumps.
+A vector of integer par.
+
+Constraints :
+num_nodes : ranges from 2 to 200000.
+num_jumps : ranges from 0 to 10^9.
+par.size() : is equal to num_nodes - 1.
+par : ranges from 1 to num_nodes.
+
+Output:
+
+An integer ans the minimum number of minutes required to visit all the nodes of the tree.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+bool CompareByDepth(const std::vector<int>& depth, int node_u, int node_v) {
+    return depth[node_u] < depth[node_v];
+}
+
+void SortSubtreesByDepth(int node_v, const std::vector<int>& parent, std::vector<int>& depth, std::vector<int>& height, std::vector<std::vector<int>>& children) {
+    depth[node_v] = 0;
+    height[node_v] = (node_v == 1) ? 0 : height[parent[node_v]] + 1;
+
+    for (int i = 0; i < children[node_v].size(); ++i) {
+        int node_u = children[node_v][i];
+        SortSubtreesByDepth(node_u, parent, depth, height, children);
+        depth[node_v] = std::max(depth[node_v], depth[node_u] + 1);
+    }
+
+    std::sort(children[node_v].begin(), children[node_v].end(), [&](int node_a, int node_b) {
+        return CompareByDepth(depth, node_a, node_b);
+    });
+}
+
+
+
+int CaterpillarOnATree(int num_nodes, int num_jumps,std::vector<int> par){
+    if (num_nodes < 2 || num_nodes > 2 * 100000 || num_nodes!=par.size()+1) {
+        throw std::invalid_argument("Invalid number of nodes. It should be between 2 and 2 * 10^5.");
+    }
+    if (num_jumps < 0 || num_jumps > 1000000000) {
+        throw std::invalid_argument("Invalid number of teleports. It should be between 0 and 10^9.");
+    }
+    for (int i = 0; i < par.size()-1; ++i) {
+        if (par[i] < 1 || par[i] > num_nodes) {
+            throw std::invalid_argument("Invalid parent node value. It should be between 1 and n.");
+        }
+    }
+    std::vector<int> parent(num_nodes + 1);
+    std::vector<int> depth(num_nodes + 1);
+    std::vector<int> height(num_nodes + 1);
+    std::vector<std::vector<int>> children(num_nodes + 1);
+    std::vector<int> leaf_gain_jumps;
+
+    for (int i = 2; i <= num_nodes; ++i) {
+        parent[i]=par[i-2];
+        children[parent[i]].push_back(i);
+    }
+
+    SortSubtreesByDepth(1, parent, depth, height, children);
+
+    for (int i = 1; i <= num_nodes; ++i) {
+        if (children[i].empty()) {  
+            int jump_gain = 0;
+            int node_v = i;
+
+            while (node_v != 1) {
+                int siblingCount = children[parent[node_v]].size();
+                if (children[parent[node_v]][siblingCount - 1] == node_v) {
+                    node_v = parent[node_v];
+                    ++jump_gain;
+                } else {
+                    jump_gain += 1 - height[parent[node_v]];
+                    break;
+                }
+            }
+
+            leaf_gain_jumps.push_back(jump_gain);
+        }
+    }
+
+    std::sort(leaf_gain_jumps.begin(), leaf_gain_jumps.end());
+
+    int numLeafNodes = leaf_gain_jumps.size();
+    ++num_jumps;
+    int result = 2 * (num_nodes - 1);
+
+    for (int i = numLeafNodes - 1; i >= std::max(0, numLeafNodes - num_jumps); --i) {
+        result -= std::max(leaf_gain_jumps[i], 0);
+    }
+    int ans=result;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::vector<int> parent_1 = {1,1,2,2,4,3,3};
+    int num_nodes_1=8,num_jumps_1=1;;
+    int expected_1 = 9;
+    int result_1 = CaterpillarOnATree(num_nodes_1,num_jumps_1,parent_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_2 = {4,4,1};
+    int num_nodes_2=4,num_jumps_2=0;
+    int expected_2 =4;
+    int result_2 = CaterpillarOnATree(num_nodes_2,num_jumps_2,parent_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_3 = {1,1,2,2,3};
+    int num_nodes_3=6,num_jumps_3=5;
+    int expected_3 =6;
+    int result_3 = CaterpillarOnATree(num_nodes_3,num_jumps_3,parent_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_4 = {1,1,2,2,3,3};
+    int num_nodes_4=7,num_jumps_4=5;
+    int expected_4 =8;
+    int result_4 = CaterpillarOnATree(num_nodes_4,num_jumps_4,parent_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_5 = {1,1,2};
+    int num_nodes_5=4,num_jumps_5=5;
+    int expected_5 =3;
+    int result_5 = CaterpillarOnATree(num_nodes_5,num_jumps_5,parent_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_6 = {1,2,3,2,5,2};
+    int num_nodes_6=7,num_jumps_6=5;
+    int expected_6 =8;
+    int result_6 = CaterpillarOnATree(num_nodes_6,num_jumps_6,parent_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_7 = {1,2,2};
+    int num_nodes_7=4,num_jumps_7=5;
+    int expected_7 =4;
+    int result_7 = CaterpillarOnATree(num_nodes_7,num_jumps_7,parent_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_8 = {1,2,2,3,3};
+    int num_nodes_8=6,num_jumps_8=4;
+    int expected_8 =7;
+    int result_8 = CaterpillarOnATree(num_nodes_8,num_jumps_8,parent_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> parent_9 = {-1,1,0,0};
+    int num_nodes_9=6,num_jumps_9=4;
+    try
+    {
+        CaterpillarOnATree(num_nodes_9,num_jumps_9,parent_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_10 = {};
+    int num_nodes_10=2,num_jumps_10=5;
+    try
+    {
+        CaterpillarOnATree(num_nodes_10,num_jumps_10,parent_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_11(1000005,5);
+    int num_nodes_11=2,num_jumps_11=5;
+    try
+    {
+        CaterpillarOnATree(num_nodes_11,num_jumps_11,parent_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_12 = {};
+    int num_nodes_12=2,num_jumps_12=4;
+    try
+    {
+        CaterpillarOnATree(num_nodes_12,num_jumps_12,parent_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_13 = {-1,1,-1,0,0};
+    int num_nodes_13=10,num_jumps_13=0;
+    try
+    {
+        CaterpillarOnATree(num_nodes_13,num_jumps_13,parent_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_14 = {-1,1,-1,0,0};
+    int num_nodes_14=-1,num_jumps_14=5;
+    try
+    {
+        CaterpillarOnATree(num_nodes_14,num_jumps_14,parent_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_15 = {1,1,2,2};
+    int num_nodes_15=5,num_jumps_15=-5;
+    try
+    {
+        CaterpillarOnATree(num_nodes_15,num_jumps_15,parent_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_16 = {1,1,2,2};
+    int num_nodes_16=5,num_jumps_16=1000000009;
+    try
+    {
+        CaterpillarOnATree(num_nodes_16,num_jumps_16,parent_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> parent_17 = {1,1,2,2};
+    int num_nodes_17=5,num_jumps_17=-1;
+    try
+    {
+        CaterpillarOnATree(num_nodes_17,num_jumps_17,parent_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
