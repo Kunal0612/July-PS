@@ -1,0 +1,342 @@
+/*
+
+https://codeforces.com/problemset/problem/1436/F
+
+Write a C++ Solution ArmorAndWeapons to determine the for each such pair (A, B), 
+calculate the product of the sum of elements in A and the sum of elements in B. 
+Find the total sum of these products across all valid pairs (A, B), modulo 998244353.
+
+
+Given a multiset S of numbers, consider all possible pairs of subsets (A, B) where:
+
+B is a proper subset of A (B ⊂ A).
+The size of B is one less than the size of A (|B| = |A| - 1).
+The greatest common divisor (GCD) of all elements in A is 1.
+For each such pair (A, B), calculate the product of the sum of elements in A and the sum 
+of elements in B. 
+Find the total sum of these products across all valid pairs (A, B), modulo 998244353.
+
+
+Input :
+
+A vector of vector of integers vec.
+
+Constraints :
+
+vec.size() : ranges from 1 to 10^5.
+vec : vec[i][0] ranges from 1 to 10^5.
+      vec[i][1] ranges from 1 to 10^9.
+let a = vec[i][0] , freq = vec[i][1] , so a appears freq times in multiset S.
+
+
+Output:
+
+An integer ans the total sum of these products across all valid pairs (A, B), modulo 998244353.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+
+void Addmod(long long &first, long long sec) {
+    first += sec;
+    int mod = 998244353;
+    if (first >= mod) {
+        first -= mod;
+    }
+    if (first < 0) {
+        first += mod;
+    }
+}
+
+long long Powmod(long long first, long long sec) {
+    long long result = 1;
+    long long base = first;
+    int mod = 998244353;
+    while (sec) {
+        if (sec & 1) {
+            result = result * base % mod;
+        }
+        base = base * base % mod;
+        sec >>= 1;
+    }
+    return result;
+}
+
+
+
+int SumOverSubsets(std::vector<std::vector<int>> vec){
+    int lem=vec.size();
+    if (lem < 1 || lem > 100000) {
+        throw std::invalid_argument("lem must be between 1 and 100000");
+    }
+    for (const std::vector<int>& it : vec) {
+        int aec=it[0],freq=it[1];
+        if (aec < 1 || aec > 100000) {
+            throw std::invalid_argument("it must be between 1 and 100000");
+        }
+        if (freq < 1 || freq > 1000000000) {
+            throw std::invalid_argument("freq must be between 1 and 1000000000");
+        }
+    }
+    int mx_range = 1e5;
+    int mod = 998244353;
+    std::vector<long long> sum(mx_range + 1, 0);
+    std::vector<long long> sum_1(mx_range + 1, 0);
+    std::vector<long long> sum_2(mx_range + 1, 0);
+    std::vector<long long> cnt(mx_range + 1, 0);
+
+    for (int i = 0; i < lem; ++i) {
+        long long xec=vec[i][0], freq=vec[i][1];
+        long long sumi = xec * freq % mod;
+        long long sumi_1 = xec * xec % mod * freq % mod;
+        long long sumi_2 = xec * xec % mod * ((freq - 1) * freq % mod) % mod;
+        for (int j = 1; j * j <= xec; ++j) {
+            if (xec % j == 0) {
+                Addmod(sum_2[j], (sumi_2 + 2 * sumi * sum[j]) % mod);Addmod(sum_1[j], sumi_1);
+                Addmod(sum[j], sumi);
+                cnt[j] += freq;
+                if (xec / j != j) {
+                    int idx=xec/j;
+                    Addmod(sum_2[idx], (sumi_2 + 2 * sumi * sum[idx]) % mod);
+                    Addmod(sum_1[idx], sumi_1);
+                    Addmod(sum[idx], sumi);
+                    cnt[idx] += freq;
+                }
+            }
+        }
+    }
+
+    std::vector<long long> freq(mx_range + 1, 0);
+    for (int i = mx_range; i >= 1; --i) {
+        if (!cnt[i]){
+            continue;
+        }
+        long long &result = freq[i];
+        long long cnt_1 = cnt[i];
+        long long pcnt_1 = 0, pcnt_2 = 0;
+        if (cnt_1 > 2) {
+            pcnt_1 = Powmod(2, cnt_1 - 3);
+            pcnt_2 = pcnt_1 * 2 % mod;
+        } else if (cnt_1 > 1) {
+            pcnt_2 = Powmod(2, cnt_1 - 2);
+        }
+
+        if (cnt_1 > 1) {
+            Addmod(result, pcnt_2 * ((cnt_1 - 1) % mod) % mod * sum_1[i] % mod);
+            Addmod(result, pcnt_2 % mod * sum_2[i] % mod);
+        }
+        if (cnt_1 > 2) {
+            Addmod(result, pcnt_1 * ((cnt_1 - 2) % mod) % mod * sum_2[i] % mod);
+        }
+
+        for (int j = i + i; j <= mx_range; j += i) {
+            Addmod(result, -freq[j]);
+        }
+    }
+
+    int ans=freq[1];
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+
+
+int main() {
+    // TEST
+    std::vector<std::vector<int>> vec_1 = {{1, 1}, {2, 1}, {3,1},{6,1}};
+    int expected_1 = 1207;
+    int result_1 = SumOverSubsets( vec_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_2 = {{1, 2},{2,2}};
+    int expected_2 = 312;
+    int result_2 = SumOverSubsets( vec_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_3 = {{1, 2}, {2, 3}, {1, 3}};
+    int expected_3 = 34120;
+    int result_3 = SumOverSubsets(vec_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_4 = {{1, 2}, {2, 3}, {1, 1}};
+    int expected_4 = 4248;
+    int result_4 = SumOverSubsets(vec_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_5 = {{1, 3}, {2, 3}, {1, 3}};
+    int expected_5 =90888;
+    int result_5 = SumOverSubsets( vec_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_6 = {{1, 5}, {2, 4}, {2, 3},{4,4},{5,5}};
+    int expected_6 = 956162364;
+    int result_6 = SumOverSubsets( vec_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_7 = {{1, 2}, {3, 4}, {2, 5},{5,5},{4,5}};
+    int expected_7 = 565485605;
+    int result_7 = SumOverSubsets( vec_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<std::vector<int>> vec_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5},{4,4}};
+    int expected_8 = 941517551;
+    int result_8 = SumOverSubsets(vec_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_9 = {{1000000, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets(vec_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_10 = {{1, 1000000008}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets( vec_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_11 = {{1, -2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets(vec_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_12 = {{1, -2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets(vec_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_13 = {{-1, -2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets(vec_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_14 = {{-1, -2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets(vec_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(1,1);
+    std::vector<std::vector<int>> vec_15 = {{1, 1}, {2, 3}, {3, 4}, {4, -100}};
+    try
+    {
+        SumOverSubsets(vec_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_16 = {{1, -1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        SumOverSubsets( vec_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_17 = {};
+    try
+    {
+        SumOverSubsets(vec_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<std::vector<int>> vec_18(5000000,{1,2});
+    try
+    {
+        SumOverSubsets(vec_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
