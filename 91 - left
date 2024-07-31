@@ -1,0 +1,225 @@
+// https://codeforces.com/problemset/problem/1876/D
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+
+int BinPow(int base, int exp, int mod) {
+    int result = 1;
+    while (exp > 0) {
+        if (exp % 2 == 1) {
+            result = (result * base) % mod;
+        }
+        base = (base * base) % mod;
+        exp /= 2;
+    }
+    return result;
+}
+
+int Find(int node, std::vector<int>& parent) {
+    return node == parent[node] ? node : parent[node] = Find(parent[node], parent);
+}
+
+
+
+int Lexichromatography(std::vector<int> &nums){
+    int len=nums.size();
+    if(len<1 or len>200000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<len;i++){
+        if(nums[i]<1 or nums[i]>200000){
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    
+    std::vector<int> values(len + 1);
+    std::vector<int> parent(len + 1);
+    std::vector<int> power(len + 1, 1);
+    std::vector<std::vector<int>> positions(200002);
+    
+    int mod = 998244353;
+    for (int i = 1; i <= len; ++i) {
+        values[i]=nums[i-1];
+        parent[i] = i;
+        power[i] = (power[i - 1] * 2) % mod;
+        positions[values[i]].push_back(i);
+    }
+    int node = 0;
+    for (const std::vector<int>& pos : positions) {
+        if (!pos.empty()) {
+            node++;
+        }
+    }
+    
+
+    std::vector<std::pair<int, int>> segments;
+    for (int i = 1; i < len+1; ++i) {
+        if (positions[i].size() % 2 != 0) {
+            return power[node - 1];
+        } else {
+            for (int j = 1; j < positions[i].size(); ++j) {
+                parent[Find(positions[i][j], parent)] = Find(positions[i][j - 1], parent);
+            }
+            for (int j = 0; j < positions[i].size(); j += 2) {
+                segments.push_back({positions[i][j], positions[i][j + 1]});
+            }
+        }
+    }
+    std::sort(segments.begin(), segments.end());
+    for (int i = 1, r = segments[0].second; i < segments.size(); ++i) {
+        if (segments[i].second < r) {
+            return power[node - 1];
+        } 
+        else {
+            if (segments[i].first < r) {
+                parent[Find(segments[i].second, parent)] = Find(r, parent);
+            }
+            r = std::max(r, segments[i].second);
+        }
+    }
+    
+    int yec = 0;
+    for (int i = 1; i <= len; ++i) {
+        if (Find(i, parent) == i) {
+            yec++;
+        }
+    }
+    int ans=(power[node - 1] + mod - power[yec - 1]) % mod;
+    std::cout<<ans<<std::endl;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+     // TEST
+    std::vector<int> nums_1 = {265};
+    int expected_1 = 4;
+    int result_1 = Lexichromatography(nums_1);
+    std::cout << result_1 << std::endl;
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_2 = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    // int expected_2 = 5;
+    // int result_2 = Lexichromatography(nums_2);
+    // assert(result_2 == expected_2);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_3 = {10000,5,5};
+    // int expected_3 = 3;
+    // int result_3 = Lexichromatography(nums_3);
+    // assert(result_3 == expected_3);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    // int expected_4 = 5;
+    // int result_4 = Lexichromatography(nums_4);
+    // assert(result_4 == expected_4);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_5 = {10, 20, 30, 40, 50, 60};
+    // int expected_5 = 2;
+    // int result_5 = Lexichromatography(nums_5);
+    // assert(result_5 == expected_5);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    // int expected_6 =6;
+    // int result_6 = Lexichromatography(nums_6);
+    // assert(result_6 == expected_6);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    // int expected_7 = 5;
+    // int result_7 = Lexichromatography(nums_7);
+    // assert(result_7 == expected_7);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_8 = {3, 3, 3, 3, 3, 3, 3};
+    // int expected_8 = 7;
+    // int result_8 = Lexichromatography(nums_8);
+    // assert(result_8 == expected_8);
+    // // TEST_END
+
+    // // TEST
+    // std::vector<int> nums_9 = {0};
+    // try
+    // {
+    //     Lexichromatography(nums_9);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    //  // TEST
+    // std::vector<int> nums_10(6000000,0);
+    // try
+    // {
+    //     Lexichromatography(nums_10);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    //  // TEST
+    // std::vector<int> nums_11(6,-1);
+    // try
+    // {
+    //     Lexichromatography(nums_11);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    // // TEST
+    // std::vector<int> nums_12(6,100000000);
+    // try
+    // {
+    //     Lexichromatography(nums_12);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    // // TEST
+    // std::vector<int> nums_13={};
+    // try
+    // {
+    //     Lexichromatography(nums_13);
+    //     assert(false);
+    // }
+    // catch (const std::invalid_argument &e)
+    // {
+    //     assert(true);
+    // }
+    // // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
