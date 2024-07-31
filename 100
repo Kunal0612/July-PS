@@ -1,0 +1,459 @@
+/*
+
+https://codeforces.com/problemset/problem/1016/G
+
+
+Write a C++ Solution AppropriateTeam to find the number of pairs (i,j) such that 
+there exists an integer v meeting the following constraints: GCD(v,arr[i])=xec
+and LCM(v,arr[j])=yec. It's possible that i=j.
+
+Since next season are coming, you'd like to form a team from two or three participants. 
+There are num candidates, the i-th candidate has rank arr[i]. 
+But you have weird requirements for your teammates: if you have rank v and have 
+chosen the i-th and j-th candidate, then GCD(v,arr[i])=xec
+and LCM(v,arr[j])=yec must be met.
+
+You are very experienced, so you can change your rank to any non-negative integer 
+but xec and yec are tied with your birthdate, so they are fixed.
+
+Now you want to know, how many are there pairs (i,j) such that there exists an 
+integer v meeting the following constraints: GCD(v,arr[i])=xec
+and LCM(v,arr[j])=yec . It's possible that i=j and you form a team of two.
+
+GCD is the greatest common divisor of two number, LCM — the least common multiple.
+
+Input :
+
+An long long integer xec.
+An long long integer yec.
+A vector of long long integer arr.
+
+
+Constraints :
+
+arr.size() : ranges from 1 to 200000.
+xec : ranges from 1 to yec.
+yec : ranges from xec+1 to 10^18.
+arr : ranges from 1 to 10^18.
+
+Output:
+
+An vector of integers ans to find the number of pairs (i,j) such that there exists an integer v meeting the following constraints: GCD(v,arr[i])=X
+and LCM(v,arr[j])=Y. It's possible that i=j.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cassert>
+#include <algorithm>
+#include <iomanip>
+#include <stdexcept>
+
+
+
+long long GCD(long long first, long long second)
+{
+    while (first > 0)
+    {
+        second %= first;
+        std::swap(first, second);
+    }
+    return second;
+}
+
+std::vector<std::pair<long long, long long>> Factorize(long long num, const std::vector<long long> &cnd)
+{
+    
+    
+    std::vector<std::pair<long long, long long>> prime_div;
+    for (long long xec = 2; xec <= 1'000'000 && xec * xec <= num; xec++)
+    {
+        int cnt = 0;
+        while (num % xec == 0)
+        {
+            num /= xec, cnt++;
+        }
+        if (cnt > 0)
+        {
+            prime_div.emplace_back(xec, cnt);
+        }
+    }
+    if (num > 1)
+    {
+        for (long long s = std::max(1ll, (long long)std::sqrt(num) - 2); s * s <= num; s++)
+            if (s * s == num)
+            {
+                prime_div.emplace_back(s, 2);
+                num = 1;
+                break;
+            }
+        if (num > 1)
+        {
+            for (long long c : cnd)
+            {
+                long long gcd = GCD(num, c);
+                if (gcd != 1 && gcd != num)
+                {
+                    long long first = gcd, sec = num / gcd;
+                    if (first > sec){
+                        std::swap(first, sec);
+                    }
+                    prime_div.emplace_back(first, 1);
+                    prime_div.emplace_back(sec, 1);
+                    num = 1;
+                    break;
+                }
+            }
+            if (num > 1){
+                prime_div.emplace_back(num, 1), num = 1;
+            }
+        }
+    }
+    return prime_div;
+}
+
+
+
+int AppropriateTeam(long long xec, long long yec, std::vector<long long> &arr)
+{
+    
+    int num=arr.size();
+    if (num < 1 || num > 200000) {
+        throw std::invalid_argument("Invalid value for n. It should be 1 ≤ n ≤ 2 * 10^5.");
+    }
+    if (xec < 1 || xec > yec || yec > 1000000000000000000LL) {
+        throw std::invalid_argument("Invalid values for X and Y. It should be 1 ≤ X ≤ Y ≤ 10^18.");
+    }
+
+    for (long long it : arr) {
+        if (it < 1 || it > 1000000000000000000LL) {
+            throw std::invalid_argument("Invalid value for arr[i]. It should be 1 ≤ arr[i] ≤ 10^18.");
+        }
+    }
+    if (yec % xec != 0)
+    {
+        return 0;
+    }
+
+    std::vector<std::pair<long long, long long>> prime_y = Factorize(yec, std::vector<long long>(arr.begin(), arr.end()));
+    std::vector<std::pair<long long, long long>> prime_x;
+    long long cxec = xec;
+    for (std::pair<long long, long long> p : prime_y)
+    {
+        int cnt = 0;
+        while (cxec % p.first == 0){
+            cxec /= p.first, cnt++;
+        }
+        prime_x.emplace_back(p.first, cnt);
+    }
+
+    std::vector<long long> psec;
+    std::vector<std::pair<long long, long long>> brr;
+
+    for (int i = 0; i < prime_y.size(); i++)
+    {
+        if (prime_x[i].second < prime_y[i].second)
+        {
+            psec.push_back(prime_y[i].first);
+            brr.emplace_back(prime_x[i].second, prime_y[i].second);
+        }
+    }
+
+    std::vector<int> res((1 << 18) + 3, 0);
+
+    for (int i = 0; i < num; i++)
+    {
+        if (arr[i] % xec != 0){
+            continue;
+        }
+        int mask = 0;
+        long long csec = arr[i];
+        for (int j = 0; j < psec.size(); j++)
+        {
+            int cnt = 0;
+            while (csec % psec[j] == 0){
+                csec /= psec[j], cnt++;
+            }
+            assert(cnt >= brr[j].first);
+            mask |= (cnt > brr[j].first) << j;
+        }
+        res[mask]++;
+    }
+
+    for (int i = 0; i < psec.size(); i++)
+    {
+        for (int mask = 0; mask < (1 << psec.size()); mask++)
+        {
+            if ((mask >> i) & 1){
+                res[mask] += res[mask ^ (1 << i)];
+            }
+        }
+    }
+
+    long long ans = 0;
+    for (int i = 0; i < num; i++)
+    {
+        if (yec % arr[i] != 0){
+            continue;
+        }
+        int mask = 0;
+        long long csec = arr[i];
+        for (int j = 0; j < psec.size(); j++)
+        {
+            int cnt = 0;
+            while (csec % psec[j] == 0){
+                csec /= psec[j], cnt++;
+            }
+            assert(cnt <= brr[j].second);
+            mask |= (cnt < brr[j].second) << j;
+        }
+        int rec = psec.size();
+        ans += res[mask ^ ((1 << rec) - 1)];
+    }
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cassert>
+#include <algorithm>
+#include <iomanip>
+#include <stdexcept>
+
+
+int main()
+{
+    // TEST
+    long long int xec_1 = 2;
+    long long int yec_1 = 2;
+    std::vector<long long int> arr_1 = {1,2,3,4,5,6,7,8,9,10,11,12};
+    long long int expected_1 = 12;
+    long long int result_1 = AppropriateTeam(xec_1, yec_1, arr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    long long int xec_2 = 5;
+    long long int yec_2 = 5;
+    std::vector<long long int> arr_2 = {2, 3, 4, 5, 6};
+    long long int expected_2 = 1;
+    long long int result_2 = AppropriateTeam(xec_2, yec_2, arr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    long long int xec_3 = 3;
+    long long int yec_3 = 3;
+    std::vector<long long int> arr_3 = {1, 4, 6};
+    long long int expected_3 = 1;
+    long long int result_3 = AppropriateTeam(xec_3, yec_3, arr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    long long int xec_4 = 6;
+    long long int yec_4 = 6;
+    std::vector<long long int> arr_4 = {2, 5, 10, 15, 18, 20};
+    long long int expected_4 = 1;
+    long long int result_4 = AppropriateTeam(xec_4, yec_4, arr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    long long int xec_5 = 7;
+    long long int yec_5 = 7;
+    std::vector<long long int> arr_5 = {1, 3, 5, 7, 9, 11, 13};
+    long long int expected_5 = 2;
+    long long int result_5 = AppropriateTeam(xec_5, yec_5, arr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    long long int xec_6 = 2;
+    long long int yec_6 = 2;
+    std::vector<long long int> arr_6 = {2, 4};
+    long long int expected_6 = 2;
+    long long int result_6 = AppropriateTeam(xec_6, yec_6, arr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    long long int xec_7 = 10;
+    long long int yec_7 = 10;
+    std::vector<long long int> arr_7 = {5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+    long long int expected_7 =10;
+    long long int result_7 = AppropriateTeam(xec_7, yec_7, arr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    long long int xec_8 = 8;
+    long long int yec_8 = 8;
+    std::vector<long long int> arr_8 = {2, 4, 6, 8, 10, 12, 1, 3};
+    long long int expected_8 = 4;
+    long long int result_8 = AppropriateTeam(xec_8, yec_8, arr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    long long int xec_9 = 1000000009;
+    long long int yec_9 = 8;
+    std::vector<long long int> arr_9 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_9, yec_9, arr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_10 = -1;
+    long long int yec_10 = 8;
+    std::vector<long long int> arr_10 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_10, yec_10, arr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_11 = 2005;
+    long long int yec_11 = 1000000000000000001LL;
+    std::vector<long long int> arr_11 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_11, yec_11, arr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_12 = -8;
+    long long int yec_12 = 1;
+    std::vector<long long int> arr_12 = {2, 4, 6, 9, 10, 12, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_12, yec_12, arr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_13 = 8;
+    long long int yec_13 = -1;
+    std::vector<long long int> arr_13 = {2, 4, 6, 9, 10, 13, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_13, yec_13, arr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_14 = 8;
+    long long int yec_14 = -2;
+    std::vector<long long int> arr_14 = {2, 4, 6, 9, 10, 14, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_14, yec_14, arr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_15 = 4;
+    long long int yec_15 = 5;
+    std::vector<long long int> arr_15 = {2, 4, 6, 9, -5, 1, 3};
+    try
+    {
+        AppropriateTeam(xec_15, yec_15, arr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_16 = 4;
+    long long int yec_16 = 5;
+    std::vector<long long int> arr_16 = {2, 1000000000000000050LL, 6, 9, 16, 1, 3,200};
+    try
+    {
+        AppropriateTeam(xec_16, yec_16, arr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_17 = 4;
+    long long int yec_17 = 5;
+    std::vector<long long int> arr_17 = {2, 4, 0, 0, -44, 1, 3,0};
+    try
+    {
+        AppropriateTeam(xec_17, yec_17, arr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_18 = 4;
+    long long int yec_18 = 5;
+    std::vector<long long int> arr_18(400000,5);
+    try
+    {
+        AppropriateTeam(xec_18, yec_18, arr_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    long long int xec_19 = 4;
+    long long int yec_19 = 5;
+    std::vector<long long int> arr_19 = {};
+    try
+    {
+        AppropriateTeam(xec_19, yec_19, arr_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
