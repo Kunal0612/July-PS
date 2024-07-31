@@ -1,0 +1,393 @@
+/*
+
+https://codeforces.com/problemset/problem/1847/F
+
+Write a C++ Solution TheBossIdentity to find ans vector where ans[i] is the answer to the i-th question asked by Giorno.
+
+
+While tracking Diavolo's origins, Giorno receives a secret code from Polnareff. The code can be represented as an infinite sequence of 
+positive integers: nums_1,nums_2,…nums_len.
+ 
+Giorno immediately sees the pattern behind the code. The first len numbers nums_1,nums_2,…nums_len are given. For i>len
+the value of nums[i] is (nums[i]−len | nums[i]−len+1), where | denotes the bitwise OR operator.
+
+Pieces of information about Diavolo are hidden in q_len questions. Each question has a positive integer v associated with it and its answer is the smallest index i
+such that nums[i]>v. If no such i exists, the answer is −1 . Help Giorno in answering the questions!
+
+Input :
+
+A vector of integers arr.
+A vector of integers quer.
+
+Constraints :
+arr.size() : ranges from 2 to 200000.
+quer.size() : ranges from 2 to 200000.
+arr , quer : ranges from 0 to 10^9.
+
+
+Output:
+
+An vector of integer ans where ans[i] is the answer to the i-th question asked by Giorno.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <cstring>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+struct Item {
+    long long position, bit, index;
+};
+
+Item CreateItem(long long position, long long bit, long long index) {
+    Item res;
+    res.position = position;
+    res.bit = bit;
+    res.index = index;
+    return res;
+}
+
+
+std::vector<int> TheBossIdentity(std::vector<int> arr,std::vector<int> quer) {
+    int len=arr.size();
+    int q_len=quer.size();
+    int bit_count = 31;
+    if (len < 2 || len > 200000){
+        throw std::invalid_argument("len out of bounds");
+    }
+    if (q_len < 1 || q_len > 200000){
+        throw std::invalid_argument("q_len out of bounds");
+    }
+    for(int i=0;i<len;i++){
+        if(arr[i]<0 or arr[i]>1000000000){
+            throw std::invalid_argument("Invalid arr value");
+        }
+    }
+    for(int i=0;i<q_len;i++){
+        if(quer[i]<0 or quer[i]>1000000000){
+            throw std::invalid_argument("Invalid quer value");
+        }
+    }
+    if (len == 1) {
+        std::vector<int> ans;
+        for(int i=0;i<quer.size();i++) {
+            int query_value=quer[i];
+            if (query_value < arr[0]){
+                ans.push_back(1);
+            }
+            else{
+                ans.push_back(-1);
+            }
+        }
+        return ans;
+    }
+
+    std::vector<std::pair<long long, long long>> value_pairs;
+    std::queue<Item> item_queue;
+    bool visited[len][bit_count];
+    std::memset(visited, 0, sizeof visited);
+
+    for (int i = 0; i < len; i++) {
+        for (int j = 0; j < bit_count; j++) {
+            if ((arr[i] & (1 << j)) > 0) {
+                visited[i][j] = true;
+            }
+        }
+        value_pairs.push_back(std::make_pair(i, arr[i]));
+    }
+
+    for (int i = 0; i < len - 1; i++) {
+        value_pairs.push_back(std::make_pair(len + i, arr[i] | arr[i + 1]));
+    }
+
+    for (int j = 0; j < bit_count; j++) {
+        if (visited[len - 1][j]){
+            item_queue.push(CreateItem(len + len - 1, j, 0));
+        }
+    }
+
+    for (int i = 0; i < len - 1; i++) {
+        for (int j = 0; j < bit_count; j++) {
+            if (visited[i][j]){
+                item_queue.push(CreateItem(len + len + i, j, (i + 1) % (len - 1)));
+            }
+        }
+    }
+
+    std::vector<int> max_values(len - 1);
+    for (int i = 0; i < len - 1; i++){
+        max_values[i] = arr[i] | arr[i + 1];
+    }
+
+    while (!item_queue.empty()) {
+        Item current_item = item_queue.front();
+        item_queue.pop();
+        if ((max_values[current_item.index] & (1 << current_item.bit)) > 0) {
+            continue;
+        }
+        max_values[current_item.index] += (1 << current_item.bit);
+        if (value_pairs.back().first == current_item.position) {
+            value_pairs.pop_back();
+        }
+        value_pairs.push_back(std::make_pair(current_item.position, max_values[current_item.index]));
+        item_queue.push(CreateItem(current_item.position + len, current_item.bit, (current_item.index + 1) % (len - 1)));
+    }
+    for (size_t i = 1; i < value_pairs.size(); i++) {
+        value_pairs[i].second = std::max(value_pairs[i].second, value_pairs[i - 1].second);
+    }
+    std::vector<int> ans;
+    for(int i=0;i<quer.size();i++) {
+        int query_value=quer[i];
+        long long left = 0, right = value_pairs.size() - 1;
+        long long result = -1;
+        
+        while (left <= right) {
+            int middle = (left + right) / 2;
+            if (value_pairs[middle].second <= query_value) {
+                left = middle + 1;
+            } else {
+                right = middle - 1;
+                result = value_pairs[middle].first + 1;
+            }
+        }
+        ans.push_back(result);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <cstring>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {3, 4, 4};
+    std::vector<int> quer_1 = {1, 2, 2};
+    std::vector<int> expected_1 = {1,1,1};
+    std::vector<int> result_1 = TheBossIdentity(arr_1, quer_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {1,3,2,5,1};
+    std::vector<int> quer_2 = {2,1,1,1,2};
+    std::vector<int> expected_2 = {2,2,2,2,2};
+    std::vector<int> result_2 = TheBossIdentity(arr_2, quer_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {1,2,1,3};
+    std::vector<int> quer_3 = {2,8,5,2};
+    std::vector<int> expected_3 = {4,-1,-1,4};
+    std::vector<int> result_3 = TheBossIdentity(arr_3, quer_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {2,2,2};
+    std::vector<int> quer_4 = {1,2,1};
+    std::vector<int> expected_4 = {1,-1,1};
+    std::vector<int> result_4 = TheBossIdentity(arr_4, quer_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+
+    std::vector<int> arr_5 = {3, 4, 5, 6, 7, 8};
+    std::vector<int> quer_5 = {2, 1, 2, 1, 2, 1};
+    std::vector<int> expected_5 = {1,1,1,1,1,1};
+    std::vector<int> result_5 = TheBossIdentity(arr_5, quer_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+
+    std::vector<int> arr_6 = {5, 6, 7, 8, 9, 10};
+    std::vector<int> quer_6 = {1, 2, 1, 2, 1, 2};
+    std::vector<int> expected_6 = {1,1,1,1,1,1};
+    std::vector<int> result_6 = TheBossIdentity(arr_6, quer_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+
+    std::vector<int> arr_7 = {6, 7, 8, 9, 10, 11};
+    std::vector<int> quer_7 = {2, 1, 2, 1, 2, 1};
+    std::vector<int> expected_7 = {1,1,1,1,1,1};
+    std::vector<int> result_7 = TheBossIdentity(arr_7, quer_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+
+    std::vector<int> arr_8 = {2,1};
+    std::vector<int> quer_8 = {1,2,3};
+    std::vector<int> expected_8 = {1,3,-1};
+    std::vector<int> result_8 = TheBossIdentity(arr_8, quer_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_9 = {-7, 9, 9, 10, 11, 12};
+    std::vector<int> quer_9 = {1, 2, 1, 2, 1, 2};
+    try
+    {
+        TheBossIdentity(arr_9, quer_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_10 = {7, 10, 10, 10, 11, 12};
+    std::vector<int> quer_10 = {1, -2, 1, 2, 1, 2};
+    try
+    {
+        TheBossIdentity( arr_10, quer_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_11 = {1};
+    std::vector<int> quer_11 = {};
+    try
+    {
+        TheBossIdentity( arr_11, quer_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_12 = {};
+    std::vector<int> quer_12 = {1};
+    try
+    {
+        TheBossIdentity( arr_12, quer_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    
+    std::vector<int> arr_13 = {-1};
+    std::vector<int> quer_13 = {1};
+    try
+    {
+        TheBossIdentity( arr_13, quer_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_14 = {1};
+    std::vector<int> quer_14 = {-1};
+    try
+    {
+        TheBossIdentity( arr_14, quer_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_15(200005,1);
+    std::vector<int> quer_15 = {-1};
+    try
+    {
+        TheBossIdentity( arr_15, quer_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_16(5,1);
+    std::vector<int> quer_16(2000005,1);
+    try
+    {
+        TheBossIdentity( arr_16, quer_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    std::vector<int> arr_17(5,1000000009);
+    std::vector<int> quer_17(5,1);
+    try
+    {
+        TheBossIdentity( arr_17, quer_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    
+    std::vector<int> arr_18(5,1);
+    std::vector<int> quer_18(5,1000000009);
+    try
+    {
+        TheBossIdentity( arr_18, quer_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST 
+    
+    std::vector<int> arr_19(5,15);
+    std::vector<int> quer_19(5,1000000009);
+    try
+    {
+        TheBossIdentity( arr_19, quer_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All testcases passed";
+    return 0;
+}
