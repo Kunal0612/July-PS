@@ -1,0 +1,482 @@
+/*
+
+https://codeforces.com/contest/1830/problem/E
+
+
+Write a C++ Solution BullySort to find ans where ans[i] is the value after ith update.
+
+
+On a permutation p of length len, we define a bully swap as follows:
+
+Let i be the index of the largest element nums[i] such that nums[i]≠i.
+
+Let j be the index of the smallest element nums[j] such that i<j.
+
+Swap nums[i] and nums[j].
+
+We define f(p) as the number of bully swaps we need to perform until nums becomes 
+sorted. Note that if nums is the identity permutation, f(nums)=0.
+
+You are given len and a permutation nums of length len. You need to process the 
+following q_len updates.
+
+In each update, you are given two integers x and y. You will swap nums[x] and 
+nums[y] and then find the value of f(nums).
+
+Note that the updates are persistent. Changes made to the permutation nums will 
+apply when processing future updates.
+
+
+Input :
+
+A vector of integers nums.
+A vector of vector of integers query.
+
+Constraints : 
+
+nums.size() : ranges from 2 to 500000.
+query.size() : ranges from 1 to 500000.
+nums : ranges from 1 to nums.size() , it is a permutation.
+query : query[i][0] ranges from 1 to query[i][1]-1, 
+        query[i][1] ranges from query[i][0] to nums.size().
+
+Output:
+
+An vector of integers ans where ans[i] is the value after ith update.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+#include <chrono>
+#include <random>
+#include <utility>
+#include <set>
+
+
+
+struct Decomp {
+    std::vector<int> array;
+    std::vector<std::pair<int, int>> buckets;
+    std::vector<int> prefix_sum;
+    std::vector<int> bucket_prefix_sum;
+    std::vector<int> position;
+    int bucket_size = 400;
+
+    void Resize(int len) {
+        array.resize(len + 1);
+        prefix_sum.resize(len + 1);
+        position.resize(len + 1);
+        for (int i = 1; i <= len; i += bucket_size) {
+            int start = i;
+            int end = std::min(len, start + bucket_size - 1);
+            for (int j = start; j <= end; ++j) {
+                position[j] = buckets.size();
+            }
+            buckets.push_back({start, end});
+            bucket_prefix_sum.push_back(0);
+        }
+    }
+
+    void Update(int pos, int value) {
+        array[pos] += value;
+        int bucket_idx = position[pos];
+        prefix_sum[buckets[bucket_idx].first] = array[buckets[bucket_idx].first];
+        for (int i = buckets[bucket_idx].first + 1; i <= buckets[bucket_idx].second; ++i) {
+            prefix_sum[i] = prefix_sum[i - 1] + array[i];
+        }
+        bucket_prefix_sum[0] = prefix_sum[buckets[0].second];
+        for (int i = 1; i < buckets.size(); ++i) {
+            bucket_prefix_sum[i] = bucket_prefix_sum[i - 1] + prefix_sum[buckets[i].second];
+        }
+    }
+
+    int Query(int pos) {
+        int bucket_idx = position[pos];
+        int result = prefix_sum[pos];
+        if (bucket_idx) {
+            result += bucket_prefix_sum[bucket_idx - 1];
+        }
+        return result;
+    }
+};
+
+struct Geralt {
+    std::vector<int> array;
+    std::vector<Decomp> decomps;
+    std::vector<std::pair<int, int>> buckets;
+    std::vector<int> position;
+    int bucket_size = 3000;
+
+    void Resize(int n) {
+        array.resize(n + 1);
+        position.resize(n + 1);
+        for (int i = 1; i <= n; i += bucket_size) {
+            int start = i;
+            int end = std::min(n, start + bucket_size - 1);
+            for (int j = start; j <= end; ++j) {
+                position[j] = buckets.size();
+            }
+            buckets.push_back({start, end});
+            decomps.push_back({});
+            decomps.back().Resize(n);
+        }
+    }
+
+    void Update(int pos, int value) {
+        int bucket_idx = position[pos];
+        if (array[pos] != 0) {
+            decomps[bucket_idx].Update(array[pos], -1);
+        }
+        array[pos] = value;
+        decomps[bucket_idx].Update(array[pos], 1);
+    }
+
+    int QueryBrute(int start, int end, int value) {
+        int result = 0;
+        for (int i = start; i <= end; ++i) {
+            if (array[i] <= value) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    int QuerySmaller(int start, int end, int value) {
+        if (position[start] == position[end]) {
+            return QueryBrute(start, end, value);
+        }
+        int bucket_idx_1 = position[start], bucket_idx_2 = position[end];
+        int result = QueryBrute(start, buckets[bucket_idx_1].second, value) + QueryBrute(buckets[bucket_idx_2].first, end, value);
+        bucket_idx_1++;
+        bucket_idx_2--;
+        for (int i = bucket_idx_1; i <= bucket_idx_2; ++i) {
+            result += decomps[i].Query(value);
+        }
+        return result;
+    }
+
+    int QueryGreater(int start, int end, int value) {
+        return (end - start + 1) - QuerySmaller(start, end, value);
+    }
+};
+
+
+
+std::vector<int> BullySort(std::vector<int> &nums,std::vector<std::vector<int>> query){
+    int len=nums.size(), q_len=query.size();
+    if (len < 2 || len > 500000) {
+        throw std::invalid_argument("n is out of bounds: should be between 2 and 500000.");
+    }
+    if (q_len < 1 || q_len > 50000) {
+        throw std::invalid_argument("q is out of bounds: should be between 1 and 50000.");
+    }
+    std::set<int> unique_elements;
+    for (int i = 0; i < len; ++i) {
+        if (nums[i] < 1 || nums[i] > len) {
+            throw std::invalid_argument("nums element out of bounds: should be between 1 and n.");
+        }
+        unique_elements.insert(nums[i]);
+    }
+
+    if (unique_elements.size() != len) {
+        throw std::invalid_argument("nums does not contain all distinct elements.");
+    }
+    for (int i = 0; i < q_len; ++i) {
+        int xec=query[i][0], yec=query[i][1];
+        if (xec < 1 || xec >= yec || yec > len) {
+            throw std::invalid_argument("query values out of bounds or invalid: x should be between 1 and y-1, y should be between x+1 and n.");
+        }
+    }
+    std::vector<int> array(len + 1);
+    for (int i = 1; i <= len; ++i) {
+        array[i]=nums[i-1];
+    }
+
+    Geralt geralt;
+    geralt.Resize(len);
+
+    long long int inversions = 0;
+
+    for (int i = 1; i <= len; ++i) {
+        geralt.Update(i, array[i]);
+        inversions += geralt.QueryGreater(1, i, array[i]);
+    }
+
+    long long int sum = 0;
+
+    for (int i = 1; i <= len; ++i) {
+        sum += std::max(array[i] - i, 0);
+    }
+    std::vector<int> ans;
+    for(int i=0;i<q_len; ++i) {
+        int xec=query[i][0], yec=query[i][1];
+        if (xec != yec) {
+            sum -= std::max(array[xec] - xec, 0);
+            sum -= std::max(array[yec] - yec, 0);
+            if (xec + 1 <= yec - 1) {
+                int less_than_x = geralt.QuerySmaller(xec + 1, yec - 1, array[xec]);
+                int greater_than_y = geralt.QueryGreater(xec + 1, yec - 1, array[yec]);
+                inversions += 2 * (yec - xec - 1 - less_than_x - greater_than_y);
+            }
+
+            if (array[xec] > array[yec]) {
+                inversions--;
+            } else {
+                inversions++;
+            }
+
+            std::swap(array[xec], array[yec]);
+            sum += std::max(array[xec] - xec, 0);
+            sum += std::max(array[yec] - yec, 0);
+            geralt.Update(xec, array[xec]);
+            geralt.Update(yec, array[yec]);
+        }
+        ans.push_back(sum + sum - inversions);
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <cassert>
+#include <stdexcept>
+#include <chrono>
+#include <random>
+#include <utility>
+#include <set>
+
+
+
+int main() {
+    // TEST
+    std::vector<int> nums_1 = {2,1,6,3,7,5,4};
+    std::vector<std::vector<int>> query_1 = {{1, 2}, {3,7}, {4,5},{6,7},{3,5}};
+    std::vector<int> expected_1 = {4,3,4,3,2};
+    std::vector<int> result_1 = BullySort(nums_1, query_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {2, 1, 3};
+    std::vector<std::vector<int>> query_2 = {{1, 3}};
+    std::vector<int> expected_2 = {2};
+    std::vector<int> result_2 = BullySort(nums_2, query_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {3, 2, 1};
+    std::vector<std::vector<int>> query_3 = {{1, 2}, {2, 3}, {1, 3}};
+    std::vector<int> expected_3 = {2,1,2};
+    std::vector<int> result_3 = BullySort(nums_3, query_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {3, 4, 1, 2};
+    std::vector<std::vector<int>> query_4 = {{1, 2}, {3, 4}, {1, 4}};
+    std::vector<int> expected_4 = {3,2,1};
+    std::vector<int> result_4 = BullySort(nums_4, query_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {5, 2, 1, 3, 4};
+    std::vector<std::vector<int>> query_5 = {{1, 3}, {2, 4}, {1, 5}};
+    std::vector<int> expected_5 ={2,3,4};
+    std::vector<int> result_5 = BullySort(nums_5, query_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {1, 3, 5, 4, 2};
+    std::vector<std::vector<int>> query_6 = {{1, 5}, {2, 4}, {2, 3}};
+    std::vector<int> expected_6 = {3,4,3};
+    std::vector<int> result_6 = BullySort(nums_6, query_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {5, 4, 3, 2, 1};
+    std::vector<std::vector<int>> query_7 = {{1, 2}, {3, 4}, {2, 5}};
+    std::vector<int> expected_7 = {3,4,3};
+    std::vector<int> result_7 = BullySort(nums_7, query_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {1, 5, 4, 3, 2};
+    std::vector<std::vector<int>> query_8 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    std::vector<int> expected_8 = {3,4,3,2};
+    std::vector<int> result_8 = BullySort(nums_8, query_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {1, 0, 4, 3, 2};
+    std::vector<std::vector<int>> query_9 = {{1, 2}, {2, 2}, {3, 4}, {4, 5}};
+    try
+    {
+        BullySort(nums_9, query_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {1, 1000000004, 4, 3, 2};
+    std::vector<std::vector<int>> query_10 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        BullySort(nums_10, query_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11 = {1, 5, -4, 3, 2};
+    std::vector<std::vector<int>> query_11 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        BullySort(nums_11, query_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    std::vector<std::vector<int>> query_12 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+
+    try
+    {
+        BullySort(nums_12, query_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13(400000,5);
+    std::vector<std::vector<int>> query_13 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+
+    try
+    {
+        BullySort(nums_13, query_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14(4,1);
+    std::vector<std::vector<int>> query_14 = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        BullySort(nums_14, query_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_15(1,1);
+    std::vector<std::vector<int>> query_15 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        BullySort(nums_15, query_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_16(1,1);
+    std::vector<std::vector<int>> query_16 = {{1, 1}, {2, 3}, {3, 4}, {4, 5}};
+    try
+    {
+        BullySort(nums_16, query_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_17(1,1);
+    std::vector<std::vector<int>> query_17 = {{1,0}};
+    try
+    {
+        BullySort(nums_17, query_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_18(1,1);
+    std::vector<std::vector<int>> query_18(500000,{1,2});
+    try
+    {
+        BullySort(nums_18, query_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_19(1,1);
+    std::vector<std::vector<int>> query_19(5,{2,1});
+    try
+    {
+        BullySort(nums_19, query_19);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_20(1,1);
+    std::vector<std::vector<int>> query_20(5,{1,-1});
+    try
+    {
+        BullySort(nums_20, query_20);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
