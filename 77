@@ -252,7 +252,7 @@ int main() {
     }
     // TEST_END
     // TEST
-    std::vector<int> nums_12(6,10000000009);
+    std::vector<int> nums_12(6,1000000009);
     try
     {
         SurvivalOfTheWeakest(nums_12);
