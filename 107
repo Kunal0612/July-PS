@@ -1,0 +1,316 @@
+/*
+
+
+https://codeforces.com/problemset/problem/1765/J
+
+Write a C++ Solution HeroToZero to  the minimum number of coins required to transform the matrix 
+c into the zero matrix.
+
+
+You are given two arrays arr and brr, each of these arrays contains len non-negative integers.
+
+Let c be a matrix of size len×len such that ci,j=|arr[i]−brr[j]| for every i∈[1,len] and 
+every j∈[1,len].
+
+Your goal is to transform the matrix c so that it becomes the zero matrix, i. e. a matrix 
+where every element is exactly 0. 
+
+In order to do so, you may perform the following operations any number of times, in any order:
+
+choose an integer i , then decrease c[i][j] by 1 for every j∈[1,len] (i. e. decrease all 
+elements in the i-th row by 1). 
+
+In order to perform this operation, you pay 1 coin,choose an integer j , then decrease 
+c[i][j] by 1 for every i∈[1,len] (i. e. decrease all elements in the j-th column by 1). 
+
+In order to perform this operation, you pay 1 coin , choose two integers i and j, then 
+decrease c[i][j] by 1. 
+
+In order to perform this operation, you pay 1 coin , choose an integer i , 
+then increase c[i][j] by 1 for every j∈[1,len] (i. e. increase all elements in the i-th row by 1).
+
+When you perform this operation, you receive 1 coin , choose an integer j , 
+then increase  c[i][j] by 1 for every i∈[1,n] (i. e. increase all elements in the j-th column by 1).
+
+When you perform this operation, you receive 1 coin.
+
+You have to calculate the minimum number of coins required to 
+transform the matrix c into the zero matrix. Note that all elements of c should be equal to 0
+
+simultaneously after the operations.
+
+
+Input :
+
+A vector of integers arr.
+A vector of integers brr.
+
+Constraints :
+
+arr.size() = brr.size() : ranges from 2 to 200000.
+arr , brr : ranges from 0 to 10^8.
+
+Output:
+
+An integer ans to the minimum number of coins required to transform the matrix c into the zero matrix.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+#include <cassert>
+
+
+
+
+int HeroToZero(std::vector<int> arr,std::vector<int> brr){
+    int len=arr.size();
+    if (len < 2 || len > 200000 || arr.size()!=brr.size())
+    {
+        throw std::invalid_argument("len must be between 2 and 200000");
+    }
+    for (int &a : arr)
+    {
+        if (a < 0 || a > 1e8)
+        {
+            throw std::invalid_argument("Each element in arr must be between 0 and 108");
+        }
+    }
+    for (int &b : brr)
+    {
+        if (b < 0 || b > 1e8)
+        {
+            throw std::invalid_argument("Each element in brr must be between 0 and 108");
+        }
+    }
+    std::sort(arr.begin(), arr.end());
+    std::sort(brr.begin(), brr.end());
+
+    long long ans = 0;
+    for (int i = 0; i < len; i++)
+    {
+        ans += len * 1ll * (arr[i] + brr[i]);
+        ans -= arr[i] * 2ll * (brr.end() - std::lower_bound(brr.begin(), brr.end(), arr[i]));
+        ans -= brr[i] * 2ll * (arr.end() - std::upper_bound(arr.begin(), arr.end(), brr[i]));
+    }
+
+    for (int i = 0; i < len; i++)
+    {
+        ans -= (len - 1) * 1ll * std::abs(arr[i] - brr[i]);
+    }
+
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+#include <cassert>
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {1, 6, 3, 7, 1};
+    std::vector<int> brr_1 = {2, 3, 5, 8, 7};
+    int expected_1 = 47;
+    int result_1 = HeroToZero(arr_1, brr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {9, 1, 3, 2, 4, 8, 7, 6, 5, 10};
+    std::vector<int> brr_2 = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int expected_2 = 330;
+    int result_2 = HeroToZero(arr_2, brr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {1, 3, 2, 4, 555, 7, 6, 8, 10, 9, 11, 12, 14, 13, 15};
+    std::vector<int> brr_3 = {15, 14, 13, 1265, 11, 1560, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int expected_3 = 17405;
+    int result_3 = HeroToZero(arr_3, brr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {2,8,5,4,8,4,1,5,10,10};
+    std::vector<int> brr_4 = {6,7,2,6,3,4,1,1,3,5};
+    int expected_4 = 163;
+    int result_4 = HeroToZero(arr_4, brr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_5 = {2,3,4};
+    std::vector<int> brr_5 = {3,3,3};
+    int expected_5 = 2;
+    int result_5 = HeroToZero(arr_5, brr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_6 = {12, 1, 1, 2, 2, 5, 6, 7, 8, 9, 10, 11};
+    std::vector<int> brr_6 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12};
+    int expected_6 = 560;
+    int result_6 = HeroToZero(arr_6, brr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_7 = {3,3,3};
+    std::vector<int> brr_7 = {2,3,4};
+    int expected_7 = 2;
+    int result_7 = HeroToZero(arr_7, brr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_8 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::vector<int> brr_8 = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int expected_8 = 240;
+    int result_8 = HeroToZero(arr_8, brr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> arr_9 = {-1, 6, 3, 7, 1};
+    std::vector<int> brr_9 = {2, 3, 5, 8, 7};
+    try
+    {
+        HeroToZero(arr_9, brr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // // TEST_END
+    // TEST
+    std::vector<int> arr_10 = {1, 6, 3, 7, 1};
+    std::vector<int> brr_10 = {2, 3, 5, 8, -1};
+    try
+    {
+        HeroToZero(arr_10, brr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_11 = {1000000009, 6, 3, 7, 1};
+    std::vector<int> brr_11 = {2, 3, 5, 8, 7};
+    try
+    {
+        HeroToZero(arr_11, brr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_12 = {0, 6, 3, 7, 1};
+    std::vector<int> brr_12 = {2, 3, 5, 8, 1000000009};
+    try
+    {
+        HeroToZero(arr_12, brr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_13 = {-4, 6, 3, 7, 1};
+    std::vector<int> brr_13 = {2, 3, 5, 8, 7};
+    try
+    {
+        HeroToZero(arr_13, brr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_14(1000100, 1);
+    std::vector<int> brr_14 = {2, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        HeroToZero(arr_14, brr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_15(10, -1);
+    std::vector<int> brr_15 = {55, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        HeroToZero(arr_15, brr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_16(10, 1);
+    std::vector<int> brr_16 = {1000000009, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        HeroToZero(arr_16, brr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_17(10, 1);
+    std::vector<int> brr_17 = {-5, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        HeroToZero(arr_17, brr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_18(10, 1);
+    std::vector<int> brr_18(1000005, 1);
+    try
+    {
+        HeroToZero(arr_18, brr_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All testcases passed";
+    return 0;
+}
