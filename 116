@@ -1,0 +1,385 @@
+/*
+
+https://codeforces.com/problemset/problem/1485/E
+
+Write a C++ Solution MoveAndSwap to find the maximum number of points you can gain after d moves.
+
+You are given num_nodes−1 integers arr_2,…,a_num_nodes and a tree with num_nodes vertices rooted at vertex 1.
+The leaves are all at the same distance d from the root.
+
+Recall that a tree is a connected undirected graph without cycles. The distance between two
+vertices is the number of edges on the simple path between them. All non-root vertices with
+degree 1 are leaves. If vertices s and f are connected by an edge and the distance of f
+from the root is greater than the distance of s from the root, then f is called a child of s.
+
+Initially, there are a red coin and a blue coin on the vertex 1. Let r be the vertex
+where the red coin is and let b be the vertex where the blue coin is. You should make d
+moves. A move consists of three steps:
+
+Move the red coin to any child of r.
+
+Move the blue coin to any vertex b′ such that dist(1,b′)=dist(1,b)+1.
+
+Here dist(x,y) indicates the length of the simple path between x and y. Note that
+b and b′ are not necessarily connected by an edge.
+
+You can optionally swap the two coins (or skip this step).
+
+Note that r and b can be equal at any time, and there is no number written on the root.
+
+After each move, you gain |arr[r]−arr[b]| points. What's the maximum number of
+points you can gain after d moves?
+
+Input :
+
+An integer num_nodes.
+A vector of integers arr.
+A vector of integers parents
+
+Constraints :
+
+num_nodes : ranges from 2 to 200000.
+parents.size() == arr.size() : is equal to num_nodes - 1.
+parents : ranges from 1 to num_nodes, parents[i]!=i.
+arr : ranges from 1 to 10^9.
+
+Output:
+
+An integer ans the maximum number of points you can gain after d moves.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <array>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+void Dfs(long long src, std::vector<long long> adj[], std::vector<std::array<long long, 3>> dadj[], bool visited[], long long dist[], long long &dis)
+{
+    for (int u : adj[src])
+    {
+        if (!visited[u])
+        {
+            visited[u] = true;
+            dist[u] = dist[src] + 1;
+            dadj[dist[u]].push_back({-1, src, u});
+            dis = std::max(dis, dist[u]);
+            Dfs(u, adj, dadj, visited, dist, dis);
+        }
+    }
+}
+
+int MoveAndSwap(int num_nodes, std::vector<int> parents, std::vector<int> arr)
+{
+    if (num_nodes < 2 || num_nodes > 200000)
+    {
+        throw std::invalid_argument("n is out of bounds (2 ≤ num_nodes ≤ 200000)");
+    }
+
+    if (parents.size() != num_nodes - 1)
+    {
+        throw std::invalid_argument("The size of the parents vector is incorrect");
+    }
+
+    if (arr.size() != num_nodes - 1)
+    {
+        throw std::invalid_argument("The size of the arr vector is incorrect");
+    }
+
+    for (long long i = 2; i <= num_nodes; ++i)
+    {
+        if (parents[i - 2] < 1 || parents[i - 2] > num_nodes || parents[i - 2] == i)
+        {
+            throw std::invalid_argument("Parent value is out of bounds or invalid");
+        }
+    }
+
+    for (long long i = 1; i < num_nodes; ++i)
+    {
+        if (arr[i - 1] < 1 || arr[i - 1] > 1000000000)
+        {
+            throw std::invalid_argument("Value is out of bounds (1 ≤ arr[i] ≤ 10^9)");
+        }
+    }
+    long long nums[num_nodes + 1];
+    for (long long i = 1; i < num_nodes; i++)
+    {
+        nums[i] = arr[i - 1];
+    }
+    std::vector<long long> adj[num_nodes + 1];
+    std::vector<std::array<long long, 3>> dadj[num_nodes + 1];
+    bool visited[num_nodes + 1] = {false};
+    long long dist[num_nodes + 1] = {0};
+    long long dp_table[num_nodes + 1] = {0};
+
+    for (long long i = 2; i <= num_nodes; i++)
+    {
+        long long node = parents[i - 2];
+        adj[node - 1].push_back(i - 1);
+        adj[i - 1].push_back(node - 1);
+    }
+
+    long long dis = 0;
+    visited[0] = true;
+    Dfs(0, adj, dadj, visited, dist, dis);
+    dadj[0].push_back({0, -1, 0});
+
+    for (long long i = 1; i <= dis; i++)
+    {
+        for (std::array<long long, 3U> &u : dadj[i])
+        {
+            u[0] = nums[u[2]];
+        }
+        std::sort(dadj[i].begin(), dadj[i].end());
+        long long src = dadj[i].size();
+        long long res_1 = dadj[i][0][0];
+        long long res_2 = dadj[i][dadj[i].size() - 1][0];
+        for (std::array<long long, 3U> &u : dadj[i])
+        {
+            long long aec_1 = nums[u[2]];
+            dp_table[u[2]] = std::max({dp_table[u[2]], dp_table[u[1]] + aec_1 - res_1, dp_table[u[1]] + res_2 - aec_1});
+        }
+        long long kdx = 0;
+        for (long long j = 0; j < src; j++)
+        {
+            if (dp_table[dadj[i][j][1]] - dadj[i][j][0] > dp_table[dadj[i][kdx][1]] - dadj[i][kdx][0])
+            {
+                kdx = j;
+            }
+            dp_table[dadj[i][j][2]] = std::max(dp_table[dadj[i][j][2]], dadj[i][j][0] - dadj[i][kdx][0] + dp_table[dadj[i][kdx][1]]);
+        }
+        kdx = src - 1;
+        for (long long j = src - 1; j >= 0; j--)
+        {
+            if (dp_table[dadj[i][j][1]] + dadj[i][j][0] > dp_table[dadj[i][kdx][1]] + dadj[i][kdx][0])
+            {
+                kdx = j;
+            }
+            dp_table[dadj[i][j][2]] = std::max(dp_table[dadj[i][j][2]], dadj[i][kdx][0] - dadj[i][j][0] + dp_table[dadj[i][kdx][1]]);
+        }
+    }
+
+    long long res = 0;
+    for (long long i = 1; i < num_nodes; i++)
+    {
+        res = std::max(res, dp_table[i]);
+    }
+
+    return res;
+}
+
+#include <iostream>
+#include <vector>
+#include <array>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
+#include <cassert>
+
+int main()
+{
+    // TEST
+    int num_1 = 6;
+    std::vector<int> parents_1 = {1, 2, 2, 3, 4};
+    std::vector<int> arr_1 = {32, 78, 69, 5, 41};
+    int expected_1 = 45;
+    int result_1 = MoveAndSwap(num_1, parents_1, arr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 5;
+    std::vector<int> parents_2 = {1, 1, 2, 3};
+    std::vector<int> arr_2 = {10, 20, 30, 40};
+    int expected_2 = 20;
+    int result_2 = MoveAndSwap(num_2, parents_2, arr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 4;
+    std::vector<int> parents_3 = {1, 1, 2};
+    std::vector<int> arr_3 = {100, 200, 300};
+    int expected_3 = 100;
+    int result_3 = MoveAndSwap(num_3, parents_3, arr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 7;
+    std::vector<int> parents_4 = {1, 1, 2, 2, 3, 3};
+    std::vector<int> arr_4 = {5, 15, 25, 35, 45, 55};
+    int expected_4 = 40;
+    int result_4 = MoveAndSwap(num_4, parents_4, arr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 3;
+    std::vector<int> parents_5 = {1, 1};
+    std::vector<int> arr_5 = {500, 600};
+    int expected_5 = 100;
+    int result_5 = MoveAndSwap(num_5, parents_5, arr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 10;
+    std::vector<int> parents_6 = {1, 2, 2, 3, 3, 4, 4, 5, 5};
+    std::vector<int> arr_6 = {10, 20, 30, 40, 50, 60, 70, 80, 90};
+    int expected_6 = 50;
+    int result_6 = MoveAndSwap(num_6, parents_6, arr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 2;
+    std::vector<int> parents_7 = {1};
+    std::vector<int> arr_7 = {1000000000};
+    int expected_7 = 0;
+    int result_7 = MoveAndSwap(num_7, parents_7, arr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 8;
+    std::vector<int> parents_8 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_8 = {12, 23, 34, 45, 56, 67, 78};
+    int expected_8 = 33;
+    int result_8 = MoveAndSwap(num_8, parents_8, arr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = 1;
+    std::vector<int> parents_9 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_9 = {12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_9, parents_9, arr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = 2000005;
+    std::vector<int> parents_10 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_10 = {12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_10, parents_10, arr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = -8;
+    std::vector<int> parents_11 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_11 = {12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_11, parents_11, arr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_12 = 8;
+    std::vector<int> parents_12 = {-1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_12 = {12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_12, parents_12, arr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_13 = 8;
+    std::vector<int> parents_13 = {10, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_13 = {12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_13, parents_13, arr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_14 = 8;
+    std::vector<int> parents_14 = {0, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_14 = {12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_14, parents_14, arr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_15 = 8;
+    std::vector<int> parents_15 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_15 = {-12, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_15, parents_15, arr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_16 = 8;
+    std::vector<int> parents_16 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_16 = {0, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_16, parents_16, arr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_17 = 8;
+    std::vector<int> parents_17 = {1, 2, 2, 3, 4, 4, 5};
+    std::vector<int> arr_17 = {1000000009, 23, 34, 45, 56, 67, 78};
+    try
+    {
+        MoveAndSwap(num_17, parents_17, arr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All testcases passed";
+    return 0;
+}
