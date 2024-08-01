@@ -1,0 +1,279 @@
+/*
+
+https://codeforces.com/problemset/problem/1580/D
+
+Write a C++ Solution Subsequence the maximal value Alice can get.
+
+Given an array of distinct positive integers nums_1, nums_2, ..., nums_len, 
+select a subsequence of length max_m from this array. The value of a 
+subsequence b_1, b_2, ..., b_max_m is defined as:
+
+max_m*(sum of elements in the subsequence) - sum of (minimum value in the 
+range [b_i, b_j] for all pairs (i, j) where 1 <= i, j <= m)
+
+Find the maximum possible value of this subsequence among all possible subsequences of length max_m.
+
+Input :
+
+An integer max_m.
+A vector of nums.
+
+Constraints : 
+
+max_m : ranges from 1 to nums.size().
+nums.size : ranges from 1 to 4000.
+nums : ranges from 1 to 2^31.
+
+
+Output:
+
+An integer ans the maximal value Alice can get.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+struct TreeSolver
+{
+    int len, max_m;
+    std::vector<int> values, left_subtree, right_subtree, left_weight, right_weight, subtree_size;
+    std::vector<std::vector<long long int>> dp_table;
+
+    TreeSolver(int n, int m) : len(n), max_m(m), values(n + 1), left_subtree(n + 1),
+                               right_subtree(n + 1), left_weight(n + 1), right_weight(n + 1), subtree_size(n + 1),
+                               dp_table(n + 1, std::vector<long long int>(m + 1, 0)) {}
+
+    void UpdateMax(long long int &first, long long int sec)
+    {
+        first = first < sec ? sec : first;
+    }
+
+    void DepthFirstSearch(int node)
+    {
+        subtree_size[node] = 1;
+        if (left_subtree[node])
+        {
+            DepthFirstSearch(left_subtree[node]);
+            for (int i = std::min(max_m, subtree_size[node]); i >= 0; i--)
+            {
+                for (int j = std::min(max_m, subtree_size[left_subtree[node]]); j >= 0; j--)
+                {
+                    UpdateMax(dp_table[node][i + j], dp_table[node][i] + dp_table[left_subtree[node]][j] + 1ll * j * (max_m - j) * left_weight[node]);
+                }
+            }
+            subtree_size[node] += subtree_size[left_subtree[node]];
+        }
+        if (right_subtree[node])
+        {
+            DepthFirstSearch(right_subtree[node]);
+            for (int i = std::min(max_m, subtree_size[node]); i >= 0; i--)
+            {
+                for (int j = std::min(max_m, subtree_size[right_subtree[node]]); j >= 0; j--)
+                {
+                    UpdateMax(dp_table[node][i + j], dp_table[node][i] + dp_table[right_subtree[node]][j] + 1ll * j * (max_m - j) * right_weight[node]);
+                }
+            }
+            subtree_size[node] += subtree_size[right_subtree[node]];
+        }
+    }
+};
+
+int Subsequence(int max_m, std::vector<int> &nums)
+{
+    int len = nums.size();
+    if (max_m < 1 || max_m > len)
+    {
+        throw std::invalid_argument("Invalid value of max_m: 1 ≤ max_m ≤ len must hold.");
+    }
+    if (len < 1 || len > 4000)
+    {
+        throw std::invalid_argument("Invalid value of len: 1 ≤ len ≤ 4000 must hold.");
+    }
+    for (int i = 0; i < len; i++)
+    {
+        if (nums[i] < 1 || nums[i] >= (1LL << 31))
+        {
+            throw std::invalid_argument("Invalid value of nums[i]: 1 ≤ nums[i] < 2^31 must hold.");
+        }
+    }
+    TreeSolver solver(len, max_m);
+    std::vector<int> &values = solver.values;
+    std::vector<int> &left_subtree = solver.left_subtree;
+    std::vector<int> &right_subtree = solver.right_subtree;
+    std::vector<int> &left_weight = solver.left_weight;
+    std::vector<int> &right_weight = solver.right_weight;
+    std::vector<std::vector<long long int>> &dp_table = solver.dp_table;
+    std::vector<int> &subtree_size = solver.subtree_size;
+
+    std::vector<int> stack(len + 1);
+    int top = 0;
+    for (int i = 1; i <= len; i++)
+    {
+        values[i] = nums[i - 1];
+        int kec = top;
+        for (; kec && values[i] < values[stack[kec]]; kec--);
+        if (kec)
+        {
+            right_subtree[stack[kec]] = i;
+            right_weight[stack[kec]] = values[i] - values[stack[kec]];
+        }
+        if (kec < top)
+        {
+            left_subtree[i] = stack[kec + 1];
+            left_weight[i] = values[stack[kec + 1]] - values[i];
+        }
+        stack[++kec] = i;
+        top = kec;
+    }
+    solver.DepthFirstSearch(stack[1]);
+    int ans = dp_table[stack[1]][max_m];
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    int max_m_1 = 4;
+    std::vector<int> arr_1 = {15, 2, 18, 12, 13, 4};
+    int expected_1 = 100;
+    int result_1 = Subsequence(max_m_1, arr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int max_m_2 = 3;
+    std::vector<int> arr_2 = {5, 1, 7, 3, 8};
+    int expected_2 = 30;
+    int result_2 = Subsequence(max_m_2, arr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int max_m_3 = 2;
+    std::vector<int> arr_3 = {1, 100, 1, 100};
+    int expected_3 = 198;
+    int result_3 = Subsequence(max_m_3, arr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int max_m_4 = 5;
+    std::vector<int> arr_4 = {10, 20, 30, 40, 50};
+    int expected_4 = 200;
+    int result_4 = Subsequence(max_m_4, arr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int max_m_5 = 5;
+    std::vector<int> arr_5 = {999, 1, 500, 2, 3};
+    int expected_5 = 5994;
+    int result_5 = Subsequence(max_m_5, arr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int max_m_6 = 6;
+    std::vector<int> arr_6 = {6, 7, 8, 9, 10, 11};
+    int expected_6 = 35;
+    int result_6 = Subsequence(max_m_6, arr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int max_m_7 = 4;
+    std::vector<int> arr_7 = {1, 3, 5, 7, 9, 11, 13, 15};
+    int expected_7 = 52;
+    int result_7 = Subsequence(max_m_7, arr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int max_m_8 = 2;
+    std::vector<int> arr_8 = {1000, 1, 1000, 1, 1000};
+    int expected_8 = 1998;
+    int result_8 = Subsequence(max_m_8, arr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int max_m_9 = 8;
+    std::vector<int> arr_9 = {1000, 1, 1000, 1, 1000};
+    try
+    {
+        Subsequence(max_m_9, arr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_10 = 0;
+    std::vector<int> arr_10 = {1000, 1, 1000, 1, 1000};
+    try
+    {
+        Subsequence(max_m_10, arr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_11 = 2;
+    std::vector<int> arr_11 = {0, 1, 1000, 1, 1000};
+    try
+    {
+        Subsequence(max_m_11, arr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_12 = 2;
+    std::vector<int> arr_12 = {-2, 1, 1000, 1, 1000};
+    try
+    {
+        Subsequence(max_m_12, arr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int max_m_13 = 2;
+    std::vector<int> arr_13 = {-9, 1, 1000, 1, 1000};
+    try
+    {
+        Subsequence(max_m_13, arr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All testcases passed";
+    return 0;
+}
