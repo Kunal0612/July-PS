@@ -1,0 +1,433 @@
+/*
+
+https://codeforces.com/problemset/problem/1691/F
+
+Write a C++ Solution KSetTree to  determine the sum of subtree sizes considering
+all possible root vertices and subsets of size k.
+
+Given a tree with num nodes, we define a function f(r, S) as follows:
+
+r is a vertex within the tree.
+
+S is a subset of the tree's vertices with size k_value.
+
+f(r, S) represents the size of the smallest subtree rooted at r that encompasses all vertices in S.
+
+The objective is to calculate the total sum of f(r, S) across all possible
+combinations of vertex r and subset S of size k_value within the tree.
+
+Formal Definition:
+
+Compute:
+
+∑(f(r, S)) for all r ∈ V, S ⊆ V, |S| = k_value
+
+where:
+
+V is the set of all vertices in the tree.
+
+The sum is calculated modulo 10^9 + 7.
+
+Input :
+
+An integer num.
+An integer k_value.
+A vector of vector of integers edges.
+
+Constraints :
+
+num : ranges from 3 to 200000.
+k_value : ranges from 1 to num.
+edges.size() : is of size equal to num - 1.
+edges : ranges from 1 to num.
+
+
+Output:
+
+An integer ans to determine the sum of subtree sizes considering all possible root vertices and subsets of size k.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+class Comb
+{
+public:
+    std::vector<long long int> fac;
+    std::vector<long long int> inv_fac;
+    long long int num;
+    long long int mod = 1e9 + 7;
+    Comb(long long int num)
+    {
+        this->num = num;
+        fac.resize(num + 1, 0);
+        inv_fac.resize(num + 1, 0);
+
+        fac[0] = 1;
+        for (long long int i = 1; i <= num; i++)
+        {
+            fac[i] = (fac[i - 1] * i) % mod;
+        }
+        inv_fac[num] = Power(fac[num], mod - 2);
+        for (long long int i = num - 1; i >= 0; i--)
+        {
+            inv_fac[i] = (inv_fac[i + 1] * (i + 1)) % mod;
+        }
+    }
+
+    static long long int Power(long long int first, long long int sec)
+    {
+        long long int ret = 1;
+        long long int mod = 1e9 + 7;
+        while (sec)
+        {
+            if (sec & 1)
+            {
+                ret = (ret * first) % mod;
+            }
+            sec >>= 1;
+            first = (first * first) % mod;
+        }
+        return ret;
+    }
+
+    long long int Ncr(long long int num, long long int r_value)
+    {
+        if (num < 0 || r_value < 0 || num < r_value)
+        {
+            return 0;
+        }
+        long long int ans = (fac[num] * ((inv_fac[r_value] * inv_fac[num - r_value]) % mod)) % mod;
+        return ans;
+    }
+};
+
+class Tree
+{
+public:
+    std::vector<std::vector<int>> adj;
+    std::vector<int> size;
+    std::vector<long long int> cnt;
+    std::vector<long long int> cnt_sz;
+    Comb cmb;
+    long long int cur_ans;
+    long long int ans;
+
+    Tree(int num) : cmb(2e5 + 5), adj(num), size(num), cnt(num), cnt_sz(num), cur_ans(0), ans(0) {}
+
+    void DFS1(int node_v, int parent, int k_value)
+    {
+        size[node_v] = 1;
+        long long int sub = 0;
+        long long int mod = 1e9 + 7;
+        for (int node_u : adj[node_v])
+        {
+            if (node_u != parent)
+            {
+                DFS1(node_u, node_v, k_value);
+                size[node_v] += size[node_u];
+                sub = (sub + cmb.Ncr(size[node_u], k_value)) % mod;
+            }
+        }
+        cnt[node_v] = (cmb.Ncr(size[node_v], k_value) - sub + mod) % mod;
+        cnt_sz[node_v] = (cnt[node_v] * size[node_v]) % mod;
+        cur_ans = (cur_ans + cnt_sz[node_v]) % mod;
+    }
+
+    void Dfs_2(int node_v, int parent, int k_value)
+    {
+        long long int mod = 1e9 + 7;
+        ans = (ans + cur_ans) % mod;
+        for (int node_u : adj[node_v])
+        {
+            if (node_u != parent)
+            {
+                int store_v_sz = size[node_v];
+                long long int store_v_cnt = cnt[node_v];
+                long long int store_v_cntsz = cnt_sz[node_v];
+                int store_u_sz = size[node_u];
+                long long int store_u_cnt = cnt[node_u];
+                long long int store_u_cntsz = cnt_sz[node_u];
+                long long int store_cur_ans = cur_ans;
+                size[node_v] -= size[node_u];
+                size[node_u] = size.size();
+                cnt[node_v] = (cnt[node_v] - cmb.Ncr(store_v_sz, k_value) + mod) % mod;
+                cnt[node_v] = (cnt[node_v] + cmb.Ncr(size[node_v], k_value)) % mod;
+                cnt[node_v] = (cnt[node_v] + cmb.Ncr(store_u_sz, k_value)) % mod;
+                cnt[node_u] = (cnt[node_u] - cmb.Ncr(store_u_sz, k_value) + mod) % mod;
+                cnt[node_u] = (cnt[node_u] + cmb.Ncr(size[node_u], k_value)) % mod;
+                cnt[node_u] = (cnt[node_u] - cmb.Ncr(size[node_v], k_value) + mod) % mod;
+                cnt_sz[node_v] = (cnt[node_v] * size[node_v]) % mod;
+                cnt_sz[node_u] = (cnt[node_u] * size[node_u]) % mod;
+                cur_ans = (cur_ans - store_v_cntsz - store_u_cntsz + mod + mod) % mod;
+                cur_ans = (cur_ans + cnt_sz[node_v] + cnt_sz[node_u]) % mod;
+                Dfs_2(node_u, node_v, k_value);
+                size[node_v] = store_v_sz;
+                cnt[node_v] = store_v_cnt;
+                cnt_sz[node_v] = store_v_cntsz;
+                size[node_u] = store_u_sz;
+                cnt[node_u] = store_u_cnt;
+                cnt_sz[node_u] = store_u_cntsz;
+                cur_ans = store_cur_ans;
+            }
+        }
+    }
+};
+
+int KSetTree(int num, int k_value, std::vector<std::vector<int>> &edges)
+{
+    if (num < 3 || num > 200000)
+    {
+        throw std::invalid_argument("n must be between 3 and 200000");
+    }
+    if (k_value < 1 || k_value > num)
+    {
+        throw std::invalid_argument("k must be between 1 and n");
+    }
+    std::set<std::pair<int, int>> edge_set;
+    for (const std::vector<int> &edge : edges)
+    {
+        int node_x = edge[0];
+        int node_y = edge[1];
+        if (node_x < 1 || node_x > num || node_y < 1 || node_y > num)
+        {
+            throw std::invalid_argument("node_x and node_y must be between 1 and n");
+        }
+        if (node_x == node_y)
+        {
+            throw std::invalid_argument("No self-loops allowed in a tree");
+        }
+        if (edge_set.count({node_x, node_y}) || edge_set.count({node_y, node_x}))
+        {
+            throw std::invalid_argument("Duplicate edges are not allowed");
+        }
+
+        edge_set.insert({node_x, node_y});
+    }
+    if (edges.size() != num - 1)
+    {
+        throw std::invalid_argument("The number of edges must be n-1 for a tree");
+    }
+    Tree tree(num);
+
+    for (int i = 0; i < num - 1; ++i)
+    {
+        int node_u = edges[i][0], node_v = edges[i][1];
+        --node_u, --node_v;
+        tree.adj[node_u].push_back(node_v);
+        tree.adj[node_v].push_back(node_u);
+    }
+
+    tree.DFS1(0, 0, k_value);
+    tree.Dfs_2(0, 0, k_value);
+
+    int ans = tree.ans;
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+
+    // TEST
+    int num_1 = 3, k_value_1 = 2;
+    std::vector<std::vector<int>> edges_1 = {{1, 2}, {1, 3}};
+    int expected_1 = 25;
+    int result_1 = KSetTree(num_1, k_value_1, edges_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 4, k_value_2 = 2;
+    std::vector<std::vector<int>> edges_2 = {{1, 2}, {2, 3}, {2, 4}};
+    int expected_2 = 87;
+    int result_2 = KSetTree(num_2, k_value_2, edges_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 5, k_value_3 = 3;
+    std::vector<std::vector<int>> edges_3 = {{1, 2}, {1, 3}, {3, 4}, {3, 5}};
+    int expected_3 = 235;
+    int result_3 = KSetTree(num_3, k_value_3, edges_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 6, k_value_4 = 4;
+    std::vector<std::vector<int>> edges_4 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}};
+    int expected_4 = 522;
+    int result_4 = KSetTree(num_4, k_value_4, edges_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 7, k_value_5 = 5;
+    std::vector<std::vector<int>> edges_5 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}};
+    int expected_5 = 1005;
+    int result_5 = KSetTree(num_5, k_value_5, edges_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 8, k_value_6 = 6;
+    std::vector<std::vector<int>> edges_6 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}, {4, 8}};
+    int expected_6 = 1761;
+    int result_6 = KSetTree(num_6, k_value_6, edges_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 9, k_value_7 = 7;
+    std::vector<std::vector<int>> edges_7 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}, {4, 8}, {4, 9}};
+    int expected_7 = 2876;
+    int result_7 = KSetTree(num_7, k_value_7, edges_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 10, k_value_8 = 8;
+    std::vector<std::vector<int>> edges_8 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}, {4, 8}, {4, 9}, {5, 10}};
+    int expected_8 = 4452;
+    int result_8 = KSetTree(num_8, k_value_8, edges_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = -10, k_value_9 = 8;
+    std::vector<std::vector<int>> edges_9 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}, {4, 8}, {4, 9}, {5, 10}};
+    try
+    {
+        KSetTree(num_9, k_value_9, edges_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = 2000005, k_value_10 = 1;
+    std::vector<std::vector<int>> edges_10 = {{1, 2}};
+    try
+    {
+        KSetTree(num_10, k_value_10, edges_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int num_12 = 201000, k_value_12 = 2;
+    std::vector<std::vector<int>> edges_12 = {{1, 2}, {2, 3}, {3, 4}};
+    try
+    {
+        KSetTree(num_12, k_value_12, edges_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int num_13 = 5, k_value_13 = 6;
+    std::vector<std::vector<int>> edges_13 = {{1, 2}, {1, 3}, {3, 4}, {3, 5}};
+    try
+    {
+        KSetTree(num_13, k_value_13, edges_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int num_14 = 6, k_value_14 = 4;
+    std::vector<std::vector<int>> edges_14 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {2, 5}};
+    try
+    {
+        KSetTree(num_14, k_value_14, edges_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int num_15 = 7, k_value_15 = 5;
+    std::vector<std::vector<int>> edges_15 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}, {3, 7}};
+    try
+    {
+        KSetTree(num_15, k_value_15, edges_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    // TEST
+    int num_16 = -10, k_value_16 = 8;
+    std::vector<std::vector<int>> edges_16 = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}, {4, 8}, {4, 9}, {5, 10}};
+    try
+    {
+        KSetTree(num_16, k_value_16, edges_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_17 = 1, k_value_17 = 8;
+    std::vector<std::vector<int>> edges_17 = {};
+    try
+    {
+        KSetTree(num_17, k_value_17, edges_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_18 = 0, k_value_18 = -5;
+    std::vector<std::vector<int>> edges_18 = {};
+    try
+    {
+        KSetTree(num_18, k_value_18, edges_18);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+
+    std::cout << "All testcases passed";
+    return 0;
+}
