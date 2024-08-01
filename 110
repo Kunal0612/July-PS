@@ -1,0 +1,194 @@
+/*
+
+https://codeforces.com/problemset/problem/1089/I
+
+Write a C++ Solution IntervalFreePermutations to find the number 
+of interval-free permutations modulo 10^9 + 7.
+
+
+Consider a permutation p_1,p_2,…p_num of integers from 1 to num. 
+We call a sub-segment pl,pl+1,…,pr−1,pr
+of the permutation an interval if it is a reordering of some set of 
+consecutive integers. For example, the permutation (6,7,1,8,5,3,2,4)
+has the intervals (6,7), (5,3,2,4), (3,2), and others.
+
+Each permutation has some trivial intervals — the full permutation 
+itself and every single element. We call a permutation interval-free 
+if it does not have non-trivial intervals. In other words, interval-free 
+permutation does not have intervals of length between 2 and num−1 inclusive.
+
+Your task is to count the number of interval-free permutations of length 
+num modulo prime number 10^9 + 7.
+
+
+Input :
+
+An integer num.
+
+Constraints :
+
+num : ranges from 1 to 400.
+
+Output:
+
+An integer ans the number of interval-free permutations modulo 10^9 + 7.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+inline void Initialize(int mod, int num, std::vector<int>& factorial, std::vector<int>& non_trivial_interval_count, std::vector<int>& interval_free_permutations, std::vector<std::vector<int>>& interval_count) {
+    factorial[0] = factorial[1] = 1;
+    non_trivial_interval_count[0] = 1;
+    interval_count[0][0] = 1;
+
+    for (int i = 2; i <= num; i++){
+        factorial[i] = 1LL * factorial[i - 1] * i % mod;
+    }
+    
+    for (int i = 1; i <= num; i++) {
+        non_trivial_interval_count[i] = factorial[i];
+        for (int j = 1; j < i; j++) {
+            non_trivial_interval_count[i] = (non_trivial_interval_count[i] - 1LL * non_trivial_interval_count[j] * factorial[i - j]) % mod;
+        }
+    }
+    
+    for (int i = 1; i <= num; i++) {
+        for (int j = 1; j <= i; j++) {
+            for (int k = 1; k <= i; k++) {
+                interval_count[i][j] = (interval_count[i][j] + 1LL * interval_count[i - k][j - 1] * factorial[k]) % mod;
+            }
+        }
+    }
+    
+    interval_free_permutations[1] = 1;
+    interval_free_permutations[2] = 2;
+    interval_free_permutations[3] = 0;
+
+    for (int i = 4; i <= num; i++) {
+        interval_free_permutations[i] = factorial[i];
+        for (int j = 1; j < i; j++) {
+            interval_free_permutations[i] = (interval_free_permutations[i] - 2LL * non_trivial_interval_count[j] * factorial[i - j]) % mod;
+        }
+        for (int j = 4; j < i; j++) {
+            interval_free_permutations[i] = (interval_free_permutations[i] - 1LL * interval_count[i][j] * interval_free_permutations[j]) % mod;
+        }
+    }
+}
+
+
+
+int IntervalFreePermutations(int num){
+    if(num<1 or num>400){
+        throw std::invalid_argument("Invalid num value");
+    }
+    int mod=1e9+7;
+    std::vector<int> factorial(num + 1), non_trivial_interval_count(num + 1), interval_free_permutations(num + 1);
+    std::vector<std::vector<int>> interval_count(num + 1, std::vector<int>(num + 1, 0));
+
+    Initialize(mod, num, factorial, non_trivial_interval_count, interval_free_permutations, interval_count);
+    int ans=(interval_free_permutations[num] + mod) % mod;
+    return ans;
+}
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main() {
+    // TEST
+    int num_1 = 4;
+    int expected_1 = 2;
+    int result_1 = IntervalFreePermutations(num_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    int num_2 = 5;
+    int expected_2 = 6;
+    int result_2 = IntervalFreePermutations(num_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    int num_3 = 10;
+    int expected_3 = 298526;
+    int result_3 = IntervalFreePermutations(num_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    int num_4 = 9;
+    int expected_4 = 28146;
+    int result_4 = IntervalFreePermutations(num_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    int num_5 = 12;
+    int expected_5 = 43286526;
+    int result_5 = IntervalFreePermutations(num_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    int num_6 = 15;
+    int expected_6 = 941212283;
+    int result_6 = IntervalFreePermutations(num_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+    // TEST
+    int num_7 = 16;
+    int expected_7 = 349150933;
+    int result_7 = IntervalFreePermutations(num_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    int num_8 = 14;
+    int expected_8 = 433987526;
+    int result_8 = IntervalFreePermutations(num_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = -14;
+    try
+    {
+        IntervalFreePermutations(num_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = 0;
+    try
+    {
+        IntervalFreePermutations(num_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = 10000000;
+    try
+    {
+        IntervalFreePermutations(num_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout<<"All testcases passed";
+    return 0;
+}
