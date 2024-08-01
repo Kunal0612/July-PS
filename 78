@@ -189,7 +189,7 @@ int main() {
     assert(result_8 == expected_8);
     // TEST_END
     // TEST
-    int num_spots_9 = 5430000000, num_trees_9 = 125, hec_9 = 987654321;
+    int num_spots_9 = 1000000009, num_trees_9 = 125, hec_9 = 987654321;
     try
     {
         Timber(num_spots_9, num_trees_9, hec_9);
@@ -249,7 +249,7 @@ int main() {
     }
     // TEST_END
     // TEST
-    int num_spots_14 = 10, num_trees_14 = -5, hec_14 = 1250000000000000000;
+    int num_spots_14 = 10, num_trees_14 = -5, hec_14 = 1000000009;
     try
     {
         Timber(num_spots_14, num_trees_14, hec_14);
