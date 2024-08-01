@@ -1,0 +1,254 @@
+/*
+
+https://codeforces.com/contest/1877/problem/F
+
+Write a C++ Solution Lexichromatography the number of different 
+colourings that satisfy all of the problem's conditions, modulo 998244353.
+
+
+Given an array nums of length len containing positive integers, 
+determine the number of ways to color each element of the array either blue or red, subject to the following constraints:
+
+Subsequence Formation: All blue elements must form a contiguous subsequence within the array, and all red elements must also form a contiguous subsequence.
+
+Lexicographic Ordering: The sequence of blue elements must be lexicographically smaller than the sequence of red elements.
+
+Color Balance: No subarray within the colored array should have an absolute difference of 2 or more between the counts of blue and red elements for any specific value.
+Output:
+
+Count the total number of distinct valid colorings modulo 998244353. Two colorings are considered different if at least one element has a different color in the two colorings.
+
+
+Input :
+
+A vector of integers nums.
+
+Constraints :
+nums.size() : ranges from 1 to 200000.
+nums : ranges from 1 to 200000.
+
+Output:
+
+An integer ans the number of different colourings that satisfy all of the problem's conditions, modulo 998244353.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <deque>
+#include <algorithm>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+
+
+long long int Find(std::vector<long long int>& parent, long long int node) {
+    return node == parent[node] ? node : parent[node] = Find(parent, parent[node]);
+}
+
+int Lexichromatography(std::vector<int> nums) {
+    int len=nums.size();
+    if(len<1 or len>200000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<len;i++){
+        if(nums[i]<1 or nums[i]>200000){
+            throw std::invalid_argument("Invalid nums");
+        }
+    }
+    long long int mxi = 0;
+    long long int mod = 998244353;
+    long long int inv_2 = (mod + 1) / 2;
+    std::vector<long long int> arr(len + 1), crr(len + 1, 0), power(len + 1, 1);
+    for (long long int i = 1; i <= len; i++){
+        arr[i]=nums[i-1];
+    }
+    for (long long int i = 1; i <= len; i++) {
+        crr[arr[i]]++;
+        mxi = std::max(mxi, arr[i]);
+    }
+    for (long long int i = 1; i <= len; i++){
+        power[i] = 2 * power[i - 1] % mod;
+    }
+
+    long long int flag = 1, tot = 0;
+    for (long long int i = 1; i <= mxi; i++) {
+        if (crr[i]){
+            tot++;
+        }
+        if (crr[i] & 1){
+            flag = 0;
+        }
+    }
+    int ans;
+    if (!flag) {
+        return power[tot - 1];
+    } 
+    else {
+        std::deque<long long int> que;
+        std::fill(crr.begin(), crr.end(), 0);
+        std::vector<long long int> parent(mxi + 1);
+        for (long long int i = 1; i <= mxi; i++){
+            parent[i] = i;
+        }
+
+        for (long long int i = 1; i <= len; i++) {
+            crr[arr[i]]++;
+            if (crr[arr[i]] % 2 == 0 && arr[i] != que.front()) {
+                return power[tot - 1];
+            }
+            if (!que.empty() && que.front() == arr[i]){
+                que.pop_front();
+            }
+            else {
+                if (!que.empty()){
+                    parent[Find(parent, que.front())] = Find(parent, arr[i]);
+                }
+                que.push_back(arr[i]);
+            }
+        }
+
+        long long int ret = 0;
+        for (long long int i = 1; i <= mxi; i++){
+            if (crr[i] && Find(parent, i) == i) {
+                ret++;
+            }
+        }
+        ans= ((power[tot] - power[ret] + mod) % mod * inv_2) % mod;
+    }
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <utility>
+#include <cassert>
+#include <stdexcept>
+
+
+int32_t main() {
+    // TEST
+    std::vector<int> nums_1 = {1,3,1,2,3,2,3,3};
+    int expected_1 = 3;
+    int result_1 = Lexichromatography(nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_2 = {1,3,1,2,3};
+    int expected_2 = 4;
+    int result_2 = Lexichromatography(nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_3 = {3,1,2};
+    int expected_3 = 4;
+    int result_3 = Lexichromatography(nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_4 = {1, 2, 3, 4, 5};
+    int expected_4 = 16;
+    int result_4 = Lexichromatography(nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_5 = {1,2,5};
+    int expected_5 = 16;
+    int result_5 = Lexichromatography(nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_6 = {5, 5, 5, 5, 5, 5};
+    int expected_6 =0;
+    int result_6 = Lexichromatography(nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
+    int expected_7 =0;
+    int result_7 = Lexichromatography(nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_8 = {3, 3, 1, 2, 5, 3, 3};
+    int expected_8 = 8;
+    int result_8 = Lexichromatography(nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+
+    // TEST
+    std::vector<int> nums_9 = {0};
+    try
+    {
+        Lexichromatography(nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_10(6000000,0);
+    try
+    {
+        Lexichromatography(nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+     // TEST
+    std::vector<int> nums_11(6,-1);
+    try
+    {
+        Lexichromatography(nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12(6,100000000);
+    try
+    {
+        Lexichromatography(nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13={};
+    try
+    {
+        Lexichromatography(nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
