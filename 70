@@ -273,7 +273,7 @@ int main() {
     }
     // TEST_END
     // TEST
-    int len_13 = 101, cnt_13 = 10000000009;
+    int len_13 = 101, cnt_13 = 1000000009;
     try
     {
         DimaAndGame(len_13, cnt_13);
