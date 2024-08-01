@@ -1,0 +1,243 @@
+/*
+
+https://codeforces.com/problemset/problem/887/F
+
+Write a C++ Solution RowOfModels to find if it's possible to make row nice using at most one exchange, or return false.
+
+During the final part of fashion show all models come to the stage and stay in one row and fashion designer stays to right to model on the right. During the rehearsal, Izabella noticed, that row isn't nice, but she can't figure out how to fix it.
+
+Like many other creative people, Izabella has a specific sense of beauty. Evaluating beauty of row of models Izabella looks at heights of models. She thinks that row is nice if for each model distance to nearest model with less height (model or fashion designer) to the right of her doesn't exceed k (distance between adjacent people equals 1, the distance between people with exactly one man between them equals 2, etc).
+
+She wants to make row nice, but fashion designer has his own sense of beauty, so she can at most one time select two models from the row and swap their positions if the left model from this pair is higher than the right model from this pair.
+
+Fashion designer (man to the right of rightmost model) has less height than all models and can't be selected for exchange.
+
+You should tell if it's possible to make at most one exchange in such a way that row becomes nice for Izabella.
+
+
+Input :
+
+An integer required_distance.
+A vector of integers heights.
+
+Constraints :
+
+height.size() : ranges from 1 to 500000.
+required_distance : ranges from 1 to height.size().
+height : ranges from 1 to 10^9.
+
+Output:
+
+An bool ans is true if it's possible to make row nice using at most one exchange, or return false.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+
+
+
+bool RowOfModels(int required_distance, std::vector<int>& heights) {
+    int num_model = heights.size();
+    if (num_model < 1 || num_model > 500000) {
+        throw std::invalid_argument("The number of models (n) must be between 1 and 500,000.");
+    }
+
+    if (required_distance < 1 || required_distance > num_model) {
+        throw std::invalid_argument("The required distance (k) must be between 1 and n.");
+    }
+
+    for (int height : heights) {
+        if (height < 1 || height > 1000000000) {
+            throw std::invalid_argument("The height of each model (ai) must be between 1 and 1,000,000,000.");
+        }
+    }
+    std::vector<int> elements(num_model+1);
+    for(int i=1;i<=num_model;i++){
+        elements[i] = heights[i-1];
+    }
+    int leftmost_min_index = 1;
+    int interval_count = 0;
+    int flag = 0;
+    int min_after_l_index = 0;
+
+    for (int current_index = 2; current_index <= num_model; current_index++) {
+        if (elements[current_index] < elements[leftmost_min_index]) {
+            leftmost_min_index = current_index;
+            interval_count = 0;
+        } else {
+            interval_count++;
+        }
+
+        if (interval_count >= required_distance) {
+            if (flag) {
+                return 0;
+            }
+            flag = 1;
+            min_after_l_index = 0;
+
+            for (int j = leftmost_min_index + 1; j <= num_model; j++) {
+                if (elements[leftmost_min_index] > elements[j] && elements[j] > elements[min_after_l_index]) {
+                    min_after_l_index = j;
+                }
+            }
+
+            if (!min_after_l_index) {
+                return 0;
+            }
+
+            std::swap(elements[leftmost_min_index + required_distance], elements[min_after_l_index]);
+            leftmost_min_index += required_distance;
+            interval_count = 0;
+        }
+    }
+    return 1;
+}
+
+int main()
+{
+    // TEST
+    std::vector<int> nums_1 = {5,1,2,3,4};
+    int k_value_1=5;
+    bool expected_1 = 1;
+    bool result_1 = RowOfModels(k_value_1,nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_2 = {5,1,2,6,8};
+    int k_value_2=2;
+    bool expected_2 =0;
+    bool result_2 = RowOfModels(k_value_2,nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_3 = {3,6,2,2,1};
+    int k_value_3=2;
+    bool expected_3 =1;
+    bool result_3 = RowOfModels(k_value_3,nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_4 = {5,3,6,5,2};
+    int k_value_4=2;
+    bool expected_4 =1;
+    bool result_4 = RowOfModels(k_value_4,nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_5 = {1,5,2,8,2};
+    int k_value_5=2;
+    bool expected_5 =0;
+    bool result_5 = RowOfModels(k_value_5,nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_6 = {1,551,287,8,2};
+    int k_value_6=2;
+    bool expected_6 =0;
+    bool result_6 = RowOfModels(k_value_6,nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+        // TEST
+    std::vector<int> nums_7 = {1,1,2,2,5};
+    int k_value_7=2;
+    bool expected_7 =0;
+    bool result_7 = RowOfModels(k_value_7,nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_8 = {1,2,3,75};
+    int k_value_8=2;
+    bool expected_8 =0;
+    bool result_8 = RowOfModels(k_value_8,nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> nums_9 = {-1,1,111115,0,0};
+    int k_value_9=2;
+    try
+    {
+        RowOfModels(k_value_9,nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_10 = {};
+    int k_value_10=2;
+    try
+    {
+        RowOfModels(k_value_10,nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_11(1000005,0);
+    int k_value_11=2;
+    try
+    {
+        RowOfModels(k_value_11,nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_12 = {};
+    int k_value_12=2;
+    try
+    {
+        RowOfModels(k_value_12,nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_13 = {-1,1,-1,0,0};
+    int k_value_13=10;
+    try
+    {
+        RowOfModels(k_value_13,nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    std::vector<int> nums_14 = {-1,1,-1,0,0};
+    int k_value_14=-1;
+    try
+    {
+        RowOfModels(k_value_14,nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All test cases passed!\n";
+    return 0;
+}
