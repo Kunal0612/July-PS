@@ -1,0 +1,353 @@
+/*
+
+https://codeforces.com/contest/1487/problem/G
+
+Write a C++ Solution StringCounting to find the number of strings you can build, taken modulo 998244353.
+
+You have nums[1] letters 'a', nums[2] letters 'b', ..., nums[26] letters 'z'. You want to build a beautiful string of length num from them (obviously, you cannot use the i-th letter more than nums[i] times). Each nums[i] is greater than num/3.
+
+A string is called beautiful if there are no palindromic contiguous substrings of odd length greater than 1 in it. For example, the string "abacaba" is not beautiful, it has several palindromic substrings of odd length greater than 1 (for example, "aca"). Another example: the string "abcaa" is beautiful.
+
+Calculate the number of different strings you can build, and print the answer modulo 998244353.
+
+
+Input :
+
+An integer num.
+A vector of vector of integers nums.
+
+Constraints : 
+
+num : ranges from 3 to 400.
+nums.size() : is equal to 26.
+nums : ranges from num/3 to num.
+
+Output:
+
+An integer ans the number of strings you can build, taken modulo 998244353.
+
+Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int Add(int first, int sec)
+{
+    int mod = 998244353;
+    first += sec;
+    while (first >= mod){
+        first -= mod;
+    }
+    while (first < 0){
+        first += mod;
+    }
+    return first;
+}
+
+int Sub(int first, int sec)
+{
+    return Add(first, -sec);
+}
+
+int Mul(int first, int sec)
+{
+    int mod = 998244353;
+    return (first * 1ll * sec) % mod;
+}
+
+
+
+
+int StringCounting(int num, std::vector<int> &nums)
+{
+    if (num < 3 || num > 400)
+    {
+        throw std::invalid_argument("The integer num must satisfy 3 ≤ num ≤ 400.");
+    }
+
+    if (nums.size() != 26)
+    {
+        throw std::invalid_argument("The list of integers must contain exactly 26 elements.");
+    }
+    int lower_bound = num / 3;
+    for (int ci : nums)
+    {
+        if (ci <= lower_bound || ci > num)
+        {
+            throw std::invalid_argument("Each integer ci must satisfy num/3 < ci ≤ num.");
+        }
+    }
+    std::vector<std::vector<std::vector<std::vector<std::vector<int>>>>> dp_table(2,
+                                                                                  std::vector<std::vector<std::vector<std::vector<int>>>>(
+                                                                                      num, std::vector<std::vector<std::vector<int>>>(
+                                                                                               num, std::vector<std::vector<int>>(
+                                                                                                        3, std::vector<int>(3, 0)))));
+
+    std::vector<std::vector<int>> sum_dp(num, std::vector<int>(num, 0));
+    std::vector<std::vector<int>> pre_1(num, std::vector<int>(num, 0));
+    std::vector<std::vector<int>> pre_2(num, std::vector<int>(num, 0));
+
+    for (int i = 0; i < 26; i++)
+    {
+        for (int j = 0; j < 26; j++)
+        {
+            for (int k = 0; k < 26; k++)
+            {
+                if (i != k)
+                {
+                    std::multiset<int> stt = {i, j, k};
+                    dp_table[1][stt.count(0)][stt.count(1)][std::min(2, j)][std::min(2, k)]++;
+                }
+            }
+        }
+    }
+
+    for (int i = 4; i <= num; i++)
+    {
+        for (int j = 0; j < num; j++)
+        {
+            for (int k = 0; k < num; k++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    for (int y = 0; y < 3; y++)
+                    {
+                        dp_table[0][j][k][x][y] = dp_table[1][j][k][x][y];
+                        dp_table[1][j][k][x][y] = 0;
+                    }
+                }
+            }
+        }
+
+        for (int j = 0; j < num; j++)
+        {
+            for (int k = 0; k < num; k++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    for (int y = 0; y < 3; y++)
+                    {
+                        int cur = dp_table[0][j][k][x][y];
+                        if (cur == 0)
+                        {
+                            continue;
+                        }
+                        for (int z = 0; z < 3; z++)
+                        {
+                            int &nww = dp_table[1][j + (z == 0 ? 1 : 0)][k + (z == 1 ? 1 : 0)][y][z];
+                            nww = Add(nww, Mul(cur, (z == 2 ? 24 : 1) - (z == x ? 1 : 0)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < num; i++)
+    {
+        for (int j = 0; j < num; j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    sum_dp[i][j] = Add(sum_dp[i][j], dp_table[1][i][j][k][l]);
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < num; i++)
+    {
+        pre_1[i][num - 1] = sum_dp[i][num - 1];
+        for (int j = num - 2; j >= 0; j--)
+        {
+            pre_1[i][j] = Add(sum_dp[i][j], pre_1[i][j + 1]);
+        }
+    }
+
+    for (int j = 0; j < num; j++)
+    {
+        pre_2[num - 1][j] = pre_1[num - 1][j];
+        for (int i = num - 2; i >= 0; i--)
+        {
+            pre_2[i][j] = Add(pre_1[i][j], pre_2[i + 1][j]);
+        }
+    }
+
+    int ans = pre_2[0][0];
+    for (int i = 0; i < 26; i++)
+    {
+        for (int j = 0; j < num; j++)
+        {
+            for (int k = nums[i] + 1; k < num; k++)
+            {
+                ans = Sub(ans, sum_dp[k][j]);
+            }
+        }
+    }
+
+    for (int i = 0; i < 26; i++)
+    {
+        for (int j = 0; j < i; j++)
+        {
+            ans = Add(ans, pre_2[nums[i] + 1][nums[j] + 1]);
+        }
+    }
+
+    return ans;
+}
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    int num_1 = 4;
+    std::vector<int> nums_1(26, 2);
+    int expected_1 = 422500;
+    int result_1 = StringCounting(num_1, nums_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    int num_2 = 10;
+    std::vector<int> nums_2(26, 5);
+    int expected_2 = 814910760;
+    int result_2 = StringCounting(num_2, nums_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    int num_3 = 20;
+    std::vector<int> nums_3(26, 7);
+    int expected_3 = 321720248;
+    int result_3 = StringCounting(num_3, nums_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    int num_4 = 50;
+    std::vector<int> nums_4(26, 20);
+    int expected_4 = 16032914;
+    int result_4 = StringCounting(num_4, nums_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    int num_5 = 100;
+    std::vector<int> nums_5(26, 34);
+    int expected_5 = 424413287;
+    int result_5 = StringCounting(num_5, nums_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    int num_6 = 20;
+    std::vector<int> nums_6(26, 8);
+    int expected_6 = 482966895;
+    int result_6 = StringCounting(num_6, nums_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    int num_7 = 30;
+    std::vector<int> nums_7(26, 12);
+    int expected_7 = 90220911;
+    int result_7 = StringCounting(num_7, nums_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    int num_8 = 40;
+    std::vector<int> nums_8(26, 15);
+    int expected_8 = 351661985;
+    int result_8 = StringCounting(num_8, nums_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    int num_9 = 405;
+    std::vector<int> nums_9(26, 15);
+    try{
+        StringCounting(num_9, nums_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_10 = 0;
+    std::vector<int> nums_10(26, 15);
+    try{
+        StringCounting(num_10, nums_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_11 = 5;
+    std::vector<int> nums_11(25, 15);
+    try{
+        StringCounting(num_11, nums_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_12 = 5;
+    std::vector<int> nums_12={};
+    try{
+        StringCounting(num_12, nums_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_13 = 5;
+    std::vector<int> nums_13(26,44);
+    try{
+        StringCounting(num_13, nums_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST
+    int num_14 = 5;
+    std::vector<int> nums_14(26,-1);
+    try{
+        StringCounting(num_14, nums_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All testcases passed";
+    return 0;
+}
