@@ -1,3 +1,5 @@
+/*
+
 https://codeforces.com/contest/1373/problem/F
 
 Write a C++ Solution PermuTree to find if the designed stations can meet the needs of all cities return 1 if 
@@ -39,3 +41,273 @@ Output:
 An integer ans to find if the designed stations can meet the needs of all cities return 1 if it can meet the needs, or return 0.
 
 Use appropriate Error Handling using the stdexcept library for the invalid test cases.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <utility>
+#include <iomanip>
+#include <cassert>
+#include <stdexcept>
+
+
+struct func {
+    int minx, mink, maxk;
+    func() : minx(0), mink(0), maxk(0) {}
+    func(int minx, int mink, int maxk) : minx(minx), mink(mink), maxk(maxk) {}
+};
+
+func GetFunc(int first, int sec) {
+    if (first <= sec){
+        return func(0, sec - first, sec);
+    }
+    else{
+        return func(first - sec, 0, sec);
+    }
+}
+
+func Merge(func first, func sec) {
+    if (first.minx == -1 || sec.minx == -1){
+        return func(-1, -1, -1);
+    }
+
+    if (first.maxk < sec.minx){
+        return func(-1, -1, -1);
+    }
+    if (first.mink >= sec.minx){
+        return func(first.minx, std::min(sec.maxk, sec.mink + (first.mink - sec.minx)), std::min(sec.maxk, sec.mink + (first.maxk - sec.minx)));
+    }
+    else {
+        int add = sec.minx - first.mink;
+        return func(first.minx + add, sec.mink, std::min(sec.maxk, sec.mink + (first.maxk - sec.minx)));
+    }
+}
+
+
+
+int NetworkCoverage(const std::vector<int>& household, const std::vector<int>& capacities) {
+    int len=household.size();
+    if(household.size()!=capacities.size()){
+        throw std::invalid_argument("Invalid size of household or capacities");
+    }
+    if(len<2 or len>1000000){
+        throw std::invalid_argument("Invalid length");
+    }
+    for(int i=0;i<len;i++){
+        if(household[i]<1 or household[i]>1000000000){
+            throw std::invalid_argument("Invalid household vector");
+        }
+    }
+    for(int i=0;i<len;i++){
+        if(capacities[i]<1 or capacities[i]>1000000000){
+            throw std::invalid_argument("Invalid capacities vector");
+        }
+    }
+
+    func total = GetFunc(household[0], capacities[0]);
+    for(int i = 1; i < len; ++i){
+        total = Merge(total, GetFunc(household[i], capacities[i]));
+    }
+
+    if (total.minx != -1 && total.minx <= total.mink){
+        return 1;
+    }
+    return 0;
+}
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <utility>
+#include <iomanip>
+#include <cassert>
+#include <stdexcept>
+
+int main()
+{
+    // TEST
+    std::vector<int> arr_1 = {1, 6, 3, 7, 1};
+    std::vector<int> brr_1 = {2, 3, 5, 8, 7};
+    int expected_1 = 0;
+    int result_1 = NetworkCoverage(arr_1, brr_1);
+    assert(result_1 == expected_1);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_2 = {9, 1, 3, 2, 4, 8, 7, 6, 5, 10};
+    std::vector<int> brr_2 = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int expected_2 = 0;
+    int result_2 = NetworkCoverage(arr_2, brr_2);
+    assert(result_2 == expected_2);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_3 = {1, 3, 2, 4, 555, 7, 6, 8, 10, 9, 11, 12, 14, 13, 15};
+    std::vector<int> brr_3 = {15, 14, 13, 1265, 11, 1560, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int expected_3 = 0;
+    int result_3 = NetworkCoverage(arr_3, brr_3);
+    assert(result_3 == expected_3);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_4 = {2,8,5,4,8,4,1,5,10,10};
+    std::vector<int> brr_4 = {6,7,2,6,3,4,1,1,3,5};
+    int expected_4 = 0;
+    int result_4 = NetworkCoverage(arr_4, brr_4);
+    assert(result_4 == expected_4);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_5 = {2,3,4};
+    std::vector<int> brr_5 = {3,3,3};
+    int expected_5 = 1;
+    int result_5 = NetworkCoverage(arr_5, brr_5);
+    assert(result_5 == expected_5);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_6 = {12, 1, 1, 2, 2, 5, 6, 7, 8, 9, 10, 11};
+    std::vector<int> brr_6 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 12};
+    int expected_6 = 0;
+    int result_6 = NetworkCoverage(arr_6, brr_6);
+    assert(result_6 == expected_6);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_7 = {3,3,3};
+    std::vector<int> brr_7 = {2,3,4};
+    int expected_7 = 1;
+    int result_7 = NetworkCoverage(arr_7, brr_7);
+    assert(result_7 == expected_7);
+    // TEST_END
+
+    // TEST
+    std::vector<int> arr_8 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::vector<int> brr_8 = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int expected_8 = 0;
+    int result_8 = NetworkCoverage(arr_8, brr_8);
+    assert(result_8 == expected_8);
+    // TEST_END
+    // TEST
+    std::vector<int> arr_9 = {0, 6, 3, 7, 1};
+    std::vector<int> brr_9 = {2, 3, 5, 8, 7};
+    try
+    {
+        NetworkCoverage(arr_9, brr_9);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // // TEST_END
+    // TEST
+    std::vector<int> arr_10 = {1, 6, 3, 7, 1};
+    std::vector<int> brr_10 = {2, 3, 5, 8, 0};
+    try
+    {
+        NetworkCoverage(arr_10, brr_10);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_11 = {1000000009, 6, 3, 7, 1};
+    std::vector<int> brr_11 = {2, 3, 5, 8, 7};
+    try
+    {
+        NetworkCoverage(arr_11, brr_11);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_12 = {0, 6, 3, 7, 1};
+    std::vector<int> brr_12 = {2, 3, 5, 8, 1000000009};
+    try
+    {
+        NetworkCoverage(arr_12, brr_12);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_13 = {-4, 6, 3, 7, 1};
+    std::vector<int> brr_13 = {2, 3, 5, 8, 7};
+    try
+    {
+        NetworkCoverage(arr_13, brr_13);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_14(1000100, 1);
+    std::vector<int> brr_14 = {2, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        NetworkCoverage(arr_14, brr_14);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_15(10, 1);
+    std::vector<int> brr_15 = {55, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        NetworkCoverage(arr_15, brr_15);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_16(10, 1);
+    std::vector<int> brr_16 = {0, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        NetworkCoverage(arr_16, brr_16);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    // TEST;
+    std::vector<int> arr_17(10, 1);
+    std::vector<int> brr_17 = {-5, 3, 5, 8, 7, 1, 5, 6};
+    try
+    {
+        NetworkCoverage(arr_17, brr_17);
+        assert(false);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        assert(true);
+    }
+    // TEST_END
+    std::cout << "All testcases passed";
+    return 0;
+}
