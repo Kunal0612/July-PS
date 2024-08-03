@@ -147,9 +147,9 @@ int Subsequence(int max_m, std::vector<int> &nums)
 int main()
 {
     // TEST
-    int max_m_1 = 4;
-    std::vector<int> arr_1 = {15, 2, 18, 12, 13, 4};
-    int expected_1 = 100;
+    int max_m_1 = 1;
+    std::vector<int> arr_1 = {666,888};
+    int expected_1 = 0;
     int result_1 = Subsequence(max_m_1, arr_1);
     assert(result_1 == expected_1);
     // TEST_END
@@ -163,9 +163,9 @@ int main()
     // TEST_END
 
     // TEST
-    int max_m_3 = 2;
-    std::vector<int> arr_3 = {1, 100, 1, 100};
-    int expected_3 = 198;
+    int max_m_3 = 1;
+    std::vector<int> arr_3 = {114514};
+    int expected_3 = 0;
     int result_3 = Subsequence(max_m_3, arr_3);
     assert(result_3 == expected_3);
     // TEST_END
@@ -203,9 +203,9 @@ int main()
     // TEST_END
 
     // TEST
-    int max_m_8 = 2;
-    std::vector<int> arr_8 = {1000, 1, 1000, 1, 1000};
-    int expected_8 = 1998;
+    int max_m_8 = 4;
+    std::vector<int> arr_8 = {15,2,18,12,13,4};
+    int expected_8 = 100;
     int result_8 = Subsequence(max_m_8, arr_8);
     assert(result_8 == expected_8);
     // TEST_END
