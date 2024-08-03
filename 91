@@ -162,8 +162,8 @@ int32_t main() {
     // TEST_END
 
     // TEST
-    std::vector<int> nums_5 = {1,2,5};
-    int expected_5 = 16;
+    std::vector<int> nums_5 = {1,1,1};
+    int expected_5 = 1;
     int result_5 = Lexichromatography(nums_5);
     assert(result_5 == expected_5);
     // TEST_END
@@ -176,8 +176,8 @@ int32_t main() {
     // TEST_END
 
     // TEST
-    std::vector<int> nums_7 = {7, 7, 7, 7, 7};
-    int expected_7 =0;
+    std::vector<int> nums_7 = {3,1,2,4};
+    int expected_7 =8;
     int result_7 = Lexichromatography(nums_7);
     assert(result_7 == expected_7);
     // TEST_END
