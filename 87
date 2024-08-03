@@ -107,8 +107,8 @@ int main() {
     // TEST_END
 
     // TEST
-    std::vector<int> nums_2 = {5,4,3,2,1};
-    int expected_2 = 3000;
+    std::vector<int> nums_2 = {1,1,1,0};
+    int expected_2 = 0;
     int result_2 = EvenHarder(nums_2);
     assert(result_2 == expected_2);
     // TEST_END
