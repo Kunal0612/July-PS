@@ -64,8 +64,9 @@ Use appropriate Error Handling using the stdexcept library for the invalid test 
 
 void Min(int &first, int sec)
 {
-    if (sec < first)
+    if (sec < first){
         first = sec;
+    }
     return;
 }
 
