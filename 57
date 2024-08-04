@@ -4,12 +4,12 @@ https://codeforces.com/problemset/problem/1704/F
 
 Write a C++ Solution ColouringGame to find the winner if both Alice and Bob play optimally.
 
-Alice and Bob are playing a game. There are len cells in a row. Initially each cell is 
+Alice and Bob are playing a game. There are len cells in a row. Initially each cell is
 either red or blue. Alice goes first.
 
-On each turn, Alice chooses two neighbouring cells which contain at least one red cell, 
-and paints that two cells white. Then, Bob chooses two neighbouring cells which 
-contain at least one blue cell, and paints that two cells white. The player 
+On each turn, Alice chooses two neighbouring cells which contain at least one red cell,
+and paints that two cells white. Then, Bob chooses two neighbouring cells which
+contain at least one blue cell, and paints that two cells white. The player
 who cannot make a move loses.
 
 Find the winner if both Alice and Bob play optimally.
@@ -68,7 +68,8 @@ std::string ColouringGame(std::string str)
         }
 
         int j;
-        for (j = 0; vis[j]; ++j);
+        for (j = 0; vis[j]; ++j)
+            ;
         frr[i] = j;
 
         for (int j = 0; j <= i; ++j)
@@ -107,25 +108,20 @@ std::string ColouringGame(std::string str)
     {
         return "Bob";
     }
-    else
+    int ans = 0;
+    for (int i = 1; i <= len;)
     {
-        int ans = 0;
-        for (int i = 1; i <= len;)
-        {
-            int j = i + 1;
-            for (; j <= len && cstr[j] != cstr[j - 1]; ++j);
-            ans ^= frr[j - i];
-            i = j;
-        }
-        if (ans)
-        {
-            return "Alice";
-        }
-        else
-        {
-            return "Bob";
-        }
+        int j = i + 1;
+        for (; j <= len && cstr[j] != cstr[j - 1]; ++j)
+            ;
+        ans ^= frr[j - i];
+        i = j;
     }
+    if (ans)
+    {
+        return "Alice";
+    }
+    return "Bob";
 }
 
 #include <iostream>
@@ -135,7 +131,6 @@ std::string ColouringGame(std::string str)
 #include <cstdio>
 #include <cassert>
 #include <stdexcept>
-
 
 int main()
 {
@@ -189,7 +184,7 @@ int main()
     // TEST_END
 
     // TEST
-    std::string str_9 = std::string(500005,'B');
+    std::string str_9 = std::string(500005, 'b');
     try
     {
         ColouringGame(str_9);
@@ -213,7 +208,7 @@ int main()
     }
     // TEST_END
     // TEST
-    std::string str_11 = "ABC";
+    std::string str_11 = "abc";
     try
     {
         ColouringGame(str_11);
