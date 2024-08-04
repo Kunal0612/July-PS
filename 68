@@ -113,7 +113,7 @@ int SequenceofBalls(int insert_time, int delete_time, int replace_time,
         }
     }
     int len_a = str_a.size(), len_b = str_b.size();
-    std::vector<std::vector<int>> dp_table(len_a + 1, std::vector<int>(len_b + 1, LONG_MAX));
+    std::vector<std::vector<int>> dp_table(len_a + 1, std::vector<int>(len_b + 1, INT_MAX));
     std::vector<int> last_position_a(26, 0), last_position_b(26, 0);
 
     str_a = " " + str_a;
